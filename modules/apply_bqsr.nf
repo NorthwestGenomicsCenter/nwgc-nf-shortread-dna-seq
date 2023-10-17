@@ -20,8 +20,7 @@ process APPLY_BQSR {
         """
         gatk \
             --java-options "-Xmx$javaMemory" \
-            ApplyBQSRSpark \
-            --spark-master local[$task.cpus] \
+            ApplyBQSR \
             --input $bam \
             --bqsr-recal-file $bqsr_recalibration_table \
             --output ${params.sampleId}.${params.libraryId}.${params.sequencingTarget}.recal.bam \
