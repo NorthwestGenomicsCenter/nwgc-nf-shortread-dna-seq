@@ -12,13 +12,18 @@ process PICARD_MARK_DUPLICATES {
 
     script:
 
+        def inputs = "";
+        for (bam in $bamList) {
+            inputs = inputs += " --INPUT " + bam;
+        }
+
         """
         java \
             -XX:InitialRAMPercentage=80 \
             -XX:MaxRAMPercentage=85 \
             -jar \$PICARD_DIR/picard.jar \
             MarkDuplicates \
-            --INPUT $bamList \
+            $inputs \
             --OUTPUT ${params.sampleId}.${params.libraryId}.${params.sequencingTarget}.bam \
             --METRICS_FILE ${params.sampleId}.${params.libraryId}.${params.sequencingTarget}.duplicate_metrics.txt \
             --ASSUME_SORT_ORDER coordinate \
