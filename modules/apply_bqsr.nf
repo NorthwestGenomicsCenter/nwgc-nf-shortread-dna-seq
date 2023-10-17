@@ -10,7 +10,7 @@ process APPLY_BQSR {
 
     output:
         path "${params.sampleId}.${params.libraryId}.${params.sequencingTarget}.recal.bam", emit: bam
-        path "${params.sampleId}.${params.libraryId}.${params.sequencingTarget}.recal.bam.bai", emit: bai
+        path "${params.sampleId}.${params.libraryId}.${params.sequencingTarget}.recal.bai", emit: bai
         path "versions.yaml", emit: versions
 
     script:
@@ -24,9 +24,10 @@ process APPLY_BQSR {
             --input $bam \
             --bqsr-recal-file $bqsr_recalibration_table \
             --output ${params.sampleId}.${params.libraryId}.${params.sequencingTarget}.recal.bam \
+            --create-output-bam-index true \
             --static-quantized-quals 10 \
             --static-quantized-quals 20 \
-            --static-quantized-quals 30
+            --static-quantized-quals 30 
 
         cat <<-END_VERSIONS > versions.yaml
         '${task.process}':
