@@ -23,9 +23,9 @@ knownIndels: "<full path to known indels file>"                 # e.g. knownInde
 
 
 # Bams  - Bam files that have been mapped (to merge together) 
-bams:
-  - "<full path to first bam>"
-  - "<full path to second bam>"
+mappedBams:
+  - "<full path to first mapedBam>"
+  - "<full path to second mappedBam>"
   - "<repeat for more bams>"
 # e.g.
 #bams:
