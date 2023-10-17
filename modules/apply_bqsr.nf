@@ -5,7 +5,8 @@ process APPLY_BQSR {
     publishDir "$params.sampleDirectory", mode: 'link', pattern: '*.recal.bam'
 
     input:
-        tuple path(bam), path(bqsr_recalibration_table)
+        path bam
+        path bqsr_recalibration_table
 
     output:
         path "${params.sampleId}.${params.libraryId}.${params.sequencingTarget}.recal.bam", emit: bam
