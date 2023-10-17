@@ -30,6 +30,8 @@ process CONTAMINATION_CHECK {
             --MeanPath \$MEANPATH \
             --BamFile $bam \
             --Reference $params.referenceGenome \
+            --Verbose \
+            $disableSanityCheck \
             --Output ${params.sampleId}.${params.libraryId}.VerifyBamID
 
         cat <<-END_VERSIONS > versions.yaml
