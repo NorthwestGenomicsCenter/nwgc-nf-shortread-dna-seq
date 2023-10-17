@@ -1,5 +1,5 @@
 include { PICARD_MARK_DUPLICATES } from '../modules/picard_mark_duplicates.nf'
-include { BASE_RECALIBRATOR } from '../modules/base+recalibrator.nf'
+include { BASE_RECALIBRATOR } from '../modules/base_recalibrator.nf'
 include { APPLY_BQSR } from '../modules/apply_bqsr.nf'
 
 workflow MERGE_MAPPED_BAMS {
