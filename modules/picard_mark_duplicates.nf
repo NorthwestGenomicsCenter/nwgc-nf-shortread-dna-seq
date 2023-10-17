@@ -21,7 +21,7 @@ process PICARD_MARK_DUPLICATES {
             --INPUT $bamList \
             --OUTPUT ${params.sampleId}.${params.libraryId}.${params.sequencingTarget}.bam \
             --METRICS_FILE ${params.sampleId}.${params.libraryId}.${params.sequencingTarget}.duplicate_metrics.txt \
-            --ASSUME_SORT_ORDER true \
+            --ASSUME_SORT_ORDER coordinate \
             --CREATE_MD5_FILE false \
             --CREATE_INDEX true \
             --OPTICAL_DUPLICATE_PIXEL_DISTANCE 100 \
