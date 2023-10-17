@@ -18,7 +18,7 @@ workflow MERGE_MAPPED_BAMS {
 
         // Versions
         ch_versions = Channel.empty()
-        ch_versions = ch_versions.mix(MERGE_MAPPED_BAMS.out.versions)
+        ch_versions = ch_versions.mix(PICARD_MARK_DUPLICATES.out.versions)
         ch_versions = ch_versions.mix(BASE_RECALIBRATOR.out.versions)
         ch_versions = ch_versions.mix(APPLY_BQSR.out.versions)
         ch_versions.unique().collectFile(name: 'merge_software_versions.yaml', storeDir: "${params.sampleDirectory}")
