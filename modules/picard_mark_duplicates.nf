@@ -13,7 +13,7 @@ process PICARD_MARK_DUPLICATES {
     script:
 
         def inputs = "";
-        for (bam in $bamList) {
+        for (bam in bamList) {
             inputs = inputs += " --INPUT " + bam;
         }
 
