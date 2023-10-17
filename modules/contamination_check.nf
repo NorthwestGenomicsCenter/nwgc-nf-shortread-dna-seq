@@ -28,7 +28,7 @@ process CONTAMINATION_CHECK {
             --UDPath \$UDPATH \
             --BedPath \$BEDPATH \
             --MeanPath \$MEANPATH \
-            --BamFile $bam
+            --BamFile $bam \
             --Reference $params.referenceGenome \
             --Output ${params.sampleId}.${params.libraryId}.VerifyBamID
 
