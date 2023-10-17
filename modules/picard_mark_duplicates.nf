@@ -12,6 +12,7 @@ process PICARD_MARK_DUPLICATES {
 
     script:
 
+        """
         java \
             -XX:InitialRAMPercentage=80 \
             -XX:MaxRAMPercentage=85 \
