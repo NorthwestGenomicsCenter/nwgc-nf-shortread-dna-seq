@@ -30,7 +30,7 @@ process APPLY_BQSR {
 
         cat <<-END_VERSIONS > versions.yaml
         '${task.process}':
-            gatk: \$(java -jar \$MOD_GSGATK_DIR/GenomeAnalysisTK.jar --version)
+            gatk: \$(gatk --version | grep GATK | awk '{print \$6}')
         END_VERSIONS
 
         """
