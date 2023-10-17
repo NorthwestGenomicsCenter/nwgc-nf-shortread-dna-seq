@@ -1,8 +1,6 @@
 process PICARD_COVERAGE_METRICS {
 
-    label "PICARD_COVERAGE_METRICS_${params.sampleId}_${params.userId}"
-
-    Boolean isOnt = params.sequencingPlatform.equalsIgnoreCase("ont")
+    label "PICARD_COVERAGE_METRICS_${params.sampleId}_${params.libraryId}_${params.userId}"
 
     publishDir "$params.sampleQCDirectory", mode: 'link', pattern: '*.picard.coverage.txt'
  
@@ -16,23 +14,20 @@ process PICARD_COVERAGE_METRICS {
 
     script:
 
-        def minimumBaseQuality = params.sequencingPlatform.equalsIgnoreCase("ont") ? '10' : '20'
-
         """
         mkdir -p $params.sampleQCDirectory
 
         java \
             -XX:InitialRAMPercentage=80 \
             -XX:MaxRAMPercentage=85 \
-            -jar \$PICARD_DIR/picard.jar CollectWgsMetrics \
+            -jar \$PICARD_DIR/picard.jar \
+            CollectWgsMetrics \
             --INPUT $bam \
-            --COUNT_UNPAIRED true \
-            --READ_LENGTH 17000 \
-            --INCLUDE_BQ_HISTOGRAM \
             --REFERENCE_SEQUENCE $params.referenceGenome \
-            --VALIDATION_STRINGENCY LENIENT \
-            --MINIMUM_BASE_QUALITY $minimumBaseQuality \
-            --OUTPUT ${params.sampleId}.picard.coverage.txt
+            --VALIDATION_STRINGENCY SILENT \
+            --MINIMUM_BASE_QUALITY 20 \
+            --COVERAGE_CAP 300000 \
+            --OUTPUT ${params.sampleId}.${params.libraryId}.picard.coverage.txt
 
         cat <<-END_VERSIONS > versions.yaml
         '${task.process}':
