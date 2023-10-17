@@ -7,27 +7,26 @@ userId: "<samplify userId>"  # e.g. userid: "kolart"
 userEmail: "<userEmail>"     # e.g. userEmail: "kolart@uw.edu"
 
 # Sample
-sampleDirectory: "<full path to sample directory>"    # e.g. sampleDirectory: "/net/nwgc/vol1/data/processed/samples/123456/WHOLE_GENOME"
-sampleId: <samplify sampleId>                         # e.g sampleId: 123456
+sampleDirectory: "<full path to sample directory>"       # e.g. sampleDirectory: "/net/nwgc/vol1/data/processed/samples/123456/WHOLE_GENOME"
+sampleQCDirectory: "<full path to sample QC directory>"  # e.g. sampleQCDirectory: "/net/nwgc/vol1/data/processed/samples/123456/WHOLE_GENOME/qc"
+sampleId: <samplify sampleId>                            # e.g sampleId: 123456
 
 # Target
 sequencingTarget: "<name of sequencing target>"   	  # e.g. sequencingTarget: "nimblegen_solution_V2refseq_2010"
-targetListFile: "<full path to target .list file>"    # e.g. targetListFile: "/net/nwgc/vol1/references/human/hg19/targets/nimblegen_solution_V2refseq_2010/nimblegen_solution_V2refseq_2010.hg19.list"
 
 # Reference Genome
-referenceGenome: "<full path to reference genome fasta>"    # e.g. referenceGenome: "/net/nwgc/vol1/references/human/hg19/genome/assembly_bwa_0.7.15/hs37d5.fa"
-dbSnp: "<full path to dbSnp file>"                          # e.g. dbSnp: "/net/nwgc/vol1/references/human/snps/dbSNP/dbSNP138.vcf"
-
-# Bam  
-bam: "<full path to the bam file from which to call variants>"  # e.g.  bam: /net/nwgc/vol1/home/kolart/pacbio_merged_test.bam   
-
-# Optional (Already defaulted in nextflow.config file to organism=Homo sapiens, isGRC38=false)
-organism: "<species other than Homo sapiens>"  # e.g. organism: "Mus musculus"
-isGRC38: "<true if grc38>"                     # e.g. isGRC38: true
+referenceGenome: "<full path to reference genome fasta>"        # e.g. referenceGenome: "/net/nwgc/vol1/references/human/grc38/genome/assembly_bwa_0.7.15/hs37d5.fa"
+dbSnp: "<full path to dbSnp file>"                              # e.g. dbSnp: "/net/nwgc/vol1/references/human/grc38/genome/assembly_bwa_0.7.15/Homo_sapiens_assembly38.dbsnp138.vcf"
+goldStandardIndels: "<full path to gold standard indels file>"  # e.g. dbSnp: "/net/nwgc/vol1/references/human/grc38/genome/assembly_bwa_0.7.15/Mills_and_1000G_gold_standard.indels.hg38.vcf"
+knownIndels: "<full path to known indels file>"                 # e.g. dbSnp: "/net/nwgc/vol1/references/human/rc38/genome/assembly_bwa_0.7.15/Homo_sapiens_assembly38.known_indels.vcf"
 
 
-##########################################
-### RabbitMQ
-##########################################
-rabbitHost: "<name of host for rabbitMQ>"				#e.g rabbitHost: "burnet"
-registration_url: "<url to send rabbit message to>"		#e.g.registration_url: "http://burnet.gs.grid.washington.edu/samplify/RegisterPacBioMapMergeQCCompletion"
+# Bams  - Bam files that have been mapped (to merge together) 
+bams:
+  - "<full path to first bam>"
+  - "<full path to second bam>"
+  - "<repeat for more bams>"
+# e.g.
+#bams:
+#  - "/net/nwgc/vol1/home/kolart/nextflow_library_merge_test/downsampled_1.bam"
+#  - "/net/nwgc/vol1/home/kolart/nextflow_library_merge_test/downsampled_2.bam"

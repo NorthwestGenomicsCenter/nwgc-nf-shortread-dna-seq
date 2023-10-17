@@ -1,18 +1,9 @@
-include { CALL_VARIANTS } from './workflows/call_variants.nf'
-include { VALIDATE_VARIANTS } from './modules/validate_variants.nf'
+include { MERGE_MAPPED_BAMS } from './workflows/merge_mapped_bams.nf'
+include { SHORTREAD_QC } from './modules/shortread_qc.nf'
 
 workflow {
-    NwgcCore.init(params)
 
-    CALL_VARIANTS()
-    VALIDATE_VARIANTS(CALL_VARIANTS.out.gvcf, CALL_VARIANTS.out.gvcf_index)
+    MERGE_MAPPED_BAMS()
+    SHORTREAD_QC(MERGE_MAPPED_BAMS.out.bam, MERGE_MAPPED_BAMS.out.bai)
 
-}
-
-workflow.onError {
-    NwgcCore.error(workflow, "$params.sampleId")
-}
-
-workflow.onComplete {
-    NwgcCore.processComplete(workflow, "$params.sampleId")
 }
