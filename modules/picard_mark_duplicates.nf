@@ -7,7 +7,7 @@ process PICARD_MARK_DUPLICATES {
 
     output:
         path "${params.sampleId}.${params.libraryId}.${params.sequencingTarget}.bam", emit: bam
-        path "${params.sampleId}.${params.libraryId}.${params.sequencingTarget}.bam.bai", emit: bai
+        path "${params.sampleId}.${params.libraryId}.${params.sequencingTarget}.bai", emit: bai
         path "versions.yaml", emit: versions
 
     script:
