@@ -1,5 +1,5 @@
 include { MERGE_MAPPED_BAMS } from './workflows/merge_mapped_bams.nf'
-include { SHORTREAD_QC } from './modules/qc.nf'
+include { SHORTREAD_QC } from './workflows/qc.nf'
 
 workflow {
 
