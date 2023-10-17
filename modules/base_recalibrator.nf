@@ -31,7 +31,7 @@ process BASE_RECALIBRATOR {
             --maximum_cycle_value 500 \
             --mismatches_context_size 2 \
             --mismatches_default_quality -1  \
-            --quantizing_levels 16
+            --quantizing_levels 16 \
             -L chr1 \
             -L chr2 \
             -L chr3 \
@@ -56,7 +56,7 @@ process BASE_RECALIBRATOR {
             -L chr22 \
             -L chrX \
             -L chrY \
-            -L chrM \
+            -L chrM
 
         cat <<-END_VERSIONS > versions.yaml
         '${task.process}_${task.index}':
