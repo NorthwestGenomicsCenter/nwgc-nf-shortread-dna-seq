@@ -16,8 +16,7 @@ process BASE_RECALIBRATOR {
         """
         gatk \
             --java-options "-Xmx$javaMemory" \
-            BaseRecalibratorSpark \
-            --spark-master local[$task.cpus] \
+            BaseRecalibrator \
             --input $bam \
             --output ${params.sampleId}.${params.libraryId}.${params.sequencingTarget}.bqsr_recalibartion.table \
             --reference $params.referenceGenome \
