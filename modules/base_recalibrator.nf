@@ -24,14 +24,14 @@ process BASE_RECALIBRATOR {
             --known-sites $params.dbSnp \
             --known-sites $params.goldStandardIndels \
             --known-sites $params.knownIndels \
-            --deletions_default_quality 45 \
-            --indels_context_size 3 \
-            --insertions_default_quality 45 \
-            --low_quality_tail 3 \
-            --maximum_cycle_value 500 \
-            --mismatches_context_size 2 \
-            --mismatches_default_quality -1  \
-            --quantizing_levels 16 \
+            --deletions-default-quality 45 \
+            --indels-context-size 3 \
+            --insertions-default-quality 45 \
+            --low-quality-tail 3 \
+            --maximum-cycle-value 500 \
+            --mismatches-context-size 2 \
+            --mismatches-default-quality -1  \
+            --quantizing-levels 16 \
             -L chr1 \
             -L chr2 \
             -L chr3 \

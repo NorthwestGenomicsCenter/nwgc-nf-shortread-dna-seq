@@ -19,8 +19,8 @@ process PICARD_MARK_DUPLICATES {
 
         """
         java \
-            -XX:InitialRAMPercentage=80 \
-            -XX:MaxRAMPercentage=85 \
+            -XX:InitialRAMPercentage=80.0 \
+            -XX:MaxRAMPercentage=85.0 \
             -jar \$PICARD_DIR/picard.jar \
             MarkDuplicates \
             $inputs \
