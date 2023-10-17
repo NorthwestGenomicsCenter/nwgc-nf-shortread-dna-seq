@@ -11,10 +11,10 @@ workflow MERGE_MAPPED_BAMS {
         PICARD_MARK_DUPLICATES(mappedBams.collect())
 
         // Quality Calc
-        BASE_RECALIBRATOR(MERGE_MAPPED_BAMS.out.merged_sorted_bam)
+        BASE_RECALIBRATOR(PICARD_MARK_DUPLICATES.out.merged_sorted_bam)
 
         // Apply BQSR
-        APPLY_BQSR(MERGE_MAPPED_BAMS.out.merged_sorted_bam, BASE_RECALIBRATOR.out.bqsr_recalibration_table)
+        APPLY_BQSR(PICARD_MARK_DUPLICATES.out.merged_sorted_bam, BASE_RECALIBRATOR.out.bqsr_recalibration_table)
 
         // Versions
         ch_versions = Channel.empty()
