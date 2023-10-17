@@ -23,7 +23,7 @@ process PICARD_MARK_DUPLICATES {
             --METRICS_FILE ${params.sampleId}.${params.libraryId}.${params.sequencingTarget}.duplicate_metrics.txt \
             --ASSUME_SORT_ORDER true \
             --CREATE_MD5_FILE false \
-            --CREATE_INDEX=true \
+            --CREATE_INDEX true \
             --OPTICAL_DUPLICATE_PIXEL_DISTANCE 100 \
             --QUIET false \
             --PROGRAM_RECORD_ID null \
