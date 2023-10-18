@@ -3,6 +3,7 @@ process APPLY_BQSR {
     label "APPLY_BQSR_${params.sampleId}_${params.libraryId}_${params.userId}"
 
     publishDir "$params.sampleDirectory", mode: 'link', pattern: '*.recal.bam'
+    publishDir "$params.sampleDirectory", mode: 'link', pattern: '*.recal.bai'
 
     input:
         path bam
@@ -10,7 +11,7 @@ process APPLY_BQSR {
 
     output:
         path "${params.sampleId}.${params.libraryId}.${params.sequencingTarget}.recal.bam", emit: bam
-        path "${params.sampleId}.${params.libraryId}.${params.sequencingTarget}.recal.bam.bai", emit: bai
+        path "${params.sampleId}.${params.libraryId}.${params.sequencingTarget}.recal.bai", emit: bai
         path "versions.yaml", emit: versions
 
     script:
