@@ -10,16 +10,14 @@ process APPLY_BQSR {
 
     output:
         path "${params.sampleId}.${params.libraryId}.${params.sequencingTarget}.recal.bam", emit: bam
-        path "${params.sampleId}.${params.libraryId}.${params.sequencingTarget}.recal.bai", emit: bai
+        path "${params.sampleId}.${params.libraryId}.${params.sequencingTarget}.recal.bam.bai", emit: bai
         path "versions.yaml", emit: versions
 
     script:
-        def taskMemoryString = "$task.memory"
-        def javaMemory = taskMemoryString.substring(0, taskMemoryString.length() - 1).replaceAll("\\s","")
 
         """
         gatk \
-            --java-options "-Xmx$javaMemory" \
+            --java-options "-XX:InitialRAMPercentage=80.0 -XX:MaxRAMPercentage=85.0" \
             ApplyBQSR \
             --input $bam \
             --bqsr-recal-file $bqsr_recalibration_table \

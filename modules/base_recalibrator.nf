@@ -10,12 +10,10 @@ process BASE_RECALIBRATOR {
         path "versions.yaml", emit: versions
 
     script:
-        def taskMemoryString = "$task.memory"
-        def javaMemory = taskMemoryString.substring(0, taskMemoryString.length() - 1).replaceAll("\\s","")
 
         """
         gatk \
-            --java-options "-Xmx$javaMemory" \
+            --java-options "-XX:InitialRAMPercentage=80.0 -XX:MaxRAMPercentage=85.0" \
             BaseRecalibrator \
             --input $bam \
             --output ${params.sampleId}.${params.libraryId}.${params.sequencingTarget}.bqsr_recalibartion.table \
