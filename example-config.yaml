@@ -20,7 +20,9 @@ referenceGenome: "<full path to reference genome fasta>"        # e.g. reference
 dbSnp: "<full path to dbSnp file>"                              # e.g. dbSnp: "/net/nwgc/vol1/references/human/grc38/genome/assembly_bwa_0.7.15/Homo_sapiens_assembly38.dbsnp138.vcf"
 goldStandardIndels: "<full path to gold standard indels file>"  # e.g. goldStandardIndels: "/net/nwgc/vol1/references/human/grc38/genome/assembly_bwa_0.7.15/Mills_and_1000G_gold_standard.indels.hg38.vcf"
 knownIndels: "<full path to known indels file>"                 # e.g. knownIndels: "/net/nwgc/vol1/references/human/rc38/genome/assembly_bwa_0.7.15/Homo_sapiens_assembly38.known_indels.vcf"
-fingerprintBed:	"<full path to known indels file>"				# e.g. fingerprintBed: "/net/nwgc/vol1/references/human/grc38/targets/fingerprint_grc38_open_array.bed"
+
+# Fingerprint
+fingerprintBed:	"<full path to fingerprint bed file>"			# e.g. fingerprintBed: "/net/nwgc/vol1/references/human/grc38/targets/fingerprint_grc38_open_array.bed"
 
 
 

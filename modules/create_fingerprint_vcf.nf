@@ -9,7 +9,7 @@ process CREATE_FINGERPRINT_VCF {
         path bai
 
     output:
-        path "*.fingerprint.vcf.gz" emit: vcf
+        path "*.fingerprint.vcf.gz", emit: vcf
         path "versions.yaml", emit: versions
 
     script:
