@@ -3,6 +3,7 @@ process CREATE_FINGERPRINT_VCF {
     label "CREATE_FINGERPRINT_VCF_${params.sampleId}_${params.libraryId}_${params.userId}"
 
     publishDir "$params.sampleQCDirectory", mode: 'link', pattern: '*.fingerprint.vcf.gz'
+    publishDir "$params.sampleQCDirectory", mode: 'link', pattern: '*.fingerprint.vcf.gz.tbi'
  
     input:
         path bam
@@ -10,6 +11,7 @@ process CREATE_FINGERPRINT_VCF {
 
     output:
         path "*.fingerprint.vcf.gz", emit: vcf
+        path "*.fingerprint.vcf.gz.tbi", emit: tbi
         path "versions.yaml", emit: versions
 
     script:
