@@ -31,7 +31,7 @@ process CREATE_FINGERPRINT_VCF {
             --output ${params.sampleId}.fingerprint.g.vcf.gz
 
         ## VCF File
-        gatk
+        gatk \
             --java-options "-XX:InitialRAMPercentage=80.0 -XX:MaxRAMPercentage=85.0" \
             GenotypeGVCFs \
             -R $params.referenceGenome \
