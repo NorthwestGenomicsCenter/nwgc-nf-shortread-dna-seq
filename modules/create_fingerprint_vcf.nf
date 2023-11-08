@@ -28,7 +28,7 @@ process CREATE_FINGERPRINT_VCF {
             -G StandardAnnotation \
             -pairHMM AVX_LOGLESS_CACHING \
             -ERC GVCF \
-            --output ${params.sampleId}.fingerprint.g.vcf.gz
+            --output ${params.sampleId}.${params.libraryId}.fingerprint.g.vcf.gz
 
         ## VCF File
         gatk \
@@ -37,7 +37,7 @@ process CREATE_FINGERPRINT_VCF {
             -R $params.referenceGenome \
             -L $params.fingerprintBed \
             --variant ${params.sampleId}.fingerprint.g.vcf.gz \
-            -O ${params.sampleId}.fingerprint.vcf.gz \
+            -O ${params.sampleId}.${params.libraryId}.fingerprint.vcf.gz \
             --include-non-variant-sites
 
         cat <<-END_VERSIONS > versions.yaml
