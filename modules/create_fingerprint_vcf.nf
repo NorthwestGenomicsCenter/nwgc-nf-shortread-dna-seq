@@ -18,7 +18,8 @@ process CREATE_FINGERPRINT_VCF {
         mkdir -p $params.sampleQCDirectory
 
         ## GVCF
-        time $GATK/gatk \
+        gatk \
+            --java-options "-XX:InitialRAMPercentage=80.0 -XX:MaxRAMPercentage=85.0" \
             HaplotypeCaller \
             -R $params.referenceGenome \
             -I $bam \
@@ -30,15 +31,14 @@ process CREATE_FINGERPRINT_VCF {
             --output ${params.sampleId}.fingerprint.g.vcf.gz
 
         ## VCF File
-        time $GATK/gatk
-                -XX:InitialRAMPercentage=80 \
-                -XX:MaxRAMPercentage=85 \
-                GenotypeGVCFs \
-                -R $params.referenceGenome \
-                -L $params.fingerprintBed \
-                --variant ${params.sampleId}.fingerprint.g.vcf.gz \
-                -O ${params.sampleId}.fingerprint.vcf.gz \
-                --include-non-variant-sites
+        gatk
+            --java-options "-XX:InitialRAMPercentage=80.0 -XX:MaxRAMPercentage=85.0" \
+            GenotypeGVCFs \
+            -R $params.referenceGenome \
+            -L $params.fingerprintBed \
+            --variant ${params.sampleId}.fingerprint.g.vcf.gz \
+            -O ${params.sampleId}.fingerprint.vcf.gz \
+            --include-non-variant-sites
 
         cat <<-END_VERSIONS > versions.yaml
         '${task.process}':
