@@ -38,7 +38,7 @@ process CREATE_FINGERPRINT_VCF {
             GenotypeGVCFs \
             -R $params.referenceGenome \
             -L $params.fingerprintBed \
-            --variant ${params.sampleId}.fingerprint.g.vcf.gz \
+            --variant ${params.sampleId}.${params.libraryId}.fingerprint.g.vcf.gz \
             -O ${params.sampleId}.${params.libraryId}.fingerprint.vcf.gz \
             --include-non-variant-sites
 
