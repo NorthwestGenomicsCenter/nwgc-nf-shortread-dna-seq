@@ -35,3 +35,8 @@ mappedBams:
 #bams:
 #  - "/net/nwgc/vol1/home/kolart/nextflow_library_merge_test/downsampled_1.bam"
 #  - "/net/nwgc/vol1/home/kolart/nextflow_library_merge_test/downsampled_2.bam"
+
+# mergedBam (for running qc on an already existing merged bam)
+mergedBam: "<full path to a merged bam that contains nm tags>"
+# e.g.
+#mergedBam: /net/nwgc/vol1/home/kolart/pacbio_merged_test.bam

@@ -29,6 +29,11 @@ workflow SHORTREAD_QC {
             CREATE_FINGERPRINT_VCF(bam, bai)
             ch_versions = ch_versions.mix(CREATE_FINGERPRINT_VCF.out.versions)
         }
+
+        if (runAll || params.qcToRun.contains("multiple")) {
+            PICARD_MULTIPLE_METRICS(bam, bai)
+            ch_version = ch_versions.mix(PICARD_MULTIPLE_METRICS.out.versions)
+        }
  
         ch_versions.unique().collectFile(name: 'qc_software_versions.yaml', storeDir: "${params.sampleDirectory}")
 
