@@ -18,7 +18,7 @@ process PICARD_MULTIPLE_METRICS {
         java \
             -XX:InitialRAMPercentage=80 \
             -XX:MaxRAMPercentage=85 \
-        	-jar \$PICARD_DIR/picard.jar
+        	-jar \$PICARD_DIR/picard.jar \
         	CollectMultipleMetrics \
         	--INPUT $bam \
         	--OUTPUT ${params.sampleQCDirectory}/$params.sampleId \
@@ -41,11 +41,6 @@ process PICARD_MULTIPLE_METRICS {
         mv ${params.sampleQCDirectory}/${params.sampleId}.insert_size_metrics ${params.sampleQCDirectory}/${params.sampleId}.insert_size_metrics.txt
         mv ${params.sampleQCDirectory}/${params.sampleId}.quality_yield_metrics ${params.sampleQCDirectory}/${params.sampleId}.quality_yield_metrics.txt
 
-
-        ## convert the pdf files to png files
-        pdftoppm ${params.sampleQCDirectory}/${params.sampleId}.base_distribution_by_cycle.pdf -pgn -scale-to 480 > ${params.sampleQCDirectory}/${params.sampleId}.base_distribution_by_cycle.png
-        pdftoppm ${params.sampleQCDirectory}/${params.sampleId}.insert_size_histogram.pdf -pgn -scale-to 480 > ${params.sampleQCDirectory}/${params.sampleId}.insert_size_histogram.png
-        pdftoppm ${params.sampleQCDirectory}/${params.sampleId}.gc_bias.pdf -pgn -scale-to 480 > ${params.sampleQCDirectory}/${params.sampleId}.gc_bias.png
 
         cat <<-END_VERSIONS > versions.yaml
         '${task.process}':
