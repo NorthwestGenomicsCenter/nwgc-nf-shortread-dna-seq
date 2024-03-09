@@ -2,8 +2,7 @@ process PICARD_COVERAGE_METRICS {
 
     label "PICARD_COVERAGE_METRICS_${params.sampleId}_${params.libraryId}_${params.userId}"
 
-    // CHANGE THIS
-    publishDir "$params.sampleQCDirectory", mode: 'link', pattern: '*.picard.coverage.txt'
+    publishDir "$params.sampleQCDirectory", mode: 'link', pattern: '*.picard.coverage.txt', saveAs:"${chrom}.picard.coverage.txt"
  
     input:
         path bam
@@ -11,21 +10,24 @@ process PICARD_COVERAGE_METRICS {
         val baseQuality
         val mappingQuality
         path intervalsList
+        val chrom
 
     output:
         path "*.picard.coverage.txt"
         path "versions.yaml", emit: versions
 
     script:
-        def baseQualityString = ""
-        def mappingQualityString = ""
+        String baseQualityString = ""
+        String mappingQualityString = ""
+        Integer baseQualityVal = baseQuality
+        Integer mappingQualityVal = mappingQuality
 
-        if($baseQuality != -1) {
-            baseQualityString = "--MINIMUM_BASE_QUALITY $baseQuality"
+        if(baseQualityVal != -1) {
+            baseQualityString = "--MINIMUM_BASE_QUALITY $baseQualityVal"
         }
 
-        if($mappingQuality != -1) {
-            mappingQualityString = "--MINIMUM_MAPPING_QUALITY $mappingQuality"
+        if(mappingQualityVal != -1) {
+            mappingQualityString = "--MINIMUM_MAPPING_QUALITY $mappingQualityVal"
         }
 
         """
