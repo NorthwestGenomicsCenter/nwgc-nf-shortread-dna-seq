@@ -4,7 +4,8 @@ include { PICARD_COVERAGE_METRICS as PICARD_COVERAGE_METRICS_BY_CHROMOSOME } fro
 include { CONTAMINATION_CHECK } from '../modules/contamination_check.nf'
 include { CREATE_FINGERPRINT_VCF } from '../modules/create_fingerprint_vcf.nf'
 include { PICARD_MULTIPLE_METRICS } from '../modules/picard_multiple_metrics.nf'
-include { SAMTOOLS_WGS_STATS } from '../modules/wgs_stats.nf'
+include { SAMTOOLS_STATS } from '../modules/samtools_stats.nf'
+include { SAMTOOLS_FLAGSTAT } from '../modules/samtools_flagstat.nf'
 
 ch_versions = Channel.empty()
 
@@ -26,7 +27,7 @@ workflow SHORTREAD_QC {
         if (runAll || params.qcToRun.contains("coverage")) {
             // Tuple containing intervals list and what part of the sequencing target is being analyzed
             // Blank in this case because the whole sequencing target is being analyzed
-            def directoryInfo = [params.intervalsList, ""]
+            def directoryInfo = [params.sequencingTargetIntervalsList, ""]
 
             // Runs PICARD_COVERAGE_METRICS with default MINIMUM_MAPPING_QUALITY for each MINIMUM_BASE_QUALITY in input baseQualityRange
             baseQualityRange = Channel.fromList(params.baseQualityRange)
@@ -41,8 +42,8 @@ workflow SHORTREAD_QC {
             ch_versions = ch_versions.mix(PICARD_COVERAGE_METRICS_MAPPING_QUALITY.out.versions)
         }
 
-        if ((runAll && params.intervalsDir != null) || params.qcToRun.contains("coverage_by_chrom")) {
-            if (params.intervalsDir == null) {
+        if ((runAll && params.sequencingTargetIntervalsDir != null) || params.qcToRun.contains("coverage_by_chrom")) {
+            if (params.sequencingTargetIntervalsDir == null) {
                 throw new Exception("Coverage by chromosome was specified but no intervalsDir was provided")
             }
             chromosomes = params.hg19Chromosomes
@@ -53,7 +54,7 @@ workflow SHORTREAD_QC {
             // Generate a Channel with the intervals.list file and name of each chromosome
             directoryInfoList = [];
             for (String chromosome in params.grc38Chromosomes) {
-                chromosomeIntervalsList = "${params.intervalsDir}/${params.sequencingTarget}.${params.referenceAbbr}.${chromosome}.intervals.list"
+                chromosomeIntervalsList = "${params.sequencingTargetIntervalsDir}/${params.sequencingTarget}.${params.referenceAbbr}.${chromosome}.intervals.list"
                 // Tuple containing intervals lis and what part of the sequencing target is being analyzed (the chromosome)
                 directoryInfoTuple = [chromosomeIntervalsList, chromosome]
                 directoryInfoList << directoryInfoTuple
@@ -82,9 +83,14 @@ workflow SHORTREAD_QC {
             ch_version = ch_versions.mix(PICARD_MULTIPLE_METRICS.out.versions)
         }
 
-        if (runAll || params.qcToRun.contains("wgs_stats")) {
-            SAMTOOLS_WGS_STATS(bam, params.bed)
-            ch_version = ch_versions.mix(SAMTOOLS_WGS_STATS.out.versions)
+        if (runAll || params.qcToRun.contains("samtools_flagstat")) {
+            SAMTOOLS_FLAGSTAT(bam)
+            ch_version = ch_versions.mix(SAMTOOLS_STATS.out.versions)
+        }
+
+        if (runAll || params.qcToRun.contains("samtools_stats")) {
+            SAMTOOLS_STATS(bam, params.sequencingTargetBed)
+            ch_version = ch_versions.mix(SAMTOOLS_STATS.out.versions)
         }
  
         ch_versions.unique().collectFile(name: 'qc_software_versions.yaml', storeDir: "${params.sampleDirectory}")
