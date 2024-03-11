@@ -4,6 +4,7 @@ include { PICARD_COVERAGE_METRICS as PICARD_COVERAGE_METRICS_BY_CHROMOSOME } fro
 include { CONTAMINATION_CHECK } from '../modules/contamination_check.nf'
 include { CREATE_FINGERPRINT_VCF } from '../modules/create_fingerprint_vcf.nf'
 include { PICARD_MULTIPLE_METRICS } from '../modules/picard_multiple_metrics.nf'
+include { SAMTOOLS_WGS_STATS } from '../modules/wgs_stats.nf'
 
 ch_versions = Channel.empty()
 
@@ -75,9 +76,14 @@ workflow SHORTREAD_QC {
             ch_versions = ch_versions.mix(CREATE_FINGERPRINT_VCF.out.versions)
         }
 
-        if (runAll || params.qcToRun.contains("multiple")) {
+        if (runAll || params.qcToRun.contains("picard_multiple_metrics")) {
             PICARD_MULTIPLE_METRICS(bam, bai)
             ch_version = ch_versions.mix(PICARD_MULTIPLE_METRICS.out.versions)
+        }
+
+        if (runAll || params.qcToRun.contains("wgs_stats")) {
+            SAMTOOLS_WGS_STATS(bam, params.bed)
+            ch_version = ch_versions.mix(SAMTOOLS_WGS_STATS.out.versions)
         }
  
         ch_versions.unique().collectFile(name: 'qc_software_versions.yaml', storeDir: "${params.sampleDirectory}")
