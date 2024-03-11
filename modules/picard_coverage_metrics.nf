@@ -2,7 +2,7 @@ process PICARD_COVERAGE_METRICS {
 
     label "PICARD_COVERAGE_METRICS_${params.sampleId}_${params.userId}"
 
-    publishDir "$params.sampleQCDirectory", mode: 'link', pattern: '*.picard.coverage.txt'
+    publishDir "${params.sampleQCDirectory}", mode: 'link', pattern: '*.picard.coverage.txt'
  
     input:
         path bam
@@ -26,7 +26,7 @@ process PICARD_COVERAGE_METRICS {
         }
 
         """
-        mkdir -p $params.sampleQCDirectory
+        mkdir -p ${params.sampleQCDirectory}
 
         java \
             -XX:InitialRAMPercentage=80 \
@@ -34,7 +34,7 @@ process PICARD_COVERAGE_METRICS {
             -jar \$PICARD_DIR/picard.jar \
             CollectWgsMetrics \
             --INPUT $bam \
-            --REFERENCE_SEQUENCE $params.referenceGenome \
+            --REFERENCE_SEQUENCE ${params.referenceGenome} \
             --VALIDATION_STRINGENCY SILENT \
             --MINIMUM_BASE_QUALITY $baseQualityVal \
             --MINIMUM_MAPPING_QUALITY $mappingQualityVal \

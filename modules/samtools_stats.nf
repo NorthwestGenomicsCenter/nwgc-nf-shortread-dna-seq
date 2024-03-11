@@ -2,10 +2,11 @@ process SAMTOOLS_STATS {
 
     label "SAMTOOLS_STATS_${params.sampleId}_${params.userId}"
 
-    publishDir "${params.sampleQCDirector}", mode: 'link', pattern: '*.onTarget.stats.txt'
+    publishDir "${params.sampleQCDirectory}", mode: 'link', pattern: '*.onTarget.stats.txt'
 
     input:
         path bam
+        path bai
         path bed
 
     output:
@@ -21,7 +22,7 @@ process SAMTOOLS_STATS {
             stats \
             -t $bed \
             $bam \
-            -- threads ${task.cpus} \
+            --threads ${task.cpus} \
             > ${params.sampleId}.onTarget.stats.txt
 
         cat <<-END_VERSIONS > versions.yaml

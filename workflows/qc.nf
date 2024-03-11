@@ -84,12 +84,12 @@ workflow SHORTREAD_QC {
         }
 
         if (runAll || params.qcToRun.contains("samtools_flagstat")) {
-            SAMTOOLS_FLAGSTAT(bam)
-            ch_version = ch_versions.mix(SAMTOOLS_STATS.out.versions)
+            SAMTOOLS_FLAGSTAT(bam, bai)
+            ch_version = ch_versions.mix(SAMTOOLS_FLAGSTAT.out.versions)
         }
 
         if (runAll || params.qcToRun.contains("samtools_stats")) {
-            SAMTOOLS_STATS(bam, params.sequencingTargetBed)
+            SAMTOOLS_STATS(bam, bai, params.sequencingTargetBed)
             ch_version = ch_versions.mix(SAMTOOLS_STATS.out.versions)
         }
  

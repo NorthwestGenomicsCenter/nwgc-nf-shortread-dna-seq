@@ -2,10 +2,11 @@ process SAMTOOLS_FLAGSTAT {
 
     label "SAMTOOLS_FLAGSTAT_${params.sampleId}_${params.userId}"
 
-    publishDir "${params.sampleQCDirector}", mode: 'link', pattern: '*.flagstat.output.txt'
+    publishDir "${params.sampleQCDirectory}", mode: 'link', pattern: '*.flagstat.output.txt'
 
     input:
         path bam
+        path bai
 
     output:
         path "*.flagstat.output.txt"
@@ -19,7 +20,7 @@ process SAMTOOLS_FLAGSTAT {
         samtools \
             flagstat \
             $bam \
-            -@ ${task.cpus} #number of threads to be used \
+            -@ ${task.cpus} \
             > ${params.sampleId}.flagstat.output.txt
 
         cat <<-END_VERSIONS > versions.yaml
