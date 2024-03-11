@@ -18,50 +18,48 @@ workflow SHORTREAD_QC {
 
        def runAll = params.qcToRun.contains("All")
 
+       // Defines default MINIMUM_BASE_QUALITY and MINIMUM_MAPPING_QUALITY
+       defaultBaseQuality = Channel.value(20);
+       defaultMappingQuality = Channel.value(20);
+
         if (runAll || params.qcToRun.contains("coverage")) {
-            // Defines the location of the intervals.list file to be used for PICARD_COVERAGE_METRICS
-            def intervalsList = "${params.intervalsDir}/${params.sequencingTarget}.${params.referenceAbbr}.intervals.list"
+            // Tuple containing intervals list and what part of the sequencing target is being analyzed
+            // Blank in this case because the whole sequencing target is being analyzed
+            def directoryInfo = new Tuple(params.intervalsList, "");
 
             // Runs PICARD_COVERAGE_METRICS with default MINIMUM_MAPPING_QUALITY for each MINIMUM_BASE_QUALITY in input baseQualityRange
-            baseQuality = Channel.fromList(params.baseQualityRange)
-            baseQualityIdent = Channel.fromList(params.baseQualityRange)
-            PICARD_COVERAGE_METRICS_BASE_QUALITY(bam, bai, baseQuality, -1, intervalsList, "1${baseQualityIdent}")
+            baseQualityRange = Channel.fromList(params.baseQualityRange)
+            PICARD_COVERAGE_METRICS_BASE_QUALITY(bam, bai, baseQuality, defaultMappingQualityRange, directoryInfo)
 
             // Runs PICARD_COVERAGE_METRICS with default MINIMUM_BASE_QUALITY for each MINIMUM_MAPPING_QUALITY in input mappingQualityRange
-            mappingQuality = Channel.fromList(params.mappingQualityRange)
-            PICARD_COVERAGE_METRICS_MAPPING_QUALITY(bam, bai, -1, mappingQuality, intervalsList, "100")
+            mappingQualityRange = Channel.fromList(params.mappingQualityRange)
+            PICARD_COVERAGE_METRICS_MAPPING_QUALITY(bam, bai, defaultBaseQuality, mappingQualityRange, directoryInfo)
 
             // Logs module versions used
             ch_versions = ch_versions.mix(PICARD_COVERAGE_METRICS_BASE_QUALITY.out.versions)
             ch_versions = ch_versions.mix(PICARD_COVERAGE_METRICS_MAPPING_QUALITY.out.versions)
         }
 
-        if (runAll || params.qcToRun.contains("coverage_by_chrom")) {
-            intervalsList = Channel.empty()
-            chromosomes = Channel.fromList(params.hg19Chromosomes)
-            if (params.isGRC38) {
-                for (String chromosome in params.grc38Chromosomes) {
-                    chromosomeIntervalsList = Channel.value("${params.intervalsDir}/${params.sequencingTarget}.${params.referenceAbbr}.${chromosome}.intervals.list")
-                    intervalsList = intervalsList.concat(chromosomeIntervalsList)
-                    chromosomes = Channel.fromList(params.hg19Chromosomes)
-                }
+        if ((runAll && params.intervalsDir != null) || params.qcToRun.contains("coverage_by_chrom")) {
+            if (params.intervalsDir == null) {
+                throw new Exception("Coverage by chromosome was specified but no intervalsDir was provided")
             }
-            else {
-                for (String chromosome in params.hg19Chromosomes) {
-                    chromosomeIntervalsList = Channel.value("${params.intervalsDir}/${params.sequencingTarget}.${params.referenceAbbr}.${chromosome}.intervals.list")
-                    intervalsList = intervalsList.concat(chromosomeIntervalsList)
-                }
+            chromosomes = params.hg19Chromosomes
+            if (params.isGRC38) {
+               chromosomes = params.grc38Chromosomes;
             }
 
-            /*
-            // Generate a Channel with one intervals.list file per chromosome
-            intervalsListFront = Channel.value("${params.intervalsDir}/${params.sequencingTarget}.${params.referenceAbbr}.")
-            intervalsListEnd = Channel.value('.intervals.list')
-            intervalsList = "${params.intervalsDir}/${params.sequencingTarget}.${params.referenceAbbr}" + chromosomes + '.intervals.list'
-            */
+            // Generate a Channel with the intervals.list file and name of each chromosome
+            directoryInfo = Channel.empty();
+            for (String chromosome in params.grc38Chromosomes) {
+                chromosomeIntervalsList = Channel.value("${params.intervalsDir}/${params.sequencingTarget}.${params.referenceAbbr}.${chromosome}.intervals.list")
+                // Tuple containing intervals lis and what part of the sequencing target is being analyzed (the chromosome)
+                directoryInfoTuple = new Tuple(chromosomeIntervalsList, chromosome)
+                directoryInfo = directoryInfo.concat(directoryInfoTuple)
+            }
 
             // Runs PICARD_COVERAGE_METRICS once for each intervals.list file in the intervalsList Channel
-            PICARD_COVERAGE_METRICS_BY_CHROMOSOME(bam, bai, -1, -1, intervalsList, chromosomes)
+            PICARD_COVERAGE_METRICS_BY_CHROMOSOME(bam, bai, defaultBaseQuality, defaultMappingQuality, directoryInfo)
 
             // Logs module versions used
             ch_versions = ch_versions.mix(PICARD_COVERAGE_METRICS_BY_CHROMOSOME.out.versions)

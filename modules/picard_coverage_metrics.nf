@@ -1,33 +1,28 @@
 process PICARD_COVERAGE_METRICS {
 
-    label "PICARD_COVERAGE_METRICS_${params.sampleId}_${params.libraryId}_${params.userId}"
+    label "PICARD_COVERAGE_METRICS_${params.sampleId}_${params.userId}"
 
-    publishDir "$params.sampleQCDirectory", mode: 'link', pattern: '*.picard.coverage.txt', saveAs:"${chrom}.picard.coverage.txt"
+    publishDir "$params.sampleQCDirectory", mode: 'link', pattern: '*.picard.coverage.txt'
  
     input:
         path bam
         path bai
         val baseQuality
         val mappingQuality
-        path intervalsList
-        val chrom
+        tuple path(intervalsList) string(partOfSequencingTarget)
 
     output:
         path "*.picard.coverage.txt"
         path "versions.yaml", emit: versions
 
     script:
-        String baseQualityString = ""
-        String mappingQualityString = ""
         Integer baseQualityVal = baseQuality
         Integer mappingQualityVal = mappingQuality
 
-        if(baseQualityVal != -1) {
-            baseQualityString = "--MINIMUM_BASE_QUALITY $baseQualityVal"
-        }
-
-        if(mappingQualityVal != -1) {
-            mappingQualityString = "--MINIMUM_MAPPING_QUALITY $mappingQualityVal"
+        // If there was a given part of sequencing target format it to be used in the file path.
+        String partOfSequencingTargetOutput = partOfSequencingTarget;
+        if (!partOfSequencingTargetOutput.equals("")) {
+            partOfSequencingTargetOutput = ".${partOfSequencingTargetOutput}"
         }
 
         """
@@ -41,11 +36,11 @@ process PICARD_COVERAGE_METRICS {
             --INPUT $bam \
             --REFERENCE_SEQUENCE $params.referenceGenome \
             --VALIDATION_STRINGENCY SILENT \
-            $baseQualityString \
-            $mappingQualityString \
+            --MINIMUM_BASE_QUALITY $baseQualityVal \
+            --MINIMUM_MAPPING_QUALITY $mappingQualityVal \
             --INTERVALS $intervalsList \
             --COVERAGE_CAP 300000 \
-            --OUTPUT ${params.sampleId}.${params.libraryId}.picard.coverage.txt
+            --OUTPUT ${params.sampleId}.BASEQ${baseQualityVal}.MAPQ${mappingQualityVal}$partOfSequencingTargetOutput.picard.coverage.txt
 
         cat <<-END_VERSIONS > versions.yaml
         '${task.process}':
