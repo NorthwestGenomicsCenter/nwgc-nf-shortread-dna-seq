@@ -2,7 +2,8 @@ process SAMTOOLS_WGS_STATS {
 
     label "SAMTOOLS_WGS_STATS_${params.sampleId}_${params.userId}"
 
-    // publishDir "$params.sampleQCDirectory", mode: 'link', pattern: '*.txt'
+    publishDir "${params.sampleQCDirectory}", mode: 'link', pattern: '*.flagstat.output.txt'
+    publishDir "${params.sampleQCDirector}", mode: 'link', pattern: '*.onTarget.stats.txt'
 
     input:
         path bam
@@ -16,12 +17,12 @@ process SAMTOOLS_WGS_STATS {
     script:
 
         """
-        mkdir -p $params.sampleQCDirectory
+        mkdir -p ${params.sampleQCDirectory}
 
         # global
-        time samtools flagstat ${bam} > ${params.sampleQCDirectory}/${params.sampleId}.flagstat.output.txt
+        samtools flagstat $bam > ${params.sampleId}.flagstat.output.txt
         # on-target
-        time samtools stats -t ${bed} ${bam} > ${params.sampleQCDirectory}/${params.sampleId}.onTarget.stats.txt
+        samtools stats -t $bed $bam > ${params.sampleId}.onTarget.stats.txt
 
         cat <<-END_VERSIONS > versions.yaml
         '${task.process}':
