@@ -26,11 +26,11 @@ workflow SHORTREAD_QC {
         if (runAll || params.qcToRun.contains("coverage")) {
             // Tuple containing intervals list and what part of the sequencing target is being analyzed
             // Blank in this case because the whole sequencing target is being analyzed
-            def directoryInfo = new Tuple(params.intervalsList, "");
+            def directoryInfo = [params.intervalsList, ""]
 
             // Runs PICARD_COVERAGE_METRICS with default MINIMUM_MAPPING_QUALITY for each MINIMUM_BASE_QUALITY in input baseQualityRange
             baseQualityRange = Channel.fromList(params.baseQualityRange)
-            PICARD_COVERAGE_METRICS_BASE_QUALITY(bam, bai, baseQuality, defaultMappingQualityRange, directoryInfo)
+            PICARD_COVERAGE_METRICS_BASE_QUALITY(bam, bai, baseQualityRange, defaultMappingQuality, directoryInfo)
 
             // Runs PICARD_COVERAGE_METRICS with default MINIMUM_BASE_QUALITY for each MINIMUM_MAPPING_QUALITY in input mappingQualityRange
             mappingQualityRange = Channel.fromList(params.mappingQualityRange)
@@ -51,13 +51,14 @@ workflow SHORTREAD_QC {
             }
 
             // Generate a Channel with the intervals.list file and name of each chromosome
-            directoryInfo = Channel.empty();
+            directoryInfoList = [];
             for (String chromosome in params.grc38Chromosomes) {
-                chromosomeIntervalsList = Channel.value("${params.intervalsDir}/${params.sequencingTarget}.${params.referenceAbbr}.${chromosome}.intervals.list")
+                chromosomeIntervalsList = "${params.intervalsDir}/${params.sequencingTarget}.${params.referenceAbbr}.${chromosome}.intervals.list"
                 // Tuple containing intervals lis and what part of the sequencing target is being analyzed (the chromosome)
-                directoryInfoTuple = new Tuple(chromosomeIntervalsList, chromosome)
-                directoryInfo = directoryInfo.concat(directoryInfoTuple)
+                directoryInfoTuple = [chromosomeIntervalsList, chromosome]
+                directoryInfoList << directoryInfoTuple
             }
+            directoryInfo = Channel.fromList(directoryInfoList)
 
             // Runs PICARD_COVERAGE_METRICS once for each intervals.list file in the intervalsList Channel
             PICARD_COVERAGE_METRICS_BY_CHROMOSOME(bam, bai, defaultBaseQuality, defaultMappingQuality, directoryInfo)

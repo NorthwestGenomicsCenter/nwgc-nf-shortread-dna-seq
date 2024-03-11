@@ -9,7 +9,7 @@ process PICARD_COVERAGE_METRICS {
         path bai
         val baseQuality
         val mappingQuality
-        tuple path(intervalsList) string(partOfSequencingTarget)
+        tuple path(intervalsList), val(partOfSequencingTarget)
 
     output:
         path "*.picard.coverage.txt"
@@ -20,7 +20,7 @@ process PICARD_COVERAGE_METRICS {
         Integer mappingQualityVal = mappingQuality
 
         // If there was a given part of sequencing target format it to be used in the file path.
-        String partOfSequencingTargetOutput = partOfSequencingTarget;
+        String partOfSequencingTargetOutput = partOfSequencingTarget
         if (!partOfSequencingTargetOutput.equals("")) {
             partOfSequencingTargetOutput = ".${partOfSequencingTargetOutput}"
         }
@@ -40,7 +40,7 @@ process PICARD_COVERAGE_METRICS {
             --MINIMUM_MAPPING_QUALITY $mappingQualityVal \
             --INTERVALS $intervalsList \
             --COVERAGE_CAP 300000 \
-            --OUTPUT ${params.sampleId}.BASEQ${baseQualityVal}.MAPQ${mappingQualityVal}$partOfSequencingTargetOutput.picard.coverage.txt
+            --OUTPUT ${params.sampleId}.BASEQ${baseQualityVal}.MAPQ${mappingQualityVal}${partOfSequencingTargetOutput}.picard.coverage.txt
 
         cat <<-END_VERSIONS > versions.yaml
         '${task.process}':
