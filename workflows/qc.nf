@@ -6,6 +6,8 @@ include { CREATE_FINGERPRINT_VCF } from '../modules/create_fingerprint_vcf.nf'
 include { PICARD_MULTIPLE_METRICS } from '../modules/picard_multiple_metrics.nf'
 include { SAMTOOLS_STATS } from '../modules/samtools_stats.nf'
 include { SAMTOOLS_FLAGSTAT } from '../modules/samtools_flagstat.nf'
+include { VERIFY_BAM_ID } from '../modules/verify_bam_id.nf'
+include { VERIFY_BAM_ID_CUSTOM_TARGET } from '../modules/verify_bam_id_custom_target.nf'
 
 ch_versions = Channel.empty()
 
@@ -80,17 +82,28 @@ workflow SHORTREAD_QC {
 
         if (runAll || params.qcToRun.contains("picard_multiple_metrics")) {
             PICARD_MULTIPLE_METRICS(bam, bai)
-            ch_version = ch_versions.mix(PICARD_MULTIPLE_METRICS.out.versions)
+            ch_versions = ch_versions.mix(PICARD_MULTIPLE_METRICS.out.versions)
         }
 
         if (runAll || params.qcToRun.contains("samtools_flagstat")) {
             SAMTOOLS_FLAGSTAT(bam, bai)
-            ch_version = ch_versions.mix(SAMTOOLS_FLAGSTAT.out.versions)
+            ch_versions = ch_versions.mix(SAMTOOLS_FLAGSTAT.out.versions)
         }
 
         if (runAll || params.qcToRun.contains("samtools_stats")) {
             SAMTOOLS_STATS(bam, bai, params.sequencingTargetBed)
-            ch_version = ch_versions.mix(SAMTOOLS_STATS.out.versions)
+            ch_versions = ch_versions.mix(SAMTOOLS_STATS.out.versions)
+        }
+
+        if (runAll || params.qcToRun.contains("verify_bam_id")) {
+            if (params.isCustomTargetContaminationSample) {
+                VERIFY_BAM_ID_CUSTOM_TARGET(bam, bai)
+                ch_versions = ch_versions.mix(VERIFY_BAM_ID_CUSTOM_TARGET.out.versions);
+            }
+            else {
+                VERIFY_BAM_ID(bam, bai)
+                ch_versions = ch_versions.mix(VERIFY_BAM_ID.out.versions)
+            }
         }
  
         ch_versions.unique().collectFile(name: 'qc_software_versions.yaml', storeDir: "${params.sampleDirectory}")

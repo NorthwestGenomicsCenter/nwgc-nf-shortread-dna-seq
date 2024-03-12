@@ -15,7 +15,7 @@ libraryId: <samplify library>                            # e.g libraryId: 123456
 # Target
 sequencingTarget: "<name of sequencing target>"   	                                           # e.g. sequencingTarget: "nimblegen_solution_V2refseq_2010"
 sequencingTargetIntervalsList: "<full path to intervals.list file>"                            # e.g. intervalsList: "/net/nwgc/vol1/references/human/grc38/targets/nimblegen_solution_V2refseq_2010/nimblegen_solution_V2refseq_2010.grc38.intervals.list"
-# intervalsDir should be null unless running analysis by chromosome
+  # sequencingTargetIntervalsDir should be null unless running analysis by chromosome
 sequencingTargetIntervalsDir: "<full path to directory with chromosome intervals list files>"  # e.g. intervalsDir: "/net/nwgc/vol1/references/human/grc38/targets/nimblegen_solution_V2refseq_2010"
 sequencingTargetBedFile: "<full path to bed file>"                                             # e.g bed: "/net/nwgc/vol1/references/human/grc38/targets/nimblegen_solution_V2refseq_2010/nimblegen_solution_V2refseq_2010.grc38.bed"
 
@@ -25,6 +25,15 @@ dbSnp: "<full path to dbSnp file>"                              # e.g. dbSnp: "/
 goldStandardIndels: "<full path to gold standard indels file>"  # e.g. goldStandardIndels: "/net/nwgc/vol1/references/human/grc38/genome/assembly_bwa_0.7.15/Mills_and_1000G_gold_standard.indels.hg38.vcf"
 knownIndels: "<full path to known indels file>"                 # e.g. knownIndels: "/net/nwgc/vol1/references/human/rc38/genome/assembly_bwa_0.7.15/Homo_sapiens_assembly38.known_indels.vcf"
 referenceAbbr: "<reference genome abbreviation>"                # e.g. referenceAbbr: "grc38"
+
+# Contamination
+  # Leave null to use default file path 
+contaminationUDPath: "<full path to contamination UD file>"     # e.g. contaminationUDPath: "/net/nwgc/vol1/references/human/grc38/contamination/1000g.twist_plus_refseq_10-31-2018.AF1p.b38.vcf.gz.UD"
+contaminationBedPath: "<full path to contamination Bed file>"   # e.g. contaminationBedPath: "/net/nwgc/vol1/references/human/grc38/contamination/1000g.twist_plus_refseq_10-31-2018.AF1p.b38.vcf.gz.bed"
+contaminationMeanPath: "<full path to contamination Mean file>" # e.g. contaminationMeanPath: "/net/nwgc/vol1/references/human/grc38/contamination/1000g.twist_plus_refseq_10-31-2018.AF1p.b38.vcf.gz.mu"
+  # Custom contamination target
+isCustomTargetContaminationSample: "<true or false based on if the sample has a custom contamination target>" #e.g. isCustomTargetContaminationSample: true
+customTargetContaminationReferenceVCF: "<full path to VCF file for a custom contamination target>"            #e.g. customTargetContaminationReferenceVCF: "/net/nwgc/vol1/references/human/hg19/snps/verifyBamId/hapmap_3.3.b37.sites.vcf"
 
 # Fingerprint
 fingerprintBed:	"<full path to fingerprint bed file>"			# e.g. fingerprintBed: "/net/nwgc/vol1/references/human/grc38/targets/fingerprint_grc38_open_array.bed"
