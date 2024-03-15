@@ -11,6 +11,7 @@ process SAMTOOLS_FLAGSTAT {
     output:
         path "*.flagstat.output.txt"
         path "versions.yaml", emit: versions
+        val true, emit: ready
 
     script:
 

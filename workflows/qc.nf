@@ -7,6 +7,7 @@ include { SAMTOOLS_STATS } from '../modules/qc/samtools_stats.nf'
 include { SAMTOOLS_FLAGSTAT } from '../modules/qc/samtools_flagstat.nf'
 include { VERIFY_BAM_ID } from '../modules/qc/verify_bam_id.nf'
 include { VERIFY_BAM_ID_CUSTOM_TARGET } from '../modules/qc/verify_bam_id_custom_target.nf'
+include { COLLECT_AND_PLOT } from '../modules/qc/collect_and_plot.nf'
 
 ch_versions = Channel.empty()
 
@@ -43,19 +44,15 @@ workflow SHORTREAD_QC {
             ch_versions = ch_versions.mix(PICARD_COVERAGE_METRICS_MAPPING_QUALITY.out.versions)
         }
 
-        if ((runAll && params.sequencingTargetIntervalsDir != null) || params.qcToRun.contains("coverage_by_chrom")) {
-            if (params.sequencingTargetIntervalsDir == null) {
+        if ((runAll && params.sequencingTargetIntervalsDirectory != null) || params.qcToRun.contains("coverage_by_chrom")) {
+            if (params.sequencingTargetIntervalsDirectory == null) {
                 throw new Exception("Coverage by chromosome was specified but no intervalsDir was provided")
-            }
-            chromosomes = params.hg19Chromosomes
-            if (params.isGRC38) {
-               chromosomes = params.grc38Chromosomes;
             }
 
             // Generate a Channel with the intervals.list file and name of each chromosome
             directoryInfoList = [];
-            for (String chromosome in params.grc38Chromosomes) {
-                chromosomeIntervalsList = "${params.sequencingTargetIntervalsDir}/${params.sequencingTarget}.${params.referenceAbbr}.${chromosome}.intervals.list"
+            for (String chromosome in params.fileSystemChromosomeNames) {
+                chromosomeIntervalsList = "${params.sequencingTargetIntervalsDirectory}/${params.sequencingTarget}.${params.referenceAbbr}.${chromosome}.intervals.list"
                 // Tuple containing intervals lis and what part of the sequencing target is being analyzed (the chromosome)
                 directoryInfoTuple = [chromosomeIntervalsList, chromosome]
                 directoryInfoList << directoryInfoTuple
@@ -69,7 +66,7 @@ workflow SHORTREAD_QC {
             ch_versions = ch_versions.mix(PICARD_COVERAGE_METRICS_BY_CHROMOSOME.out.versions)
         }
 
-        if (runAll || params.qcToRun.contains("verify_bam_id")) {
+        if (params.qcToRun.contains("verify_bam_id")) {
             if (params.isCustomTargetContaminationSample) {
                 VERIFY_BAM_ID_CUSTOM_TARGET(bam, bai)
                 ch_versions = ch_versions.mix(VERIFY_BAM_ID_CUSTOM_TARGET.out.versions);
@@ -80,7 +77,7 @@ workflow SHORTREAD_QC {
             }
         }
 
-        if (runAll || params.qcToRun.contains("fingerprint")) {
+        if (params.qcToRun.contains("fingerprint")) {
             CREATE_FINGERPRINT_VCF(bam, bai)
             ch_versions = ch_versions.mix(CREATE_FINGERPRINT_VCF.out.versions)
         }
@@ -96,8 +93,20 @@ workflow SHORTREAD_QC {
         }
 
         if (runAll || params.qcToRun.contains("samtools_stats")) {
-            SAMTOOLS_STATS(bam, bai, params.sequencingTargetBed)
+            SAMTOOLS_STATS(bam, bai)
             ch_versions = ch_versions.mix(SAMTOOLS_STATS.out.versions)
+        }
+
+        if (runAll) {
+            COLLECT_AND_PLOT(PICARD_COVERAGE_METRICS_BASE_QUALITY.out.ready.collect(), PICARD_COVERAGE_METRICS_MAPPING_QUALITY.out.ready.collect(),
+                            PICARD_COVERAGE_METRICS_BY_CHROMOSOME.out.ready.collect(), PICARD_MULTIPLE_METRICS.out.ready.collect(), 
+                            SAMTOOLS_FLAGSTAT.out.ready.collect(), SAMTOOLS_STATS.out.ready.collect(), bam, bai)
+            ch_versions = ch_versions.mix(COLLECT_AND_PLOT.out.versions)
+        }
+
+        if (params.qcToRun.contains("collect_and_plot_test")) {
+            COLLECT_AND_PLOT(true, true, true, true, true, true, bam, bai)
+            ch_versions = ch_versions.mix(COLLECT_AND_PLOT.out.versions)
         }
  
         ch_versions.unique().collectFile(name: 'qc_software_versions.yaml', storeDir: "${params.sampleDirectory}")

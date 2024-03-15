@@ -7,11 +7,11 @@ process SAMTOOLS_STATS {
     input:
         path bam
         path bai
-        path bed
 
     output:
         path "*.onTarget.stats.txt"
         path "versions.yaml", emit: versions
+        val true, emit: ready
 
     script:
 
@@ -20,7 +20,7 @@ process SAMTOOLS_STATS {
 
         samtools \
             stats \
-            -t $bed \
+            -t ${params.sequencingTargetBedFile}\
             $bam \
             --threads ${task.cpus} \
             > ${params.sampleId}.onTarget.stats.txt

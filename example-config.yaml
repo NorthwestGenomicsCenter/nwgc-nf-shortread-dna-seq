@@ -14,10 +14,10 @@ libraryId: <samplify library>                            # e.g libraryId: 123456
 
 # Target
 sequencingTarget: "<name of sequencing target>"   	                                           # e.g. sequencingTarget: "nimblegen_solution_V2refseq_2010"
-sequencingTargetIntervalsList: "<full path to intervals.list file>"                            # e.g. intervalsList: "/net/nwgc/vol1/references/human/grc38/targets/nimblegen_solution_V2refseq_2010/nimblegen_solution_V2refseq_2010.grc38.intervals.list"
-  # sequencingTargetIntervalsDir should be null unless running analysis by chromosome
-sequencingTargetIntervalsDir: "<full path to directory with chromosome intervals list files>"  # e.g. intervalsDir: "/net/nwgc/vol1/references/human/grc38/targets/nimblegen_solution_V2refseq_2010"
-sequencingTargetBedFile: "<full path to bed file>"                                             # e.g bed: "/net/nwgc/vol1/references/human/grc38/targets/nimblegen_solution_V2refseq_2010/nimblegen_solution_V2refseq_2010.grc38.bed"
+sequencingTargetIntervalsList: "<full path to intervals.list file>"                            # e.g. sequencingTargetIntervalsList: "/net/nwgc/vol1/references/human/grc38/targets/nimblegen_solution_V2refseq_2010/nimblegen_solution_V2refseq_2010.grc38.intervals.list"
+  # sequencingTargetIntervalsDirectory should be null unless running analysis by chromosome
+sequencingTargetIntervalsDirectory: "<full path to directory with chromosome intervals list files>"  # e.g. sequencingTargetIntervalsDirectory: "/net/nwgc/vol1/references/human/grc38/targets/nimblegen_solution_V2refseq_2010"
+sequencingTargetBedFile: "<full path to bed file>"                                             # e.g sequencingTargetBedFile: "/net/nwgc/vol1/references/human/grc38/targets/nimblegen_solution_V2refseq_2010/nimblegen_solution_V2refseq_2010.grc38.bed"
 
 # Reference Genome
 referenceGenome: "<full path to reference genome fasta>"        # e.g. referenceGenome: "/net/nwgc/vol1/references/human/grc38/genome/assembly_bwa_0.7.15/hs37d5.fa"

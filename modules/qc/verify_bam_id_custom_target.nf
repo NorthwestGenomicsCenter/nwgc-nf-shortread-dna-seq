@@ -24,7 +24,7 @@ process VERIFY_BAM_ID_CUSTOM_TARGET {
             --verbose \
             --chip-none \
             --maxDepth 1000 \
-            --precise \
+            --precise
 
         cat <<-END_VERSIONS > versions.yaml
         '${task.process}':

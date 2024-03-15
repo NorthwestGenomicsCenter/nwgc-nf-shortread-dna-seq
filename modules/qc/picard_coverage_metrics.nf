@@ -14,6 +14,7 @@ process PICARD_COVERAGE_METRICS {
     output:
         path "*.picard.coverage.txt"
         path "versions.yaml", emit: versions
+        val true, emit: ready
 
     script:
         Integer baseQualityVal = baseQuality
