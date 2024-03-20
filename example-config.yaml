@@ -13,15 +13,17 @@ sampleId: <samplify sampleId>                            # e.g sampleId: 123456
 libraryId: <samplify library>                            # e.g libraryId: 123456
 
 # Target
-sequencingTarget: "<name of sequencing target>"   	                                           # e.g. sequencingTarget: "nimblegen_solution_V2refseq_2010"
-sequencingTargetIntervalsList: "<full path to intervals.list file>"                            # e.g. sequencingTargetIntervalsList: "/net/nwgc/vol1/references/human/grc38/targets/nimblegen_solution_V2refseq_2010/nimblegen_solution_V2refseq_2010.grc38.intervals.list"
+sequencingTarget: "<name of sequencing target>"                      # e.g. sequencingTarget: "nimblegen_solution_V2refseq_2010"
+sequencingTargetIntervalsList: "<full path to intervals.list file>"  # e.g. sequencingTargetIntervalsList: "/net/nwgc/vol1/references/human/grc38/targets/nimblegen_solution_V2refseq_2010/nimblegen_solution_V2refseq_2010.grc38.intervals.list"
+targetListFile: "<full path to target .list file>"                   # e.g. targetListFile: "/net/nwgc/vol1/references/human/hg19/targets/nimblegen_solution_V2refseq_2010/nimblegen_solution_V2refseq_2010.hg19.list"
   # sequencingTargetIntervalsDirectory should be null unless running analysis by chromosome
 sequencingTargetIntervalsDirectory: "<full path to directory with chromosome intervals list files>"  # e.g. sequencingTargetIntervalsDirectory: "/net/nwgc/vol1/references/human/grc38/targets/nimblegen_solution_V2refseq_2010"
-sequencingTargetBedFile: "<full path to bed file>"                                             # e.g sequencingTargetBedFile: "/net/nwgc/vol1/references/human/grc38/targets/nimblegen_solution_V2refseq_2010/nimblegen_solution_V2refseq_2010.grc38.bed"
+sequencingTargetBedFile: "<full path to bed file>"                                                   # e.g sequencingTargetBedFile: "/net/nwgc/vol1/references/human/grc38/targets/nimblegen_solution_V2refseq_2010/nimblegen_solution_V2refseq_2010.grc38.bed"
 
 # Reference Genome
 referenceGenome: "<full path to reference genome fasta>"        # e.g. referenceGenome: "/net/nwgc/vol1/references/human/grc38/genome/assembly_bwa_0.7.15/hs37d5.fa"
-dbSnp: "<full path to dbSnp file>"                              # e.g. dbSnp: "/net/nwgc/vol1/references/human/grc38/genome/assembly_bwa_0.7.15/Homo_sapiens_assembly38.dbsnp138.vcf"
+dbSnp: "<full path to dbSnp file>"                              # e.g. dbSnp: "/net/nwgc/vol1/references/human/grc38/genome/assembly_bwa_0.7.15/Homo_sapiens_assembly38.dbsnp138.vcf" (grc38)
+                                                                # e.g. dbSnp: "/net/nwgc/vol1/references/human/snps/dbSNP/dbSNP138.vcf" (hg19)
 goldStandardIndels: "<full path to gold standard indels file>"  # e.g. goldStandardIndels: "/net/nwgc/vol1/references/human/grc38/genome/assembly_bwa_0.7.15/Mills_and_1000G_gold_standard.indels.hg38.vcf"
 knownIndels: "<full path to known indels file>"                 # e.g. knownIndels: "/net/nwgc/vol1/references/human/rc38/genome/assembly_bwa_0.7.15/Homo_sapiens_assembly38.known_indels.vcf"
 referenceAbbr: "<reference genome abbreviation>"                # e.g. referenceAbbr: "grc38"
@@ -52,3 +54,7 @@ mappedBams:
 mergedBam: "<full path to a merged bam that contains nm tags>"
 # e.g.
 #mergedBam: /net/nwgc/vol1/home/kolart/pacbio_merged_test.bam
+
+# Optional (Already defaulted in nextflow.config file to organism=Homo sapiens, isGRC38=false)
+organism: "<species other than Homo sapiens>"  # e.g. organism: "Mus musculus"
+isGRC38: "<true if grc38>"                     # e.g. isGRC38: true
