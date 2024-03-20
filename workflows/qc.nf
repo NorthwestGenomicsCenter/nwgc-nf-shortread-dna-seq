@@ -21,6 +21,7 @@ workflow SHORTREAD_QC {
     main:
 
        def runAll = params.qcToRun.contains("All")
+       def runChromosomes = (params.sequencingTargetIntervalsDirectory != null)
 
        // Defines default MINIMUM_BASE_QUALITY and MINIMUM_MAPPING_QUALITY
        defaultBaseQuality = Channel.value(20);
@@ -44,7 +45,7 @@ workflow SHORTREAD_QC {
             ch_versions = ch_versions.mix(PICARD_COVERAGE_METRICS_MAPPING_QUALITY.out.versions)
         }
 
-        if ((runAll && params.sequencingTargetIntervalsDirectory != null) || params.qcToRun.contains("coverage_by_chrom")) {
+        if ((runAll && runChromosomes) || params.qcToRun.contains("coverage_by_chrom")) {
             if (params.sequencingTargetIntervalsDirectory == null) {
                 throw new Exception("Coverage by chromosome was specified but no intervalsDir was provided")
             }
@@ -66,10 +67,10 @@ workflow SHORTREAD_QC {
             ch_versions = ch_versions.mix(PICARD_COVERAGE_METRICS_BY_CHROMOSOME.out.versions)
         }
 
-        if (params.qcToRun.contains("verify_bam_id")) {
+        if (runAll || params.qcToRun.contains("verify_bam_id")) {
             if (params.isCustomTargetContaminationSample) {
                 VERIFY_BAM_ID_CUSTOM_TARGET(bam, bai)
-                ch_versions = ch_versions.mix(VERIFY_BAM_ID_CUSTOM_TARGET.out.versions);
+                ch_versions = ch_versions.mix(VERIFY_BAM_ID_CUSTOM_TARGET.out.versions)
             }
             else {
                 VERIFY_BAM_ID(bam, bai)
@@ -77,7 +78,7 @@ workflow SHORTREAD_QC {
             }
         }
 
-        if (params.qcToRun.contains("fingerprint")) {
+        if (runAll || params.qcToRun.contains("fingerprint")) {
             CREATE_FINGERPRINT_VCF(bam, bai)
             ch_versions = ch_versions.mix(CREATE_FINGERPRINT_VCF.out.versions)
         }
@@ -97,15 +98,10 @@ workflow SHORTREAD_QC {
             ch_versions = ch_versions.mix(SAMTOOLS_STATS.out.versions)
         }
 
-        if (runAll) {
+        if (runAll && runChromosomes) {
             COLLECT_AND_PLOT(PICARD_COVERAGE_METRICS_BASE_QUALITY.out.ready.collect(), PICARD_COVERAGE_METRICS_MAPPING_QUALITY.out.ready.collect(),
                             PICARD_COVERAGE_METRICS_BY_CHROMOSOME.out.ready.collect(), PICARD_MULTIPLE_METRICS.out.ready.collect(), 
                             SAMTOOLS_FLAGSTAT.out.ready.collect(), SAMTOOLS_STATS.out.ready.collect(), bam, bai)
-            ch_versions = ch_versions.mix(COLLECT_AND_PLOT.out.versions)
-        }
-
-        if (params.qcToRun.contains("collect_and_plot_test")) {
-            COLLECT_AND_PLOT(true, true, true, true, true, true, bam, bai)
             ch_versions = ch_versions.mix(COLLECT_AND_PLOT.out.versions)
         }
  
