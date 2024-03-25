@@ -64,7 +64,7 @@ process COLLECT_AND_PLOT {
 
         cat <<-END_VERSIONS > versions.yaml
         '${task.process}':
-            R: "" #put r version here
+            R: \$(R --version | grep '^R version' | awk '{print \$3}')
         END_VERSIONS
         """
 

@@ -4,8 +4,10 @@ include { APPLY_BQSR } from '../modules/apply_bqsr.nf'
 
 workflow MERGE_MAPPED_BAMS {
 
+    take:
+        mappedBams
+
     main:
-        def mappedBams = Channel.fromPath(params.mappedBams)
 
         // Merge
         PICARD_MARK_DUPLICATES(mappedBams.collect())

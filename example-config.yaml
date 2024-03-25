@@ -7,10 +7,11 @@ userId: "<samplify userId>"  # e.g. userid: "kolart"
 userEmail: "<userEmail>"     # e.g. userEmail: "kolart@uw.edu"
 
 # Sample
-sampleDirectory: "<full path to sample directory>"       # e.g. sampleDirectory: "/net/nwgc/vol1/data/processed/samples/123456/WHOLE_GENOME"
-sampleQCDirectory: "<full path to sample QC directory>"  # e.g. sampleQCDirectory: "/net/nwgc/vol1/data/processed/samples/123456/WHOLE_GENOME/qc"
-sampleId: <samplify sampleId>                            # e.g sampleId: 123456
-libraryId: <samplify library>                            # e.g libraryId: 123456
+sampleDirectory: "<full path to sample directory>"                  # e.g. sampleDirectory: "/net/nwgc/vol1/data/processed/samples/123456/WHOLE_GENOME"
+sampleQCDirectory: "<full path to sample QC directory>"             # e.g. sampleQCDirectory: "/net/nwgc/vol1/data/processed/samples/123456/WHOLE_GENOME/qc"
+samplePolymorphicQCDirectory: "<full path to sample QC directory>"  # e.g. samplePolymorphicQCDirectory: "/net/nwgc/vol1/data/processed/samples/123456/WHOLE_GENOME/polymorphicQC"
+sampleId: <samplify sampleId>                                       # e.g sampleId: 123456
+libraryId: <samplify library>                                       # e.g libraryId: 123456
 
 # Target
 sequencingTarget: "<name of sequencing target>"                      # e.g. sequencingTarget: "nimblegen_solution_V2refseq_2010"
@@ -40,6 +41,9 @@ customTargetContaminationReferenceVCF: "<full path to VCF file for a custom cont
 # Fingerprint
 fingerprintBed:	"<full path to fingerprint bed file>"			# e.g. fingerprintBed: "/net/nwgc/vol1/references/human/grc38/targets/fingerprint_grc38_open_array.bed"
 
+
+# Semi optional input files. Each yaml should have exactly one of mappedBams, mergedBam, or filteredGVCF depending on the portion of the pipeline meant to run.
+
 # Bams  - Bam files that have been mapped (to merge together) 
 mappedBams:
   - "<full path to first mapedBam>"
@@ -54,6 +58,9 @@ mappedBams:
 mergedBam: "<full path to a merged bam that contains nm tags>"
 # e.g.
 #mergedBam: /net/nwgc/vol1/home/kolart/pacbio_merged_test.bam
+
+# filteredGVCF (for running polymorphic qc on already a smaple with variants already called)
+filteredGVCF: "<full path to a filtered_gvcf file>" # e.g. /net/nwgc/vol1/home/kolart/
 
 # Optional (Already defaulted in nextflow.config file to organism=Homo sapiens, isGRC38=false)
 organism: "<species other than Homo sapiens>"  # e.g. organism: "Mus musculus"
