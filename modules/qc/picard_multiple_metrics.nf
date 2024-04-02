@@ -1,20 +1,20 @@
 process PICARD_MULTIPLE_METRICS {
 
-    label "PICARD_MULTIPLE_METRICS${params.sampleId}_${params.libraryId}_${params.userId}"
+    tag "PICARD_MULTIPLE_METRICS${sampleId}_${userId}"
 
-    publishDir "${params.sampleQCDirectory}", mode: 'link', pattern: "*.alignment_summary_metrics", saveAs: {filename -> "${filename}.txt"}
-    publishDir "${params.sampleQCDirectory}", mode: 'link', pattern: "*.base_distribution_by_cycle_metrics", saveAs: {"${params.sampleId}.base_distribution_by_cycle.txt"}
-    publishDir "${params.sampleQCDirectory}", mode: 'link', pattern: "*.gc_bias.detail_metrics", saveAs: {"${params.sampleId}.gc_bias_metrics.txt"}
-    publishDir "${params.sampleQCDirectory}", mode: 'link', pattern: "*.gc_bias.summary_metrics", saveAs: {"${params.sampleId}.gc_bias_summary_metrics.txt"}
-    publishDir "${params.sampleQCDirectory}", mode: 'link', pattern: "*.insert_size_metrics", saveAs: {filename -> "${filename}.txt"}
-    publishDir "${params.sampleQCDirectory}", mode: 'link', pattern: "*.quality_yield_metrics", saveAs: {filename -> "${filename}.txt"}
-    publishDir "${params.sampleQCDirectory}", mode: 'link', pattern: "*.base_distribution_by_cycle.pdf"
-    publishDir "${params.sampleQCDirectory}", mode: 'link', pattern: "*.insert_size_histogram.pdf"
-    publishDir "${params.sampleQCDirectory}", mode: 'link', pattern: "*.gc_bias.pdf"
+    publishDir "${publishDirectory}", mode: 'link', pattern: "*.alignment_summary_metrics", saveAs: {filename -> "${filename}.txt"}
+    publishDir "${publishDirectory}", mode: 'link', pattern: "*.base_distribution_by_cycle_metrics", saveAs: {"${sampleId}${libraryIdString}.base_distribution_by_cycle.txt"}
+    publishDir "${publishDirectory}", mode: 'link', pattern: "*.gc_bias.detail_metrics", saveAs: {"${sampleId}${libraryIdString}.gc_bias_metrics.txt"}
+    publishDir "${publishDirectory}", mode: 'link', pattern: "*.gc_bias.summary_metrics", saveAs: {"${sampleId}${libraryIdString}.gc_bias_summary_metrics.txt"}
+    publishDir "${publishDirectory}", mode: 'link', pattern: "*.insert_size_metrics", saveAs: {filename -> "${filename}.txt"}
+    publishDir "${publishDirectory}", mode: 'link', pattern: "*.quality_yield_metrics", saveAs: {filename -> "${filename}.txt"}
+    publishDir "${publishDirectory}", mode: 'link', pattern: "*.base_distribution_by_cycle.pdf"
+    publishDir "${publishDirectory}", mode: 'link', pattern: "*.insert_size_histogram.pdf"
+    publishDir "${publishDirectory}", mode: 'link', pattern: "*.gc_bias.pdf"
 
     input:
-        path bam
-        path bai
+        tuple path(bam), path(bai), val(sampleId), val(libraryId), val(userId), val(publishDirectory)
+        tuple val(isGRC38), val(referenceGenome)
 
     output:
         path "*.alignment_summary_metrics"
@@ -30,9 +30,13 @@ process PICARD_MULTIPLE_METRICS {
         val true, emit: ready
 
     script:
+        libraryIdString = ""
+        if (libraryId != null) {
+            libraryIdString = ".${libraryId}"
+        }
 
         """
-        mkdir -p ${params.sampleQCDirectory}
+        mkdir -p ${publishDirectory}
 
         java \
             -XX:InitialRAMPercentage=80 \
@@ -40,8 +44,8 @@ process PICARD_MULTIPLE_METRICS {
         	-jar \$PICARD_DIR/picard.jar \
         	CollectMultipleMetrics \
         	--INPUT $bam \
-        	--OUTPUT ${params.sampleId} \
-        	--REFERENCE_SEQUENCE ${params.referenceGenome} \
+        	--OUTPUT ${sampleId}${libraryIdString} \
+        	--REFERENCE_SEQUENCE ${referenceGenome} \
         	--VALIDATION_STRINGENCY SILENT \
         	--PROGRAM CollectAlignmentSummaryMetrics \
         	--PROGRAM CollectBaseDistributionByCycle \

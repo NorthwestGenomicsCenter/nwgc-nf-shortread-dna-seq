@@ -1,12 +1,11 @@
 process SAMTOOLS_FLAGSTAT {
 
-    label "SAMTOOLS_FLAGSTAT_${params.sampleId}_${params.userId}"
+    tag "SAMTOOLS_FLAGSTAT_${sampleId}_${userId}"
 
-    publishDir "${params.sampleQCDirectory}", mode: 'link', pattern: '*.flagstat.output.txt'
+    publishDir "${publishDirectory}", mode: 'link', pattern: '*.flagstat.output.txt'
 
     input:
-        path bam
-        path bai
+        tuple path(bam), path(bai), val(sampleId), val(libraryId), val(userId), val(publishDirectory)
 
     output:
         path "*.flagstat.output.txt"
@@ -14,15 +13,19 @@ process SAMTOOLS_FLAGSTAT {
         val true, emit: ready
 
     script:
+        String libraryIdString = ""
+        if (libraryId != null) {
+            libraryIdString = ".${libraryId}"
+        }
 
         """
-        mkdir -p ${params.sampleQCDirectory}
+        mkdir -p ${publishDirectory}
 
         samtools \
             flagstat \
             $bam \
             -@ ${task.cpus} \
-            > ${params.sampleId}.flagstat.output.txt
+            > ${sampleId}${libraryIdString}.flagstat.output.txt
 
         cat <<-END_VERSIONS > versions.yaml
         '${task.process}':

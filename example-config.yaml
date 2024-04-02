@@ -35,11 +35,11 @@ contaminationUDPath: "<full path to contamination UD file>"     # e.g. contamina
 contaminationBedPath: "<full path to contamination Bed file>"   # e.g. contaminationBedPath: "/net/nwgc/vol1/references/human/grc38/contamination/1000g.twist_plus_refseq_10-31-2018.AF1p.b38.vcf.gz.bed"
 contaminationMeanPath: "<full path to contamination Mean file>" # e.g. contaminationMeanPath: "/net/nwgc/vol1/references/human/grc38/contamination/1000g.twist_plus_refseq_10-31-2018.AF1p.b38.vcf.gz.mu"
   # Custom contamination target
-isCustomTargetContaminationSample: "<true or false based on if the sample has a custom contamination target>" #e.g. isCustomTargetContaminationSample: true
-customTargetContaminationReferenceVCF: "<full path to VCF file for a custom contamination target>"            #e.g. customTargetContaminationReferenceVCF: "/net/nwgc/vol1/references/human/hg19/snps/verifyBamId/hapmap_3.3.b37.sites.vcf"
+isCustomContaminationTargetSample: "<true or false based on if the sample has a custom contamination target>" #e.g. isCustomTargetContaminationSample: true
+customContaminationTargetReferenceVCF: "<full path to VCF file for a custom contamination target>"            #e.g. customTargetContaminationReferenceVCF: "/net/nwgc/vol1/references/human/hg19/snps/verifyBamId/hapmap_3.3.b37.sites.vcf"
 
 # Fingerprint
-fingerprintBed:	"<full path to fingerprint bed file>"			# e.g. fingerprintBed: "/net/nwgc/vol1/references/human/grc38/targets/fingerprint_grc38_open_array.bed"
+fingerprintBedFile:	"<full path to fingerprint bed file>"			# e.g. fingerprintBed: "/net/nwgc/vol1/references/human/grc38/targets/fingerprint_grc38_open_array.bed"
 
 
 # Semi optional input files. Each yaml should have exactly one of mappedBams, mergedBam, or filteredGVCF depending on the portion of the pipeline meant to run.

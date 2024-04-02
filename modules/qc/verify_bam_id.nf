@@ -1,40 +1,50 @@
 process VERIFY_BAM_ID {
 
-    label "VERIFY_BAM_ID_${params.sampleId}_${params.userId}"
+    tag "VERIFY_BAM_ID_${sampleId}_${userId}"
 
-    publishDir "${params.sampleQCDirectory}", mode: 'link', pattern: '*.VerifyBamId.selfSM'
+    publishDir "${publishDirectory}", mode: 'link', pattern: '*.VerifyBamId.selfSM'
 
     input:
-        path bam
-        path bai
+        tuple path(bam), path(bai), val(sampleId), val(libraryId), val(userId), val(publishDirectory)
+        tuple val(isGRC38), val(referenceGenome)
+        tuple val(isCustomContaminationTarget), val(contaminationUDPath), val(contaminationBedPath), val(contaminationMeanPath)
+
 
     output:
         path "*.VerifyBamId.selfSM"
         path "versions.yaml", emit: versions
 
+    when:
+        isCustomContaminationTarget != true
+
     script:
         def disableSanityCheck = params.mode == 'test' ? '--DisableSanityCheck' : ''
 
         def refVersion = 'b37'
-        if (params.isGRC38) {
+        if (isGRC38) {
             refVersion = 'b38'
         }
 
-        def udPath = params.contaminationUDPath != 'null' ? params.contaminationUDPath : "\$MOD_GSVERIFYBAMID_DIR/resource/1000g.100k.${refVersion}.vcf.gz.dat.UD"
-        def bedPath = params.contaminationBedPath != 'null' ? params.contaminationBedPath : "\$MOD_GSVERIFYBAMID_DIR/resource/1000g.100k.${refVersion}.vcf.gz.dat.bed"
-        def meanPath = params.contaminationMeanPath != 'null' ? params.contaminationMeanPath : "\$MOD_GSVERIFYBAMID_DIR/resource/1000g.100k.${refVersion}.vcf.gz.dat.mu"
+        def udPath = contaminationUDPath != 'null' ? contaminationUDPath : "\$MOD_GSVERIFYBAMID_DIR/resource/1000g.100k.${refVersion}.vcf.gz.dat.UD"
+        def bedPath = contaminationBedPath != 'null' ? contaminationBedPath : "\$MOD_GSVERIFYBAMID_DIR/resource/1000g.100k.${refVersion}.vcf.gz.dat.bed"
+        def meanPath = contaminationMeanPath != 'null' ? contaminationMeanPath : "\$MOD_GSVERIFYBAMID_DIR/resource/1000g.100k.${refVersion}.vcf.gz.dat.mu"
+
+        String libraryIdString = ""
+        if (libraryId != null) {
+            libraryIdString = ".${libraryId}"
+        }
 
         """
-        mkdir -p ${params.sampleQCDirectory}
+        mkdir -p ${publishDirectory}
 
         VerifyBamID \
             --UDPath $udPath \
             --BedPath $bedPath \
             --MeanPath $meanPath \
             --BamFile $bam \
-            --Reference ${params.referenceGenome} \
+            --Reference ${referenceGenome} \
             $disableSanityCheck \
-            --Output ${params.sampleId}.VerifyBamId
+            --Output ${sampleId}${libraryIdString}.VerifyBamId
 
         cat <<-END_VERSIONS > versions.yaml
         '${task.process}':

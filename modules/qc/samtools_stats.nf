@@ -1,12 +1,12 @@
 process SAMTOOLS_STATS {
 
-    label "SAMTOOLS_STATS_${params.sampleId}_${params.userId}"
+    tag "SAMTOOLS_STATS_${sampleId}_${userId}"
 
-    publishDir "${params.sampleQCDirectory}", mode: 'link', pattern: '*.onTarget.stats.txt'
+    publishDir "${publishDirectory}", mode: 'link', pattern: '*.onTarget.stats.txt'
 
     input:
-        path bam
-        path bai
+        tuple path(bam), path(bai), val(sampleId), val(libraryId), val(userId), val(publishDirectory)
+        path sequencingTargetBedFile
 
     output:
         path "*.onTarget.stats.txt"
@@ -14,16 +14,20 @@ process SAMTOOLS_STATS {
         val true, emit: ready
 
     script:
+        String libraryIdString = ""
+        if (libraryId != null) {
+            libraryIdString = ".${libraryId}"
+        }
 
         """
-        mkdir -p ${params.sampleQCDirectory}
+        mkdir -p ${publishDirectory}
 
         samtools \
             stats \
-            -t ${params.sequencingTargetBedFile}\
+            -t ${sequencingTargetBedFile}\
             $bam \
             --threads ${task.cpus} \
-            > ${params.sampleId}.onTarget.stats.txt
+            > ${sampleId}${libraryIdString}.onTarget.stats.txt
 
         cat <<-END_VERSIONS > versions.yaml
         '${task.process}':

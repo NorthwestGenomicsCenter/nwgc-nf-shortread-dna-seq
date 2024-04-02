@@ -1,15 +1,15 @@
 process PICARD_COVERAGE_METRICS {
 
-    label "PICARD_COVERAGE_METRICS_${params.sampleId}_${params.userId}"
+    tag "PICARD_COVERAGE_METRICS_${sampleId}_${userId}"
 
-    publishDir "${params.sampleQCDirectory}", mode: 'link', pattern: '*.picard.coverage.txt'
+    publishDir "${publishDirectory}", mode: 'link', pattern: '*.picard.coverage.txt'
  
     input:
-        path bam
-        path bai
-        val baseQuality
-        val mappingQuality
-        tuple path(intervalsList), val(partOfSequencingTarget)
+        tuple path(bam), path(bai), val(sampleId), val(libraryId), val(userId), val(publishDirectory)
+        tuple val(isGRC38), val(referenceGenome)
+        each baseQuality
+        each mappingQuality
+        each path(intervalsList)
 
     output:
         path "*.picard.coverage.txt"
@@ -17,17 +17,20 @@ process PICARD_COVERAGE_METRICS {
         val true, emit: ready
 
     script:
-        Integer baseQualityVal = baseQuality
-        Integer mappingQualityVal = mappingQuality
 
-        // If there was a given part of sequencing target format it to be used in the file path.
-        String partOfSequencingTargetOutput = partOfSequencingTarget
-        if (!partOfSequencingTargetOutput.equals("")) {
-            partOfSequencingTargetOutput = ".${partOfSequencingTargetOutput}"
+        // Scrape the chromosome from the intervals list path if it exists.
+        String partOfSequencingTargetOutput = (intervalsList =~ "\\.(ch.*)?intervals\\.list")[0][1]
+        if (partOfSequencingTargetOutput == null) {
+            partOfSequencingTargetOutput = ""
+        }
+
+        String libraryIdString = ""
+        if (libraryId != null) {
+            libraryIdString = ".${libraryId}"
         }
 
         """
-        mkdir -p ${params.sampleQCDirectory}
+        mkdir -p ${publishDirectory}
 
         java \
             -XX:InitialRAMPercentage=80 \
@@ -35,13 +38,13 @@ process PICARD_COVERAGE_METRICS {
             -jar \$PICARD_DIR/picard.jar \
             CollectWgsMetrics \
             --INPUT $bam \
-            --REFERENCE_SEQUENCE ${params.referenceGenome} \
+            --REFERENCE_SEQUENCE ${referenceGenome} \
             --VALIDATION_STRINGENCY SILENT \
-            --MINIMUM_BASE_QUALITY $baseQualityVal \
-            --MINIMUM_MAPPING_QUALITY $mappingQualityVal \
+            --MINIMUM_BASE_QUALITY $baseQuality \
+            --MINIMUM_MAPPING_QUALITY $mappingQuality \
             --INTERVALS $intervalsList \
             --COVERAGE_CAP 300000 \
-            --OUTPUT ${params.sampleId}.BASEQ${baseQualityVal}.MAPQ${mappingQualityVal}${partOfSequencingTargetOutput}.picard.coverage.txt
+            --OUTPUT ${sampleId}${libraryIdString}.BASEQ${baseQuality}.MAPQ${mappingQuality}.${partOfSequencingTargetOutput}picard.coverage.txt
 
         cat <<-END_VERSIONS > versions.yaml
         '${task.process}':
