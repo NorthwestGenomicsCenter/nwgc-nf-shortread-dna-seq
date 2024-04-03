@@ -11,7 +11,7 @@ sampleDirectory: "<full path to sample directory>"                  # e.g. sampl
 sampleQCDirectory: "<full path to sample QC directory>"             # e.g. sampleQCDirectory: "/net/nwgc/vol1/data/processed/samples/123456/WHOLE_GENOME/qc"
 samplePolymorphicQCDirectory: "<full path to sample QC directory>"  # e.g. samplePolymorphicQCDirectory: "/net/nwgc/vol1/data/processed/samples/123456/WHOLE_GENOME/polymorphicQC"
 sampleId: <samplify sampleId>                                       # e.g sampleId: 123456
-libraryId: <samplify library>                                       # e.g libraryId: 123456
+libraryId: <samplify libraryId>                                       # e.g libraryId: 123456
 
 # Target
 sequencingTarget: "<name of sequencing target>"                      # e.g. sequencingTarget: "nimblegen_solution_V2refseq_2010"
@@ -43,6 +43,23 @@ fingerprintBedFile:	"<full path to fingerprint bed file>"			# e.g. fingerprintBe
 
 
 # Semi optional input files. Each yaml should have exactly one of mappedBams, mergedBam, or filteredGVCF depending on the portion of the pipeline meant to run.
+
+# LibraryInfo - List of fastq files that need mapping and associated (optional) read group info
+flowCellLaneLibraries:
+  - fastq1: "<full path to the fastq1 file>"
+    fastq2: "<full path to the fastq2 file>"
+    library: "<samplify libraryId>"
+    flowCell: "<flowcell ID>"
+    lane: "<lane ID>"
+    runDate: "<Timestamp from sequencer>"
+    # barcode: "<Barcode from flowcell>" might remove this
+  - fastq1: "<full path to the fastq1 file>"
+    fastq2: "<full path to the fastq2 file>"
+    library: "<samplify libraryId>"
+    flowCell: "<flowcell ID>"
+    lane: "<lane ID>"
+    runDate: "<Timestamp from sequencer>"
+    # barcode: "<Barcode from flowcell>" might remove this
 
 # Bams  - Bam files that have been mapped (to merge together) 
 mappedBams:

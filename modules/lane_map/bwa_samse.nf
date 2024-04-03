@@ -1,25 +1,23 @@
-// process BWA_SAMSE {
+process BWA_SAMSE {
 
-//     label "BWA_SAMSE_${params.sampleId}_${params.libraryId}_${params.userId}"
+    tag "BWA_SAMSE_${flowCell}_${lane}_${library}_${userId}"
     
-//     input:
+    input:
+        tuple path(fastq1), val(flowCell), val(lane), val(library), val(userId), val(readGroup), val(publishDirectory)
+        path referenceGenome
 
-//     output:
 
-//     script:
-//         """
-//         $BWA samse \
-// 				$GENOMEREF \
-// 				-r $READ_GROUP \
-// 		    	<($BWA aln -t $NSLOTS $GENOMEREF -0 $INPUT_1) \
-// 		    	$INPUT_1 | \
-// 				samblaster --addMateTags -a | \
-// 				samtools view -Sbhu - | \
-// 				$SAMBAMBA sort \
-// 					-t $NSLOTS \
-// 					--tmpdir $TMP_DIR \
-// 					-o $OUTPUT_FILE \
-// 					/dev/stdin
+    output:
+        tuple stdout(out), val(flowCell), val(lane), val(library), val(userId), val(publishDirectory), emit: samse
 
-//         """
-// }
+    script:
+        """
+        mkdir ${tmpDir}
+
+        \$BWA samse \
+				${referenceGenome} \
+				-r ${readGroup} \
+		    	<(\$BWA aln -t ${task.cpus} ${referenceGenome} -0 ${fastq1}) \
+		    	${fastq1}
+        """
+}
