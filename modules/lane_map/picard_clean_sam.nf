@@ -1,13 +1,15 @@
 process PICARD_CLEAN_SAM {
     tag "PICARD_CLEAN_SAM_${flowCell}_${lane}_${library}_${userId}"
 
-    publishDir "${publishDirectory}", mode: "link", pattern: "${fileToClean}.clean", saveAs: {"${fileToClean}"}
+    publishDir "${publishDirectory}", mode: "link", pattern: "${fileToClean}"
+    publishDir "${publishDirectory}", mode: "link", pattern: "${fileToClean}.bai"
 
     input:
         tuple path(fileToClean), val(flowCell), val(lane), val(library), val(userId), val(publishDirectory)
 
     output:
-        path "${fileToClean}.clean"
+        path "${fileToClean}"
+        path "${fileToClean}.bai"
 
     script:
 
@@ -18,5 +20,9 @@ process PICARD_CLEAN_SAM {
         -jar \$PICARD_DIR/picard.jar CleanSam \
         I= ${fileToClean} \
         O= ${fileToClean}.clean
+    
+    mv ${fileToClean}.clean ${fileToClean}
+
+    samtools index ${fileToClean}
     """
 }

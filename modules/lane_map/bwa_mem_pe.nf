@@ -2,6 +2,7 @@ process BWA_MEM_PE {
     tag "BWA_MEM_PE_${flowCell}_${lane}_${library}_${userId}"
 
     publishDir "${publishDirectory}", mode: "link", pattern: "${flowCell}.${lane}.${library}.matefixed.sorted.bam"
+    publishDir "${publishDirectory}", mode: "link", pattern: "${flowCell}.${lane}.${library}.matefixed.sorted.bam.bai"
     
     input:
         tuple path(fastq1), path(fastq2), val(flowCell), val(lane), val(library), val(userId), val(readGroup), val(publishDirectory)
@@ -10,8 +11,7 @@ process BWA_MEM_PE {
 
 
     output:
-        tuple path("${flowCell}.${lane}.${library}.matefixed.sorted.bam"), val(flowCell), val(lane), val(library), val(userId), val(publishDirectory), emit: sorted_bam
-
+        tuple path("${flowCell}.${lane}.${library}.matefixed.sorted.bam"), path("${flowCell}.${lane}.${library}.matefixed.sorted.bam.bai")
     script:
         def threads = task.cpus / 2
 
@@ -19,6 +19,7 @@ process BWA_MEM_PE {
         
         """
         mkdir ${tmpDir}
+
         bwa mem -t ${task.cpus} \
 				${memOpts} \
 				-R ${readGroup} \

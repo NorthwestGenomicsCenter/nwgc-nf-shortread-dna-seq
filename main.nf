@@ -16,10 +16,10 @@ workflow {
         | map { flowCellLaneLibrary -> 
                     def readGroup = Utils.defineReadGroup(params.sequencingCenter, params.sequencingPlatform, params.sampleId, flowCellLaneLibrary)
                     [flowCellLaneLibrary.fastq1, flowCellLaneLibrary.fastq2, flowCellLaneLibrary.flowCell, flowCellLaneLibrary.lane, flowCellLaneLibrary.library, 
-                    params.userId, readGroup, flowCellLaneLibrary.readLength, flowCellLaneLibrary.readType, params.sampleDirectory + '/mapped_bams'] }
+                    params.userId, readGroup, flowCellLaneLibrary.readLength, flowCellLaneLibrary.readType, params.sampleDirectory + "/mapped_bams/${flowCellLaneLibrary.library}"] }
         | set { ch_fastq_info }
 
-        LANE_MAP(ch_fastq_info, params.referenceGenome)
+        LANE_MAP(ch_fastq_info, params.sampleId, params.sampleDirectory, params.userId, params.referenceGenome)
         // ch_mapped_bams = ch_mapped_bams.mix(LANE_MAP.out.mappedBams)
     }
 

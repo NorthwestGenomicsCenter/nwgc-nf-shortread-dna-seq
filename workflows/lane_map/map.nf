@@ -17,8 +17,8 @@ workflow MAP {
         referenceGenome
 
     main:
-    ch_referenceGenome = Channel.of(referenceGenome)
-    ch_bwaMemOptions = Channel.value(params.bwaMemOptions)
+    def ch_referenceGenome = Channel.of(referenceGenome)
+    def ch_bwaMemOptions = Channel.value(params.bwaMemOptions)
 
     ch_flowCellLaneLibraryTuple.branch { fastq1, fastq2, flowCell, lane, library, userId, readGroup, readLength, readType, publishDirectory ->
         samse: (readType == 'SR' || readType == 'SE') && readLength < 75
@@ -29,13 +29,13 @@ workflow MAP {
     }
     | set { ch_branchedFlowCellLaneLibraries }
 
-    mapToSingleRead = {fastq1, fastq2, flowCell, lane, library, userId, readGroup, readLength, readType, publishDirectory -> [fastq1, flowCell, lane, library, userId, readGroup, publishDirectory]}
-    mapToPairedEnd = {fastq1, fastq2, flowCell, lane, library, userId, readGroup, readLength, readType, publishDirectory -> [fastq1, fastq2, flowCell, lane, library, userId, readGroup, publishDirectory]}
+    def mapToSingleRead = {fastq1, fastq2, flowCell, lane, library, userId, readGroup, readLength, readType, publishDirectory -> [fastq1, flowCell, lane, library, userId, readGroup, publishDirectory]}
+    def mapToPairedEnd = {fastq1, fastq2, flowCell, lane, library, userId, readGroup, readLength, readType, publishDirectory -> [fastq1, fastq2, flowCell, lane, library, userId, readGroup, publishDirectory]}
 
-    ch_samseInput = ch_branchedFlowCellLaneLibraries.samse.map mapToSingleRead
-    ch_memseInput = ch_branchedFlowCellLaneLibraries.memse.map mapToSingleRead
-    ch_sampeInput = ch_branchedFlowCellLaneLibraries.sampe.map mapToPairedEnd
-    ch_mempeInput = ch_branchedFlowCellLaneLibraries.mempe.map mapToPairedEnd
+    def ch_samseInput = ch_branchedFlowCellLaneLibraries.samse.map mapToSingleRead
+    def ch_memseInput = ch_branchedFlowCellLaneLibraries.memse.map mapToSingleRead
+    def ch_sampeInput = ch_branchedFlowCellLaneLibraries.sampe.map mapToPairedEnd
+    def ch_mempeInput = ch_branchedFlowCellLaneLibraries.mempe.map mapToPairedEnd
 
     // Read Length < 75
     // Single Read
@@ -49,7 +49,7 @@ workflow MAP {
     // Paired End
     BWA_MEM_PE(ch_mempeInput, ch_referenceGenome, ch_bwaMemOptions)
 
-    ch_bwaSamOut = Channel.empty()
+    def ch_bwaSamOut = Channel.empty()
     ch_bwaSamOut = ch_bwaSamOut.mix(BWA_SAMSE.out.samse)
     ch_bwaSamOut = ch_bwaSamOut.mix(BWA_SAMPE.out.sampe)
     PICARD_CLEAN_SAM(ch_bwaSamOut)
