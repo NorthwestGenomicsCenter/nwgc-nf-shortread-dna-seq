@@ -48,18 +48,22 @@ fingerprintBedFile:	"<full path to fingerprint bed file>"			# e.g. fingerprintBe
 flowCellLaneLibraries:
   - fastq1: "<full path to the fastq1 file>"
     fastq2: "<full path to the fastq2 file>"
-    library: "<samplify libraryId>"
-    flowCell: "<flowcell ID>"
-    lane: "<lane ID>"
-    runDate: "<Timestamp from sequencer>"
-    # barcode: "<Barcode from flowcell>" might remove this
+    library: "<library id>"
+    flowCell: "<flow cell name>"
+    lane: "<flow cell lane number>"
+    runDate: "<iso formatted date the flow cell was run on the sequencer>"
+    readLength: "<The read length for the given fastq files>"
+    readType: "<The read type for the given fastq files>" # Optional input defaulted to PE (Paired End). Can be overriden to SR (Single Read).
+    sequencingPlatform: "<sequencing platform of the flow cell>" # Optional input defaulted to Illumina
   - fastq1: "<full path to the fastq1 file>"
     fastq2: "<full path to the fastq2 file>"
-    library: "<samplify libraryId>"
-    flowCell: "<flowcell ID>"
-    lane: "<lane ID>"
-    runDate: "<Timestamp from sequencer>"
-    # barcode: "<Barcode from flowcell>" might remove this
+    library: "<library id>"
+    flowCell: "<flow cell name>"
+    lane: "<flow cell lane number>"
+    runDate: "<iso formatted date the flow cell was run on the sequencer>"
+    readLength: "<The read length for the given fastq files>"
+    readType: "<The read type for the given fastq files>" # Optional input defaulted to PE (Paired End). Can be overriden to SR (Single Read).
+    sequencingPlatform: "<sequencing platform of the flow cell>"
 
 # Bams  - Bam files that have been mapped (to merge together) 
 mappedBams:

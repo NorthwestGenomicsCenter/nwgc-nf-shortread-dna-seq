@@ -2,45 +2,75 @@ include { MERGE_MAPPED_BAMS } from './workflows/merge_mapped_bams.nf'
 include { SHORTREAD_QC } from './workflows/qc.nf' params (qcToRun: params.qcToRunCustom)
 include { CALL_VARIANTS } from './workflows/call_variants.nf'
 include { POLYMORPHIC_QC } from './workflows/polymorphic_qc.nf'
+include { LANE_MAP } from './workflows/lane_map.nf'
 
 workflow {
 
-    // // If there is an input mapped bam set up a channel and run MERGE_MAPPED_BAMS
-    // ch_MappedBams = Channel.empty()
-    
-    // if (params.mappedBams != null) {
-    //     ch_MappedBams = Channel.value(params.mappedBams)
-    // }
+    // *****************
+    // **** Mapping ****
+    // *****************
+    ch_mapped_bams = Channel.empty()
+    if (params.pipelineStepsToRun.contains("mapping")) {
 
-    // MERGE_MAPPED_BAMS(ch_MappedBams)
+        Channel.fromList(params.flowCellLaneLibraries)
+        | map { flowCellLaneLibrary -> 
+                    def readGroup = Utils.defineReadGroup(params.sequencingCenter, params.sequencingPlatform, params.sampleId, flowCellLaneLibrary)
+                    [flowCellLaneLibrary.fastq1, flowCellLaneLibrary.fastq2, flowCellLaneLibrary.flowCell, flowCellLaneLibrary.lane, flowCellLaneLibrary.library, 
+                    params.userId, readGroup, flowCellLaneLibrary.readLength, flowCellLaneLibrary.readType, params.sampleDirectory + '/mapped_bams'] }
+        | set { ch_fastq_info }
 
-    // ch_MergedBam = MERGE_MAPPED_BAMS.out.bam
-    // ch_MergedBai = MERGE_MAPPED_BAMS.out.bai
+        LANE_MAP(ch_fastq_info, params.referenceGenome)
+        // ch_mapped_bams = ch_mapped_bams.mix(LANE_MAP.out.mappedBams)
+    }
 
-    // // If there is an input merged bam set up a channel and run SHORTREAD_QC and CALL_VARIANTS
-    // if (params.mergedBam != null) {
-    //     ch_MergedBam = Channel.value(params.mergedBam)
-    //     ch_MergedBai = Channel.value("${params.mergedBam}.bai")
-    // }
-    ch_sampleInfo = Channel.of([file("${params.mergedBam}"), file("${params.mergedBam}.bai"), params.sampleId, params.libraryId, params.userId, params.sampleQCDirectory])
-    ch_referenceInfo = Channel.of([params.isGRC38, params.referenceGenome])
-    ch_sampleInfoMap = Channel.of(params.subMap("sequencingTarget", "sequencingTargetIntervalsList", "sequencingTargetIntervalsDirectory", 
+    // If there are input mapped bams mix them in
+    ch_mapped_bams = ch_mapped_bams.mix(Channel.fromList(params.mappedBams))
+
+    // *****************
+    // **** Merging ****
+    // *****************
+    if (params.pipelineStepsToRun.contains("merging")) {
+        MERGE_MAPPED_BAMS(ch_mapped_bams)
+        ch_merged_bam = MERGE_MAPPED_BAMS.out.bam.merge(MERGE_MAPPED_BAMS.out.bai)
+    }
+    else {
+        ch_merged_bam = Channel.of([params.mergedBam, "${params.mergedBam}.bai"])
+    }
+
+
+    // ************
+    // **** QC ****
+    // ************
+    if (params.pipelineStepsToRun.contains("qc")) {
+        // Sample information that qc needs to run
+        ch_bam_info = ch_merged_bam.combine(Channel.of([params.sampleId, null, params.userId, params.sampleQCDirectory]))
+        ch_referenceInfo = Channel.of([params.isGRC38, params.referenceGenome])
+        ch_sampleInfoMap = Channel.of(params.subMap("sequencingTarget", "sequencingTargetIntervalsList", "sequencingTargetIntervalsDirectory", 
                                "baseQualityRange", "mappingQualityRange", 
                                "isCustomContaminationTargetSample", "customContaminationTargetReferenceVCF", "contaminationUDPath", "contaminationBedPath", "contaminationMeanPath", 
                                "referenceAbbr", "dbSnp", "sequencingTargetBedFile", "fingerprintBedFile"))
 
-    ch_sampleInfo.view()
-    ch_referenceInfo.view()
-    ch_sampleInfoMap.view()
+        SHORTREAD_QC(ch_bam_info, ch_referenceInfo, ch_sampleInfoMap)
+    }
 
-    SHORTREAD_QC(ch_sampleInfo, ch_referenceInfo, ch_sampleInfoMap)
-    // CALL_VARIANTS(ch_MergedBam)
 
-    // ch_FilteredGVCF = CALL_VARIANTS.out.filtered_gvcf
+    // *************************
+    // **** Variant Calling ****
+    // *************************
+    if (params.pipelineStepsToRun.contains("variant_calling")) {
+        CALL_VARIANTS(ch_merged_bam)
+        ch_FilteredGVCF = CALL_VARIANTS.out.filtered_gvcf
+    }
+    else {
+        // This should only ever have one element but if we make it a value channel the process hangs forever on POLYMORPHIC_QC if params.filteredGVCF is null 
+        ch_FilteredGVCF = Channel.of(params.filteredGVCF)
+    }
 
-    // // If there is an input filtered GVCF set up a channel and run POLYMORPHIC_QC
-    // if (params.filteredGVCF != null) {
-    //     ch_FilteredGVCF = Channel.value(params.filteredGVCF)
-    // }
-    // POLYMORPHIC_QC(ch_FilteredGVCF)
+
+    // ************************
+    // **** Polymorphic QC ****
+    // ************************
+    if (params.pipelineStepsToRun.contains("polymorphic_qc")) {
+        POLYMORPHIC_QC(ch_FilteredGVCF)
+    }
 }

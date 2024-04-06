@@ -1,25 +1,29 @@
-process BWA_SAMSE {
+process BWA_MEM_SE {
+    tag "BWA_MEM_SE_${flowCell}_${lane}_${library}_${userId}"
 
-    tag "BWA_SAMSE_${flowCell}_${lane}_${library}_${userId}"
+    publishDir "${publishDirectory}", mode: "link", pattern: "${flowCell}.${lane}.${library}.matefixed.sorted.bam"
     
     input:
         tuple path(fastq1), val(flowCell), val(lane), val(library), val(userId), val(readGroup), val(publishDirectory)
         val referenceGenome
+        val memOpts
 
 
     output:
-        tuple path("${flowCell}.${lane}.${library}.matefixed.sorted.bam"), val(flowCell), val(lane), val(library), val(userId), val(publishDirectory), emit: samse
+        tuple path("${flowCell}.${lane}.${library}.matefixed.sorted.bam"), val(flowCell), val(lane), val(library), val(userId), val(publishDirectory), emit: sorted_bam
 
     script:
+        def threads = task.cpus / 2
+
         String tmpDir = "tmp"
         
         """
         mkdir ${tmpDir}
-        bwa samse \
+        bwa mem -t ${task.cpus} \
+				${memOpts} \
+				-R ${readGroup} \
 				${referenceGenome} \
-				-r ${readGroup} \
-		    	<(bwa aln -t ${task.cpus} ${referenceGenome} -0 ${fastq1}) \
-		    	${fastq1} | \
+				${fastq1} | \
         samblaster --addMateTags -a | \
         samtools view -Sbhu - | \
         sambamba sort \

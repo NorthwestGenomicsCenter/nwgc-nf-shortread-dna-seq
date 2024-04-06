@@ -4,24 +4,31 @@ process BWA_SAMPE {
     
     input:
         tuple path(fastq1), path(fastq2), val(flowCell), val(lane), val(library), val(userId), val(readGroup), val(publishDirectory)
-        path referenceGenome
+        val referenceGenome
 
 
     output:
-        tuple stdout(out), val(flowCell), val(lane), val(library), val(userId), val(publishDirectory), emit: sampe
+        tuple path("${flowCell}.${lane}.${library}.matefixed.sorted.bam"), val(flowCell), val(lane), val(library), val(userId), val(publishDirectory), emit: sampe
 
     script:
         def threads = task.cpus / 2
 
+        String tmpDir = "tmp"
         """
         mkdir ${tmpDir}
-
-        \$BWA sampe \
-				-P ${referenceGenome} \
-				-r ${readGroup} \
-		    	<(\$BWA aln -t ${threads} ${referenceGenome} -1 ${fastq1}) \
-                <(\$BWA aln -t ${threads} ${referenceGenome} -2 ${fastq2}) \
-		    	${fastq1} \
-                ${fastq2}
+        bwa sampe \
+                -P ${referenceGenome} \
+                -r ${readGroup} \
+                <(bwa aln -t ${threads} ${referenceGenome} -1 ${fastq1}) \
+                <(bwa aln -t ${threads} ${referenceGenome} -2 ${fastq2}) \
+                ${fastq1} \
+                ${fastq2} | \
+        samblaster --addMateTags -a | \
+        samtools view -Sbhu - | \
+        sambamba sort \
+                -t ${task.cpus} \
+                --tmpdir ${tmpDir} \
+                -o ${flowCell}.${lane}.${library}.matefixed.sorted.bam \
+                /dev/stdin
         """
 }
