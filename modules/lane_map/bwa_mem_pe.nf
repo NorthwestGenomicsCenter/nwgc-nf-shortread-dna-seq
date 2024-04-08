@@ -11,7 +11,7 @@ process BWA_MEM_PE {
 
 
     output:
-        tuple path("${flowCell}.${lane}.${library}.matefixed.sorted.bam"), path("${flowCell}.${lane}.${library}.matefixed.sorted.bam.bai")
+        tuple path("${flowCell}.${lane}.${library}.matefixed.sorted.bam"), path("${flowCell}.${lane}.${library}.matefixed.sorted.bam.bai"), emit: mappedBam
     script:
         def threads = task.cpus / 2
 

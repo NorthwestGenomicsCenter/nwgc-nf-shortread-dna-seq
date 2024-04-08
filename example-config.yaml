@@ -10,8 +10,9 @@ userEmail: "<userEmail>"     # e.g. userEmail: "kolart@uw.edu"
 sampleDirectory: "<full path to sample directory>"                  # e.g. sampleDirectory: "/net/nwgc/vol1/data/processed/samples/123456/WHOLE_GENOME"
 sampleQCDirectory: "<full path to sample QC directory>"             # e.g. sampleQCDirectory: "/net/nwgc/vol1/data/processed/samples/123456/WHOLE_GENOME/qc"
 samplePolymorphicQCDirectory: "<full path to sample QC directory>"  # e.g. samplePolymorphicQCDirectory: "/net/nwgc/vol1/data/processed/samples/123456/WHOLE_GENOME/polymorphicQC"
-sampleId: <samplify sampleId>                                       # e.g sampleId: 123456
-libraryId: <samplify libraryId>                                       # e.g libraryId: 123456
+sampleId: "<samplify sampleId>"                                     # e.g  sampleId: 123456
+libraryId: "<samplify libraryId>"                                   # e.g  libraryId: 123456
+isNovaseqQCPool: "<true if sample is a Novaseq qc pool>"            # e.g. isNovaseqQCPool: true
 
 # Target
 sequencingTarget: "<name of sequencing target>"                      # e.g. sequencingTarget: "nimblegen_solution_V2refseq_2010"
@@ -53,7 +54,7 @@ flowCellLaneLibraries:
     lane: "<flow cell lane number>"
     runDate: "<iso formatted date the flow cell was run on the sequencer>"
     readLength: "<The read length for the given fastq files>"
-    readType: "<The read type for the given fastq files>" # Optional input defaulted to PE (Paired End). Can be overriden to SR (Single Read).
+    readType: "<The read type for the given fastq files>" # Optional input defaulted to PE (Paired End). Can be overriden to SR or SE (Single Read/ End).
     sequencingPlatform: "<sequencing platform of the flow cell>" # Optional input defaulted to Illumina
   - fastq1: "<full path to the fastq1 file>"
     fastq2: "<full path to the fastq2 file>"
@@ -62,7 +63,7 @@ flowCellLaneLibraries:
     lane: "<flow cell lane number>"
     runDate: "<iso formatted date the flow cell was run on the sequencer>"
     readLength: "<The read length for the given fastq files>"
-    readType: "<The read type for the given fastq files>" # Optional input defaulted to PE (Paired End). Can be overriden to SR (Single Read).
+    readType: "<The read type for the given fastq files>" # Optional input defaulted to PE (Paired End). Can be overriden to SR or SE (Single Read/ End).
     sequencingPlatform: "<sequencing platform of the flow cell>"
 
 # Bams  - Bam files that have been mapped (to merge together) 

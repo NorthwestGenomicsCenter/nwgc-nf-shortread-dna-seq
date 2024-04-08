@@ -54,4 +54,11 @@ workflow MAP {
     ch_bwaSamOut = ch_bwaSamOut.mix(BWA_SAMPE.out.sampe)
     PICARD_CLEAN_SAM(ch_bwaSamOut)
 
+
+    ch_mappedBams = BWA_MEM_PE.out.mappedBam
+    ch_mappedBams = ch_mappedBams.mix(BWA_MEM_SE.out.mappedBam)
+    ch_mappedBams = ch_mappedBams.mix(PICARD_CLEAN_SAM.out.mappedBam)
+
+    emit:
+        mappedBams = ch_mappedBams
 }

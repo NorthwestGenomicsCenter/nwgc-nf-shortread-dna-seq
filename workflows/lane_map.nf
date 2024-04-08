@@ -1,5 +1,8 @@
+params.novaseqQCReadCountTarget = 1250000
+
 include { MAP } from "../workflows/lane_map/map.nf"
 include { FASTX_QC } from "../modules/lane_map/fastx_quality_stats.nf"
+include { DOWNSAMPLE_NOVASEQ_FASTQS } from "../modules/lane_map/downsample_novaseq_fastqs.nf"
 
 workflow LANE_MAP {
 
@@ -12,12 +15,17 @@ workflow LANE_MAP {
         sampleId
         sampleDirectory
         userId
+        isNovaseqQCPool
         referenceGenome
 
     main:
         // Check if reads > 100 (Undecided if we are doing this here)
 
         // Downsample for novaseq pool
+        if (isNovaseqQCPool) {
+            DOWNSAMPLE_NOVASEQ_FASTQS(ch_flowCellLaneLibraryTuple, 10)
+            ch_flowCellLaneLibraryTuple = DOWNSAMPLE_NOVASEQ_FASTQS.out.flowCellLaneLibraryTuple
+        }
 
         // run fastx
         ch_flowCellLaneLibraryTuple.multiMap { 
@@ -34,4 +42,6 @@ workflow LANE_MAP {
         // map
         MAP(ch_flowCellLaneLibraryTuple, referenceGenome)
 
+    emit:
+        mappedBams = MAP.out.mappedBams
 }
