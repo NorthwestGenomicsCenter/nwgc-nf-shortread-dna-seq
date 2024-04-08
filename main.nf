@@ -33,7 +33,8 @@ workflow {
     // **** Merging ****
     // *****************
     if (params.pipelineStepsToRun.contains("merging")) {
-        MERGE_MAPPED_BAMS(ch_mappedBams)
+        ch_mappedBams = ch_mappedBams.map { bam, bai -> bam }
+        MERGE_MAPPED_BAMS(ch_mappedBams, params.sampleId, params.sequencingTarget, params.organism, params.isGRC38, params.dbSnp, params.goldStandardIndels, params.knownIndels, params.referenceGenome, params.sampleDirectory + '/merged_bam/')
         ch_mergedBam = MERGE_MAPPED_BAMS.out.bam.merge(MERGE_MAPPED_BAMS.out.bai)
     }
     else {
