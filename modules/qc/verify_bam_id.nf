@@ -7,15 +7,12 @@ process VERIFY_BAM_ID {
     input:
         tuple path(bam), path(bai), val(sampleId), val(libraryId), val(userId), val(publishDirectory)
         tuple val(isGRC38), val(referenceGenome)
-        tuple val(isCustomContaminationTarget), val(contaminationUDPath), val(contaminationBedPath), val(contaminationMeanPath)
+        tuple val(contaminationUDPath), val(contaminationBedPath), val(contaminationMeanPath)
 
 
     output:
         path "*.VerifyBamId.selfSM"
         path "versions.yaml", emit: versions
-
-    when:
-        isCustomContaminationTarget != true
 
     script:
         def disableSanityCheck = params.mode == 'test' ? '--DisableSanityCheck' : ''

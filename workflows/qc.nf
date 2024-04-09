@@ -30,42 +30,45 @@ workflow SHORTREAD_QC {
         // library id is null when doing qc on a merged bam
         qcInputTuple
 
-        // **************************************
+        // *************************************
         // **** Assumed to be value channel ****
-        // **************************************
+        // *************************************
         // "Environment" for the workflow
 
         // (is GRC38, reference genome file path)
-        referenceInfoTuple
+        ch_referenceInfoTuple
 
         // (is custom contamination target (true), contamination file path)
         // or
         // (is custom contamination target (false), UD Path, Bed Path, Mean Path)
         // UD Path, Bed Path, and Mean Path can be null and a default value will be used
         
+        // ************************
+        // **** Groovy objects ****
+        // ************************
+        
         // Map containing fields sequencingTarget, sequencingTargetIntervalsList, sequencingIntervalsTargetDirectory, 
         //                       baseQualityRange, mappingQualityRange, 
         //                       isCustomContaminationTargetSample, customContaminationTargetReferenceVCF, contaminationUDPath, contaminationBedPath, contaminationMeanPath, 
         //                       referenceAbbr, dbSnp, sequencingTargetBedFile, fingerprintBedFile
         sampleInfoMap
+        
+        versionsDirectory
 
 
     main:
 
         // RUNS PICARD_COVERAGE_METRICS ON FULL SAMPLE
         if (params.qcToRun.contains("coverage")) {
-            // Parse input channels from sampleInfoMap
-            intervalsList = sampleInfoMap.map {
-                it.sequencingTargetIntervalsList
-            }
+
             def baseQualityRange = Channel.fromList(params.baseQualityRange)
             def mappingQualityRange = Channel.fromList(params.mappingQualityRange)
 
             // Runs PICARD_COVERAGE_METRICS with default MINIMUM_MAPPING_QUALITY for each MINIMUM_BASE_QUALITY in input baseQualityRange
-            PICARD_COVERAGE_METRICS_BASE_QUALITY(qcInputTuple, referenceInfoTuple, baseQualityRange, params.defaultMappingQuality, intervalsList)
+            PICARD_COVERAGE_METRICS_BASE_QUALITY(qcInputTuple, ch_referenceInfoTuple, baseQualityRange, params.defaultMappingQuality, sampleInfoMap.sequencingTargetIntervalsList)
 
             // Runs PICARD_COVERAGE_METRICS with default MINIMUM_BASE_QUALITY for each MINIMUM_MAPPING_QUALITY in input mappingQualityRange
-            PICARD_COVERAGE_METRICS_MAPPING_QUALITY(qcInputTuple, referenceInfoTuple, params.defaultBaseQuality, mappingQualityRange, intervalsList)
+            PICARD_COVERAGE_METRICS_MAPPING_QUALITY(qcInputTuple, ch_referenceInfoTuple, params.defaultBaseQuality, mappingQualityRange, sampleInfoMap.sequencingTargetIntervalsList)
 
             // Logs module versions used
             ch_versions = ch_versions.concat(PICARD_COVERAGE_METRICS_BASE_QUALITY.out.versions)
@@ -77,19 +80,17 @@ workflow SHORTREAD_QC {
         if (params.qcToRun.contains("coverage_by_chrom")) {
 
             // Construct .intervals.list files for all chromosomes
-            intervalsList = sampleInfoMap.map {
-                "${it.sequencingTargetIntervalsDirectory}/${it.sequencingTarget}.${it.referenceAbbr}"
-            }
-            chromosomes = Channel.fromList(params.chromosomeNames)
+            def intervalsList = Channel.value("${sampleInfoMap.sequencingTargetIntervalsDirectory}/${sampleInfoMap.sequencingTarget}.${sampleInfoMap.referenceAbbr}")
+            def chromosomes = Channel.fromList(params.chromosomeNames)
 
             intervalsList.combine(chromosomes)
-            | map { intervalsList, chr ->
-                "${intervalsList}.${chr}.intervals.list"
+            | map { iList, chr ->
+                "${iList}.${chr}.intervals.list"
             }
             | set { intervalsLists }
 
             // Runs PICARD_COVERAGE_METRICS once for each intervals.list file in the intervalsList Channel
-            PICARD_COVERAGE_METRICS_BY_CHROMOSOME(qcInputTuple, referenceInfoTuple, params.defaultBaseQuality, params.defaultMappingQuality, intervalsLists)
+            PICARD_COVERAGE_METRICS_BY_CHROMOSOME(qcInputTuple, ch_referenceInfoTuple, params.defaultBaseQuality, params.defaultMappingQuality, intervalsLists)
 
             // Logs module versions used
             ch_versions = ch_versions.concat(PICARD_COVERAGE_METRICS_BY_CHROMOSOME.out.versions)
@@ -98,47 +99,29 @@ workflow SHORTREAD_QC {
 
         // RUNS CONTAMINATION FOR THE SAMPLE
         if (params.qcToRun.contains("contamination")) {
-            contamInfo = sampleInfoMap.branch {
-                custom: it.isCustomContaminationTargetSample
-                regular: true
-            }
-            
-            customContamInfo = contamInfo.custom.map {
-                [it.isCustomContaminationTargetSample, it.customContaminationTargetReferenceVCF]
-            }
-
-            regularContamInfo = contamInfo.regular.map {
-                [it.isCustomContaminationTargetSample, it.contaminationUDPath, it.contaminationBedPath, it.contaminationMeanPath]
-            }
-
             // Runs contamination
-            // ISSUE WITH NULL FILES MAYBE IS CUSTOM CONTAMINATION TARGET SHOULD BE A PARAM
-            // basically just cant call both of these raw because itll try to run one of them with null channels and crash
-            // may also have some issues with work-dir = null whatever that means
-            VERIFY_BAM_ID_CUSTOM_TARGET(qcInputTuple, customContamInfo)
-            VERIFY_BAM_ID(qcInputTuple, referenceInfoTuple, regularContamInfo)
-
-            // Logs module versions used
-            ch_versions = ch_versions.concat(VERIFY_BAM_ID_CUSTOM_TARGET.out.versions)
-            ch_versions = ch_versions.concat(VERIFY_BAM_ID.out.versions)
+            if (sampleInfoMap.isCustomContaminationTargetSample) {
+                VERIFY_BAM_ID_CUSTOM_TARGET(qcInputTuple, sampleInfoMap.customContaminationTargetReferenceVCF)
+                ch_versions = ch_versions.concat(VERIFY_BAM_ID_CUSTOM_TARGET.out.versions)
+            }
+            else {
+                def regularContamInfo = [it.contaminationUDPath, it.contaminationBedPath, it.contaminationMeanPath]
+                VERIFY_BAM_ID(qcInputTuple, ch_referenceInfoTuple, regularContamInfo)
+                ch_versions = ch_versions.concat(VERIFY_BAM_ID.out.versions)
+            }
         }
 
 
         // CREATES VCF FOR THE SAMPLE
         if (params.qcToRun.contains("fingerprint")) {
-            fingerprintInfo = sampleInfoMap.multiMap {
-                dbSnp: it.dbSnp
-                fingerprintBed: it.fingerprintBedFile
-            }
-
-            CREATE_FINGERPRINT_VCF(qcInputTuple, referenceInfoTuple, fingerprintInfo.dbSnp, fingerprintInfo.fingerprintBed)
+            CREATE_FINGERPRINT_VCF(qcInputTuple, ch_referenceInfoTuple, sampleInfoMap.dbSnp, sampleInfoMap.fingerprintBedFile)
             ch_versions = ch_versions.concat(CREATE_FINGERPRINT_VCF.out.versions)
         }
 
         
         // RUNS PICARD MULTIPLE METRICS ON THE SAMPLE
         if (params.qcToRun.contains("picard_multiple_metrics")) {
-            PICARD_MULTIPLE_METRICS(qcInputTuple, referenceInfoTuple)
+            PICARD_MULTIPLE_METRICS(qcInputTuple, ch_referenceInfoTuple)
             ch_versions = ch_versions.concat(PICARD_MULTIPLE_METRICS.out.versions)
         }
 
@@ -152,25 +135,23 @@ workflow SHORTREAD_QC {
 
         // RUNS SAMTOOLS STATS ON THE SAMPLE
         if (params.qcToRun.contains("samtools_stats")) {
-            sequencingTargetBedFile = sampleInfoMap.map { it.sequencingTargetBedFile }
-
-            SAMTOOLS_STATS(qcInputTuple, sequencingTargetBedFile)
+            SAMTOOLS_STATS(qcInputTuple, sampleInfoMap.sequencingTargetBedFile)
             ch_versions = ch_versions.concat(SAMTOOLS_STATS.out.versions)
         }
 
 
         // GENERATES A PLOT FOR EACH QC STEP (excluding contamination and vcf)
         if (params.qcToRun.contains("collect_and_plot")) {
-            sequencingTargetBedFile = sampleInfoMap.map { it.sequencingTargetBedFile }
-
+            // Collect the outputs for each metric
+            
             COLLECT_AND_PLOT(PICARD_COVERAGE_METRICS_BASE_QUALITY.out.ready.collect(), PICARD_COVERAGE_METRICS_MAPPING_QUALITY.out.ready.collect(),
                             PICARD_COVERAGE_METRICS_BY_CHROMOSOME.out.ready.collect(), PICARD_MULTIPLE_METRICS.out.ready.collect(), 
-                            SAMTOOLS_FLAGSTAT.out.ready.collect(), SAMTOOLS_STATS.out.ready.collect(), qcInputTuple, sequencingTargetBedFile)
+                            SAMTOOLS_FLAGSTAT.out.ready.collect(), SAMTOOLS_STATS.out.ready.collect(), qcInputTuple, sampleInfoMap.sequencingTargetBedFile)
             ch_versions = ch_versions.concat(COLLECT_AND_PLOT.out.versions)
         }
  
 
         // VERSIONS
-        ch_versions.unique().collectFile(name: 'qc_software_versions.yaml', storeDir: "${params.sampleDirectory}")
+        ch_versions.unique().collectFile(name: 'qc_software_versions.yaml', storeDir: "${versionsDirectory}")
 
 }

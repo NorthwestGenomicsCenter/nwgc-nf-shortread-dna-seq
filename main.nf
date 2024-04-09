@@ -1,5 +1,6 @@
 include { MERGE_MAPPED_BAMS } from './workflows/merge_mapped_bams.nf'
-include { SHORTREAD_QC } from './workflows/qc.nf' params (qcToRun: params.qcToRunCustom)
+include { SHORTREAD_QC as MERGING_QC } from './workflows/qc.nf' params (qcToRun: params.qcToRunCustom)
+include { SHORTREAD_QC as MAPPING_QC } from './workflows/qc.nf'
 include { CALL_VARIANTS } from './workflows/call_variants.nf'
 include { POLYMORPHIC_QC } from './workflows/polymorphic_qc.nf'
 include { LANE_MAP } from './workflows/lane_map.nf'
@@ -29,13 +30,20 @@ workflow {
     // If there are input mapped bams mix them in
     ch_mappedBams = ch_mappedBams.mix(Channel.fromList(params.mappedBams))
 
+    // ********************
+    // **** Mapping QC ****
+    // ********************
+    if (params.pipelineStepsToRun.contains('mapping_qc')) {
+
+    }
+
     // *****************
     // **** Merging ****
     // *****************
     if (params.pipelineStepsToRun.contains("merging")) {
         ch_mappedBams = ch_mappedBams.map { bam, bai -> bam }
         MERGE_MAPPED_BAMS(ch_mappedBams, params.sampleId, params.sequencingTarget, params.organism, params.isGRC38, params.dbSnp, params.goldStandardIndels, params.knownIndels, params.referenceGenome, params.sampleDirectory + '/merged_bam/')
-        ch_mergedBam = MERGE_MAPPED_BAMS.out.bam.merge(MERGE_MAPPED_BAMS.out.bai)
+        ch_mergedBam = MERGE_MAPPED_BAMS.out.bam
     }
     else {
         ch_mergedBam = Channel.of([params.mergedBam, "${params.mergedBam}.bai"])
@@ -48,13 +56,13 @@ workflow {
     if (params.pipelineStepsToRun.contains("qc")) {
         // Sample information that qc needs to run
         ch_bamInfo = ch_mergedBam.combine(Channel.of([params.sampleId, null, params.userId, params.sampleQCDirectory]))
-        ch_referenceInfo = Channel.of([params.isGRC38, params.referenceGenome])
-        ch_sampleInfoMap = Channel.of(params.subMap("sequencingTarget", "sequencingTargetIntervalsList", "sequencingTargetIntervalsDirectory", 
+        ch_referenceInfo = Channel.value([params.isGRC38, params.referenceGenome])
+        def sampleInfoMap = params.subMap("sequencingTarget", "sequencingTargetIntervalsList", "sequencingTargetIntervalsDirectory", 
                                "baseQualityRange", "mappingQualityRange", 
                                "isCustomContaminationTargetSample", "customContaminationTargetReferenceVCF", "contaminationUDPath", "contaminationBedPath", "contaminationMeanPath", 
-                               "referenceAbbr", "dbSnp", "sequencingTargetBedFile", "fingerprintBedFile"))
+                               "referenceAbbr", "dbSnp", "sequencingTargetBedFile", "fingerprintBedFile")
 
-        SHORTREAD_QC(ch_bamInfo, ch_referenceInfo, ch_sampleInfoMap)
+        MERGING_QC(ch_bamInfo, ch_referenceInfo, sampleInfoMap, params.sampleQCDirectory)
     }
 
 

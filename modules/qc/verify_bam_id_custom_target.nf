@@ -6,14 +6,12 @@ process VERIFY_BAM_ID_CUSTOM_TARGET {
 
     input:
         tuple path(bam), path(bai), val(sampleId), val(libraryId), val(userId), val(publishDirectory)
-        tuple val(isCustomContaminationTarget), path(customTargetContaminationReferenceVCF)
+        path customTargetContaminationReferenceVCF
 
     output:
         path "*.VerifyBamId.selfSM"
         path "versions.yaml", emit: versions
 
-    when:
-        isCustomContaminationTarget == true
 
     script:
         String libraryIdString = ""
