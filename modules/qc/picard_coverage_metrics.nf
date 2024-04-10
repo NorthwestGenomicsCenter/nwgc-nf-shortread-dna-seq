@@ -2,7 +2,7 @@ process PICARD_COVERAGE_METRICS {
 
     tag "PICARD_COVERAGE_METRICS_${sampleId}_${userId}"
 
-    publishDir "${publishDirectory}", mode: 'link', pattern: '*.picard.coverage.txt'
+    publishDir "${publishDirectory}", mode: 'link', pattern: "${sampleId}${libraryIdString}.BASEQ${baseQuality}.MAPQ${mappingQuality}.${partOfSequencingTargetOutput}picard.coverage.txt"
  
     input:
         tuple path(bam), path(bai), val(sampleId), val(libraryId), val(userId), val(publishDirectory)
@@ -12,13 +12,13 @@ process PICARD_COVERAGE_METRICS {
         each path(intervalsList)
 
     output:
-        path "*.picard.coverage.txt", emit: metricsFiles
+        tuple val(libraryId), path("${sampleId}${libraryIdString}.BASEQ${baseQuality}.MAPQ${mappingQuality}.${partOfSequencingTargetOutput}picard.coverage.txt"), emit: metricsFile
         path "versions.yaml", emit: versions
 
     script:
 
         // Scrape the chromosome from the intervals list path if it exists.
-        String partOfSequencingTargetOutput = (intervalsList =~ "\\.(ch.*)?intervals\\.list")[0][1]
+        partOfSequencingTargetOutput = (intervalsList =~ "\\.(ch.*)?intervals\\.list")[0][1]
         if (partOfSequencingTargetOutput == null) {
             partOfSequencingTargetOutput = ""
         }

@@ -17,7 +17,7 @@ process PICARD_MULTIPLE_METRICS {
         tuple val(isGRC38), val(referenceGenome)
 
     output:
-        tuple path("${sampleId}${libraryIdString}.alignment_summary_metrics.txt"), path("${sampleId}${libraryIdString}.base_distribution_by_cycle.txt"),
+        tuple val(libraryId), path("${sampleId}${libraryIdString}.alignment_summary_metrics.txt"), path("${sampleId}${libraryIdString}.base_distribution_by_cycle.txt"),
               path("${sampleId}${libraryIdString}.gc_bias_metrics.txt"), path("${sampleId}${libraryIdString}.gc_bias_summary_metrics.txt"),
               path("${sampleId}${libraryIdString}.insert_size_metrics.txt"), path("${sampleId}${libraryIdString}.quality_yield_metrics.txt"), emit: metricsFiles
         path "${sampleId}${libraryIdString}.base_distribution_by_cycle.pdf"

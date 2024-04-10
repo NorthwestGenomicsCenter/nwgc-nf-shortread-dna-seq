@@ -9,7 +9,7 @@ process SAMTOOLS_STATS {
         path sequencingTargetBedFile
 
     output:
-        path "${sampleId}${libraryIdString}.onTarget.stats.txt", emit: statsFile
+        tuple val(libraryId), path("${sampleId}${libraryIdString}.onTarget.stats.txt"), emit: statsFile
         path "versions.yaml", emit: versions
 
     script:

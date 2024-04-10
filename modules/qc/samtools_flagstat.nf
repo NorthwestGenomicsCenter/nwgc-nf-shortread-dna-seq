@@ -8,7 +8,7 @@ process SAMTOOLS_FLAGSTAT {
         tuple path(bam), path(bai), val(sampleId), val(libraryId), val(userId), val(publishDirectory)
 
     output:
-        path "${sampleId}${libraryIdString}.flagstat.output.txt", emit: flagstatFile
+        tuple val(libraryId), path("${sampleId}${libraryIdString}.flagstat.output.txt"), emit: flagstatFile
         path "versions.yaml", emit: versions
 
     script:

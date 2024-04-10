@@ -9,7 +9,7 @@ process COLLECT_AND_PLOT {
         path flagstat
         path stats
         path pcm_mapq
-        tuple path(pcm_baseq_0), path(pcm_baseq_30), path(pcm_baseq_20), path(pcm_baseq_10) // This ordering is super finicky. Its based on the sorting order of file names if they're changed the order will change.
+        path pcm_baseq_files
         path pcm_chrom_files
         tuple path(bam), path(bai), val(sampleId), val(libraryId), val(userId), val(publishDirectory)
         path sequencingTargetBedFile
@@ -39,12 +39,17 @@ process COLLECT_AND_PLOT {
                                  mv ${flagstat} qcFiles/
                                  mv ${stats} qcFiles/
                                  
-                                 # Picard coverage metrics files
-                                 mv ${pcm_baseq_0} qcFiles/${sampleId}${libraryIdString}.MIN0.wgs_metrics.txt
-                                 mv ${pcm_baseq_10} qcFiles/${sampleId}${libraryIdString}.MIN10.wgs_metrics.txt
-                                 mv ${pcm_baseq_20} qcFiles/${sampleId}${libraryIdString}.MIN20.wgs_metrics.txt
-                                 mv ${pcm_baseq_30} qcFiles/${sampleId}${libraryIdString}.MIN30.wgs_metrics.txt
+                                 # Picard coverage metrics custom mapping quality file
                                  mv ${pcm_mapq} qcFiles/${sampleId}${libraryIdString}.MAPQ0.wgs_metrics.txt
+
+                                 # Picard coverage metrics custom base quality files
+                                 for file in ${pcm_baseq_files}
+                                 do 
+                                    # Extract just the BaseQ number to use in the old file format
+                                    tail="\${file##*.BASEQ}"
+                                    baseQ="\${tail%.MAPQ*}"
+                                    mv \${file} qcFiles/${sampleId}${libraryIdString}.MIN\${baseQ}.wgs_metrics.txt
+                                 done
 
                                  # Picard coverage metrics by chromosome files
                                  for file in ${pcm_chrom_files}
@@ -74,35 +79,8 @@ process COLLECT_AND_PLOT {
 
 }
 /*
-"""
-                                 mkdir -p qcFiles
-
-                                 # Picard multiple metrics files
-                                 ln -s --target-directory=qcFiles ${alignment_summary_metrics}
-                                 ln -s --target-directory=qcFiles ${base_distribution_by_cycle}
-                                 ln -s --target-directory=qcFiles ${gc_bias_metrics}
-                                 ln -s --target-directory=qcFiles ${gc_bias_summary_metrics}
-                                 ln -s --target-directory=qcFiles ${insert_size_metrics}
-                                 ln -s --target-directory=qcFiles ${quality_yield_metrics}
-
-                                 # Samtools flagstat/ stats files
-                                 ln -s --target-directory=qcFiles ${flagstat}
-                                 ln -s --target-directory=qcFiles ${stats}
-                                 
-                                 # Picard coverage metrics files
-                                 ln -s ${pcm_baseq_0} qcFiles/${sampleId}${libraryIdString}.MIN0.wgs_metrics.txt
-                                 ln -s ${pcm_baseq_10} qcFiles/${sampleId}${libraryIdString}.MIN10.wgs_metrics.txt
-                                 ln -s ${pcm_baseq_20} qcFiles/${sampleId}${libraryIdString}.MIN20.wgs_metrics.txt
-                                 ln -s ${pcm_baseq_30} qcFiles/${sampleId}${libraryIdString}.MIN30.wgs_metrics.txt
-                                 ln -s ${pcm_mapq} qcFiles/${sampleId}${libraryIdString}.MAPQ0.wgs_metrics.txt
-
-                                 # Picard coverage metrics by chromosome files
-                                 for file in ${pcm_chrom_files}
-                                 do 
-                                    # Extract just the chromosome number to use in the old file format
-                                    tail="\${file##*MAPQ20.}"
-                                    chr="\${tail%.picard*}"
-                                    ln -s \${file} qcFiles/${sampleId}${libraryIdString}.wgsMetrics.Q20.\${chr}.txt
-                                 done
-                                 """
-                                 */
+mv ${pcm_baseq_0} qcFiles/${sampleId}${libraryIdString}.MIN0.wgs_metrics.txt
+mv ${pcm_baseq_10} qcFiles/${sampleId}${libraryIdString}.MIN10.wgs_metrics.txt
+mv ${pcm_baseq_20} qcFiles/${sampleId}${libraryIdString}.MIN20.wgs_metrics.txt
+mv ${pcm_baseq_30} qcFiles/${sampleId}${libraryIdString}.MIN30.wgs_metrics.txt
+*/

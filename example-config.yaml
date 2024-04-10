@@ -69,7 +69,8 @@ flowCellLaneLibraries:
 # Bams  - Bam files that have been mapped (to merge together) 
 mappedBams:
   - "<full path to first mapedBam>"
-  - "<full path to second mappedBam>"
+    "<full path to first mapedBai (mappedBam.bai)>"
+    "<libraryId>"
   - "<repeat for more bams>"
 # e.g.
 #bams:

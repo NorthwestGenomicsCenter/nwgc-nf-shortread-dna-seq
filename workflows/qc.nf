@@ -142,18 +142,38 @@ workflow SHORTREAD_QC {
 
         // GENERATES A PLOT FOR EACH QC STEP (excluding contamination and vcf)
         if (params.qcToRun.contains("collect_and_plot")) {
-            // Collect the outputs for each metric
-            // 1. Add library ID as identifier to all output tuples
-            // 2. Map output tupples to [librayId, [file1, file2]]
-            // 3. Join on libraryId
-            // 4. MultiMap { libraryId, fileTuple1, fileTuple2, fileTuple3, ... -> process1: fileTuple1, process2: fileTuple2, process3: fileTuple3, ... }
-            // 5. Pass into collect and plot
-            // Associate qcInputTuple in there somewhere probably at 3. [libraryId, [qcInputTuple]]
+            // Collect output for each library where necessary
+            PICARD_COVERAGE_METRICS_BASE_QUALITY.out.metricsFile.groupTuple(size: 4, sort: true) | set { ch_pcmBaseQGrouped }
+            PICARD_COVERAGE_METRICS_BY_CHROMOSOME.out.metricsFile.groupTuple(size: 25) | set { ch_pcmChrGrouped }
+
+            // Map Channels from [library, file1, file2, ...] to [library, [file1, file2, ...]]
+            // Then Join them together
+            qcInputTuple.map({[it[3], it]}) | set { ch_qcInputTupleFormatted } // LibraryId is the 3rd index of qcInputTuple
+            def filterLibraryId = { fileTuple -> [fileTuple[0], fileTuple - fileTuple[0]] }
+            PICARD_MULTIPLE_METRICS.out.metricsFiles.map(filterLibraryId)
+            | join(SAMTOOLS_FLAGSTAT.out.flagstatFile.map(filterLibraryId))
+            | join(SAMTOOLS_STATS.out.statsFile.map(filterLibraryId))
+            | join(PICARD_COVERAGE_METRICS_MAPPING_QUALITY.out.metricsFile.map(filterLibraryId))
+            | join(ch_pcmBaseQGrouped)
+            | join(ch_pcmChrGrouped)
+            | join(ch_qcInputTupleFormatted)
+            // MultiMap to proper input streams
+            | multiMap {libraryId, picardMultipleMetricsFiles, samtoolsFlagstatFile, samtoolsStatsFile, pcmMapQFile, pcmBaseQFiles, pcmChrFiles, qcGeneralInfo ->
+                    picardMultipleMetrics: picardMultipleMetricsFiles
+                    samtoolsFlagstat: samtoolsFlagstatFile
+                    samtoolsStats: samtoolsStatsFile
+                    pcmMapQ: pcmMapQFile
+                    pcmBaseQ: pcmBaseQFiles
+                    pcmChr: pcmChrFiles
+                    qcInput: qcGeneralInfo
+            }
+            | set { ch_collectAndPlotInput }
+
+
             
-            COLLECT_AND_PLOT( PICARD_MULTIPLE_METRICS.out.metricsFiles.collect(), SAMTOOLS_FLAGSTAT.out.flagstatFile.collect(), 
-                              SAMTOOLS_STATS.out.statsFile.collect(), PICARD_COVERAGE_METRICS_MAPPING_QUALITY.out.metricsFiles.collect(),
-                              PICARD_COVERAGE_METRICS_BASE_QUALITY.out.metricsFiles.collect(), PICARD_COVERAGE_METRICS_BY_CHROMOSOME.out.metricsFiles.collect(),
-                              qcInputTuple, sampleInfoMap.sequencingTargetBedFile)
+            COLLECT_AND_PLOT( ch_collectAndPlotInput.picardMultipleMetrics, ch_collectAndPlotInput.samtoolsFlagstat, ch_collectAndPlotInput.samtoolsStats,
+                              ch_collectAndPlotInput.pcmMapQ, ch_collectAndPlotInput.pcmBaseQ, ch_collectAndPlotInput.pcmChr,
+                              ch_collectAndPlotInput.qcInput, sampleInfoMap.sequencingTargetBedFile)
             ch_versions = ch_versions.concat(COLLECT_AND_PLOT.out.versions)
         }
  
