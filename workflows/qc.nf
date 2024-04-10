@@ -143,10 +143,17 @@ workflow SHORTREAD_QC {
         // GENERATES A PLOT FOR EACH QC STEP (excluding contamination and vcf)
         if (params.qcToRun.contains("collect_and_plot")) {
             // Collect the outputs for each metric
+            // 1. Add library ID as identifier to all output tuples
+            // 2. Map output tupples to [librayId, [file1, file2]]
+            // 3. Join on libraryId
+            // 4. MultiMap { libraryId, fileTuple1, fileTuple2, fileTuple3, ... -> process1: fileTuple1, process2: fileTuple2, process3: fileTuple3, ... }
+            // 5. Pass into collect and plot
+            // Associate qcInputTuple in there somewhere probably at 3. [libraryId, [qcInputTuple]]
             
-            COLLECT_AND_PLOT(PICARD_COVERAGE_METRICS_BASE_QUALITY.out.ready.collect(), PICARD_COVERAGE_METRICS_MAPPING_QUALITY.out.ready.collect(),
-                            PICARD_COVERAGE_METRICS_BY_CHROMOSOME.out.ready.collect(), PICARD_MULTIPLE_METRICS.out.ready.collect(), 
-                            SAMTOOLS_FLAGSTAT.out.ready.collect(), SAMTOOLS_STATS.out.ready.collect(), qcInputTuple, sampleInfoMap.sequencingTargetBedFile)
+            COLLECT_AND_PLOT( PICARD_MULTIPLE_METRICS.out.metricsFiles.collect(), SAMTOOLS_FLAGSTAT.out.flagstatFile.collect(), 
+                              SAMTOOLS_STATS.out.statsFile.collect(), PICARD_COVERAGE_METRICS_MAPPING_QUALITY.out.metricsFiles.collect(),
+                              PICARD_COVERAGE_METRICS_BASE_QUALITY.out.metricsFiles.collect(), PICARD_COVERAGE_METRICS_BY_CHROMOSOME.out.metricsFiles.collect(),
+                              qcInputTuple, sampleInfoMap.sequencingTargetBedFile)
             ch_versions = ch_versions.concat(COLLECT_AND_PLOT.out.versions)
         }
  

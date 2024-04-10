@@ -12,9 +12,8 @@ process PICARD_COVERAGE_METRICS {
         each path(intervalsList)
 
     output:
-        path "*.picard.coverage.txt"
+        path "*.picard.coverage.txt", emit: metricsFiles
         path "versions.yaml", emit: versions
-        val true, emit: ready
 
     script:
 
@@ -24,7 +23,7 @@ process PICARD_COVERAGE_METRICS {
             partOfSequencingTargetOutput = ""
         }
 
-        String libraryIdString = ""
+        libraryIdString = ""
         if (libraryId != null) {
             libraryIdString = ".${libraryId}"
         }

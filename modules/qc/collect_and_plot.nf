@@ -5,12 +5,12 @@ process COLLECT_AND_PLOT {
     publishDir "${publishDirectory}/qcPlots", mode: 'link'
  
     input:
-        val ready1
-        val ready2
-        val ready3
-        val ready4
-        val ready5
-        val ready6
+        tuple path(alignment_summary_metrics), path(base_distribution_by_cycle), path(gc_bias_metrics), path(gc_bias_summary_metrics), path(insert_size_metrics), path(quality_yield_metrics)
+        path flagstat
+        path stats
+        path pcm_mapq
+        tuple path(pcm_baseq_0), path(pcm_baseq_30), path(pcm_baseq_20), path(pcm_baseq_10) // This ordering is super finicky. Its based on the sorting order of file names if they're changed the order will change.
+        path pcm_chrom_files
         tuple path(bam), path(bai), val(sampleId), val(libraryId), val(userId), val(publishDirectory)
         path sequencingTargetBedFile
 
@@ -28,31 +28,31 @@ process COLLECT_AND_PLOT {
                                  mkdir -p qcFiles
 
                                  # Picard multiple metrics files
-                                 ln -s --target-directory=qcFiles ${publishDirectory}/${sampleId}${libraryIdString}.alignment_summary_metrics.txt 
-                                 ln -s --target-directory=qcFiles ${publishDirectory}/${sampleId}${libraryIdString}.base_distribution_by_cycle.txt
-                                 ln -s --target-directory=qcFiles ${publishDirectory}/${sampleId}${libraryIdString}.gc_bias_metrics.txt
-                                 ln -s --target-directory=qcFiles ${publishDirectory}/${sampleId}${libraryIdString}.gc_bias_summary_metrics.txt
-                                 ln -s --target-directory=qcFiles ${publishDirectory}/${sampleId}${libraryIdString}.insert_size_metrics.txt
-                                 ln -s --target-directory=qcFiles ${publishDirectory}/${sampleId}${libraryIdString}.quality_yield_metrics.txt
+                                 mv ${alignment_summary_metrics} qcFiles/
+                                 mv ${base_distribution_by_cycle} qcFiles/
+                                 mv ${gc_bias_metrics} qcFiles/
+                                 mv ${gc_bias_summary_metrics} qcFiles/
+                                 mv ${insert_size_metrics} qcFiles/
+                                 mv ${quality_yield_metrics} qcFiles/
 
                                  # Samtools flagstat/ stats files
-                                 ln -s --target-directory=qcFiles ${publishDirectory}/${sampleId}${libraryIdString}.flagstat.output.txt
-                                 ln -s --target-directory=qcFiles ${publishDirectory}/${sampleId}${libraryIdString}.onTarget.stats.txt
+                                 mv ${flagstat} qcFiles/
+                                 mv ${stats} qcFiles/
                                  
                                  # Picard coverage metrics files
-                                 ln -s ${publishDirectory}/${sampleId}${libraryIdString}.BASEQ0.MAPQ20.picard.coverage.txt qcFiles/${sampleId}${libraryIdString}.MIN0.wgs_metrics.txt
-                                 ln -s ${publishDirectory}/${sampleId}${libraryIdString}.BASEQ10.MAPQ20.picard.coverage.txt qcFiles/${sampleId}${libraryIdString}.MIN10.wgs_metrics.txt
-                                 ln -s ${publishDirectory}/${sampleId}${libraryIdString}.BASEQ20.MAPQ20.picard.coverage.txt qcFiles/${sampleId}${libraryIdString}.MIN20.wgs_metrics.txt
-                                 ln -s ${publishDirectory}/${sampleId}${libraryIdString}.BASEQ30.MAPQ20.picard.coverage.txt qcFiles/${sampleId}${libraryIdString}.MIN30.wgs_metrics.txt
-                                 ln -s ${publishDirectory}/${sampleId}${libraryIdString}.BASEQ20.MAPQ0.picard.coverage.txt qcFiles/${sampleId}${libraryIdString}.MAPQ0.wgs_metrics.txt
+                                 mv ${pcm_baseq_0} qcFiles/${sampleId}${libraryIdString}.MIN0.wgs_metrics.txt
+                                 mv ${pcm_baseq_10} qcFiles/${sampleId}${libraryIdString}.MIN10.wgs_metrics.txt
+                                 mv ${pcm_baseq_20} qcFiles/${sampleId}${libraryIdString}.MIN20.wgs_metrics.txt
+                                 mv ${pcm_baseq_30} qcFiles/${sampleId}${libraryIdString}.MIN30.wgs_metrics.txt
+                                 mv ${pcm_mapq} qcFiles/${sampleId}${libraryIdString}.MAPQ0.wgs_metrics.txt
 
                                  # Picard coverage metrics by chromosome files
-                                 for file in ${publishDirectory}/${sampleId}${libraryIdString}.BASEQ20.MAPQ20.chr*
+                                 for file in ${pcm_chrom_files}
                                  do 
                                     # Extract just the chromosome number to use in the old file format
                                     tail="\${file##*MAPQ20.}"
                                     chr="\${tail%.picard*}"
-                                    ln -s \${file} qcFiles/${sampleId}${libraryIdString}.wgsMetrics.Q20.\${chr}.txt
+                                    mv \${file} qcFiles/${sampleId}${libraryIdString}.wgsMetrics.Q20.\${chr}.txt
                                  done
                                  """
 
@@ -73,3 +73,36 @@ process COLLECT_AND_PLOT {
         """
 
 }
+/*
+"""
+                                 mkdir -p qcFiles
+
+                                 # Picard multiple metrics files
+                                 ln -s --target-directory=qcFiles ${alignment_summary_metrics}
+                                 ln -s --target-directory=qcFiles ${base_distribution_by_cycle}
+                                 ln -s --target-directory=qcFiles ${gc_bias_metrics}
+                                 ln -s --target-directory=qcFiles ${gc_bias_summary_metrics}
+                                 ln -s --target-directory=qcFiles ${insert_size_metrics}
+                                 ln -s --target-directory=qcFiles ${quality_yield_metrics}
+
+                                 # Samtools flagstat/ stats files
+                                 ln -s --target-directory=qcFiles ${flagstat}
+                                 ln -s --target-directory=qcFiles ${stats}
+                                 
+                                 # Picard coverage metrics files
+                                 ln -s ${pcm_baseq_0} qcFiles/${sampleId}${libraryIdString}.MIN0.wgs_metrics.txt
+                                 ln -s ${pcm_baseq_10} qcFiles/${sampleId}${libraryIdString}.MIN10.wgs_metrics.txt
+                                 ln -s ${pcm_baseq_20} qcFiles/${sampleId}${libraryIdString}.MIN20.wgs_metrics.txt
+                                 ln -s ${pcm_baseq_30} qcFiles/${sampleId}${libraryIdString}.MIN30.wgs_metrics.txt
+                                 ln -s ${pcm_mapq} qcFiles/${sampleId}${libraryIdString}.MAPQ0.wgs_metrics.txt
+
+                                 # Picard coverage metrics by chromosome files
+                                 for file in ${pcm_chrom_files}
+                                 do 
+                                    # Extract just the chromosome number to use in the old file format
+                                    tail="\${file##*MAPQ20.}"
+                                    chr="\${tail%.picard*}"
+                                    ln -s \${file} qcFiles/${sampleId}${libraryIdString}.wgsMetrics.Q20.\${chr}.txt
+                                 done
+                                 """
+                                 */
