@@ -17,7 +17,7 @@ workflow MAP {
         referenceGenome
 
     main:
-    def ch_referenceGenome = Channel.of(referenceGenome)
+    def ch_referenceGenome = Channel.value(referenceGenome)
     def ch_bwaMemOptions = Channel.value(params.bwaMemOptions)
 
     ch_flowCellLaneLibraryTuple.branch { fastq1, fastq2, flowCell, lane, library, userId, readGroup, readLength, readType, publishDirectory ->
