@@ -1,34 +1,34 @@
 process PICARD_MULTIPLE_METRICS {
 
-    tag "PICARD_MULTIPLE_METRICS${sampleId}_${userId}"
+    tag "PICARD_MULTIPLE_METRICS${sampleId}${flowCellLaneLibraryString}_${userId}"
 
-    publishDir "${publishDirectory}", mode: 'link', pattern: "${sampleId}${libraryIdString}.alignment_summary_metrics.txt"
-    publishDir "${publishDirectory}", mode: 'link', pattern: "${sampleId}${libraryIdString}.base_distribution_by_cycle.txt"
-    publishDir "${publishDirectory}", mode: 'link', pattern: "${sampleId}${libraryIdString}.gc_bias_metrics.txt"
-    publishDir "${publishDirectory}", mode: 'link', pattern: "${sampleId}${libraryIdString}.gc_bias_summary_metrics.txt"
-    publishDir "${publishDirectory}", mode: 'link', pattern: "${sampleId}${libraryIdString}.insert_size_metrics.txt"
-    publishDir "${publishDirectory}", mode: 'link', pattern: "${sampleId}${libraryIdString}.quality_yield_metrics.txt"
-    publishDir "${publishDirectory}", mode: 'link', pattern: "${sampleId}${libraryIdString}.base_distribution_by_cycle.pdf"
-    publishDir "${publishDirectory}", mode: 'link', pattern: "${sampleId}${libraryIdString}.insert_size_histogram.pdf"
-    publishDir "${publishDirectory}", mode: 'link', pattern: "${sampleId}${libraryIdString}.gc_bias.pdf"
+    publishDir "${publishDirectory}", mode: 'link', pattern: "${sampleId}${flowCellLaneLibraryString}.alignment_summary_metrics.txt"
+    publishDir "${publishDirectory}", mode: 'link', pattern: "${sampleId}${flowCellLaneLibraryString}.base_distribution_by_cycle.txt"
+    publishDir "${publishDirectory}", mode: 'link', pattern: "${sampleId}${flowCellLaneLibraryString}.gc_bias_metrics.txt"
+    publishDir "${publishDirectory}", mode: 'link', pattern: "${sampleId}${flowCellLaneLibraryString}.gc_bias_summary_metrics.txt"
+    publishDir "${publishDirectory}", mode: 'link', pattern: "${sampleId}${flowCellLaneLibraryString}.insert_size_metrics.txt"
+    publishDir "${publishDirectory}", mode: 'link', pattern: "${sampleId}${flowCellLaneLibraryString}.quality_yield_metrics.txt"
+    publishDir "${publishDirectory}", mode: 'link', pattern: "${sampleId}${flowCellLaneLibraryString}.base_distribution_by_cycle.pdf"
+    publishDir "${publishDirectory}", mode: 'link', pattern: "${sampleId}${flowCellLaneLibraryString}.insert_size_histogram.pdf"
+    publishDir "${publishDirectory}", mode: 'link', pattern: "${sampleId}${flowCellLaneLibraryString}.gc_bias.pdf"
 
     input:
-        tuple path(bam), path(bai), val(sampleId), val(libraryId), val(userId), val(publishDirectory)
+        tuple path(bam), path(bai), val(sampleId), val(flowCellLaneLibrary), val(userId), val(publishDirectory)
         tuple val(isGRC38), val(referenceGenome)
 
     output:
-        tuple val(libraryId), path("${sampleId}${libraryIdString}.alignment_summary_metrics.txt"), path("${sampleId}${libraryIdString}.base_distribution_by_cycle.txt"),
-              path("${sampleId}${libraryIdString}.gc_bias_metrics.txt"), path("${sampleId}${libraryIdString}.gc_bias_summary_metrics.txt"),
-              path("${sampleId}${libraryIdString}.insert_size_metrics.txt"), path("${sampleId}${libraryIdString}.quality_yield_metrics.txt"), emit: metricsFiles
-        path "${sampleId}${libraryIdString}.base_distribution_by_cycle.pdf"
-        path "${sampleId}${libraryIdString}.insert_size_histogram.pdf"
-        path "${sampleId}${libraryIdString}.gc_bias.pdf"
+        tuple val(flowCellLaneLibrary), path("${sampleId}${flowCellLaneLibraryString}.alignment_summary_metrics.txt"), path("${sampleId}${flowCellLaneLibraryString}.base_distribution_by_cycle.txt"),
+              path("${sampleId}${flowCellLaneLibraryString}.gc_bias_metrics.txt"), path("${sampleId}${flowCellLaneLibraryString}.gc_bias_summary_metrics.txt"),
+              path("${sampleId}${flowCellLaneLibraryString}.insert_size_metrics.txt"), path("${sampleId}${flowCellLaneLibraryString}.quality_yield_metrics.txt"), emit: metricsFiles
+        path "${sampleId}${flowCellLaneLibraryString}.base_distribution_by_cycle.pdf"
+        path "${sampleId}${flowCellLaneLibraryString}.insert_size_histogram.pdf"
+        path "${sampleId}${flowCellLaneLibraryString}.gc_bias.pdf"
         path "versions.yaml", emit: versions
 
     script:
-        libraryIdString = ""
-        if (libraryId != null) {
-            libraryIdString = ".${libraryId}"
+        flowCellLaneLibraryString = ""
+        if (flowCellLaneLibrary != null) {
+            flowCellLaneLibraryString = ".${flowCellLaneLibrary}"
         }
 
         """
@@ -40,7 +40,7 @@ process PICARD_MULTIPLE_METRICS {
         	-jar \$PICARD_DIR/picard.jar \
         	CollectMultipleMetrics \
         	--INPUT $bam \
-        	--OUTPUT ${sampleId}${libraryIdString} \
+        	--OUTPUT ${sampleId}${flowCellLaneLibraryString} \
         	--REFERENCE_SEQUENCE ${referenceGenome} \
         	--VALIDATION_STRINGENCY SILENT \
         	--PROGRAM CollectAlignmentSummaryMetrics \
@@ -50,12 +50,12 @@ process PICARD_MULTIPLE_METRICS {
         	--PROGRAM CollectQualityYieldMetrics
         
         # Rename files to use txt
-        mv ${sampleId}${libraryIdString}.alignment_summary_metrics ${sampleId}${libraryIdString}.alignment_summary_metrics.txt
-        mv ${sampleId}${libraryIdString}.base_distribution_by_cycle_metrics ${sampleId}${libraryIdString}.base_distribution_by_cycle.txt
-        mv ${sampleId}${libraryIdString}.gc_bias.detail_metrics ${sampleId}${libraryIdString}.gc_bias_metrics.txt
-        mv ${sampleId}${libraryIdString}.gc_bias.summary_metrics ${sampleId}${libraryIdString}.gc_bias_summary_metrics.txt
-        mv ${sampleId}${libraryIdString}.insert_size_metrics ${sampleId}${libraryIdString}.insert_size_metrics.txt
-        mv ${sampleId}${libraryIdString}.quality_yield_metrics ${sampleId}${libraryIdString}.quality_yield_metrics.txt
+        mv ${sampleId}${flowCellLaneLibraryString}.alignment_summary_metrics ${sampleId}${flowCellLaneLibraryString}.alignment_summary_metrics.txt
+        mv ${sampleId}${flowCellLaneLibraryString}.base_distribution_by_cycle_metrics ${sampleId}${flowCellLaneLibraryString}.base_distribution_by_cycle.txt
+        mv ${sampleId}${flowCellLaneLibraryString}.gc_bias.detail_metrics ${sampleId}${flowCellLaneLibraryString}.gc_bias_metrics.txt
+        mv ${sampleId}${flowCellLaneLibraryString}.gc_bias.summary_metrics ${sampleId}${flowCellLaneLibraryString}.gc_bias_summary_metrics.txt
+        mv ${sampleId}${flowCellLaneLibraryString}.insert_size_metrics ${sampleId}${flowCellLaneLibraryString}.insert_size_metrics.txt
+        mv ${sampleId}${flowCellLaneLibraryString}.quality_yield_metrics ${sampleId}${flowCellLaneLibraryString}.quality_yield_metrics.txt
 
 
         cat <<-END_VERSIONS > versions.yaml

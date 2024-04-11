@@ -11,7 +11,6 @@ sampleDirectory: "<full path to sample directory>"                  # e.g. sampl
 sampleQCDirectory: "<full path to sample QC directory>"             # e.g. sampleQCDirectory: "/net/nwgc/vol1/data/processed/samples/123456/WHOLE_GENOME/qc"
 samplePolymorphicQCDirectory: "<full path to sample QC directory>"  # e.g. samplePolymorphicQCDirectory: "/net/nwgc/vol1/data/processed/samples/123456/WHOLE_GENOME/polymorphicQC"
 sampleId: "<samplify sampleId>"                                     # e.g  sampleId: 123456
-libraryId: "<samplify libraryId>"                                   # e.g  libraryId: 123456
 isNovaseqQCPool: "<true if sample is a Novaseq qc pool>"            # e.g. isNovaseqQCPool: true
 
 # Target

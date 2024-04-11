@@ -1,6 +1,6 @@
 process COLLECT_AND_PLOT {
 
-    tag "COLLECT_AND_PLOT_${sampleId}_${userId}"
+    tag "COLLECT_AND_PLOT_${sampleId}${flowCellLaneLibraryString}_${userId}"
 
     publishDir "${publishDirectory}/qcPlots", mode: 'link'
  
@@ -11,7 +11,7 @@ process COLLECT_AND_PLOT {
         path pcm_mapq
         path pcm_baseq_files
         path pcm_chrom_files
-        tuple path(bam), path(bai), val(sampleId), val(libraryId), val(userId), val(publishDirectory)
+        tuple path(bam), path(bai), val(sampleId), val(flowCellLaneLibrary), val(userId), val(publishDirectory)
         path sequencingTargetBedFile
 
     output:
@@ -19,12 +19,13 @@ process COLLECT_AND_PLOT {
         path "versions.yaml", emit: versions
 
     script:
-        String libraryIdString = ""
-        if (libraryId != null) {
-            libraryIdString = ".${libraryId}"
+        flowCellLaneLibraryString = ""
+        if (flowCellLaneLibrary != null) {
+            flowCellLaneLibraryString = ".${flowCellLaneLibrary}"
         }
-        // Create a bunch of soft links to our published qc files to support the formatting used by our old scripts
-        String createSoftLinks = """
+        // Move the input files to ./qcFiles as required by the scripts.
+        // Also rename files to expected name where appropriate.
+        createSoftLinks = """
                                  mkdir -p qcFiles
 
                                  # Picard multiple metrics files
@@ -40,7 +41,7 @@ process COLLECT_AND_PLOT {
                                  mv ${stats} qcFiles/
                                  
                                  # Picard coverage metrics custom mapping quality file
-                                 mv ${pcm_mapq} qcFiles/${sampleId}${libraryIdString}.MAPQ0.wgs_metrics.txt
+                                 mv ${pcm_mapq} qcFiles/${sampleId}${flowCellLaneLibraryString}.MAPQ0.wgs_metrics.txt
 
                                  # Picard coverage metrics custom base quality files
                                  for file in ${pcm_baseq_files}
@@ -48,7 +49,7 @@ process COLLECT_AND_PLOT {
                                     # Extract just the BaseQ number to use in the old file format
                                     tail="\${file##*.BASEQ}"
                                     baseQ="\${tail%.MAPQ*}"
-                                    mv \${file} qcFiles/${sampleId}${libraryIdString}.MIN\${baseQ}.wgs_metrics.txt
+                                    mv \${file} qcFiles/${sampleId}${flowCellLaneLibraryString}.MIN\${baseQ}.wgs_metrics.txt
                                  done
 
                                  # Picard coverage metrics by chromosome files
@@ -57,7 +58,7 @@ process COLLECT_AND_PLOT {
                                     # Extract just the chromosome number to use in the old file format
                                     tail="\${file##*MAPQ20.}"
                                     chr="\${tail%.picard*}"
-                                    mv \${file} qcFiles/${sampleId}${libraryIdString}.wgsMetrics.Q20.\${chr}.txt
+                                    mv \${file} qcFiles/${sampleId}${flowCellLaneLibraryString}.wgsMetrics.Q20.\${chr}.txt
                                  done
                                  """
 
@@ -68,8 +69,8 @@ process COLLECT_AND_PLOT {
         $createSoftLinks 
 
 
-        collect.qc.metrics.core.picard.2.18.10.pl ${sampleId}${libraryIdString} \${SCRIPT_DIR} ${sequencingTargetBedFile}
-        run_R_plotQC.v5.sh \${SCRIPT_DIR} ${sampleId}${libraryIdString}
+        collect.qc.metrics.core.picard.2.18.10.pl ${sampleId}${flowCellLaneLibraryString} \${SCRIPT_DIR} ${sequencingTargetBedFile}
+        run_R_plotQC.v5.sh \${SCRIPT_DIR} ${sampleId}${flowCellLaneLibraryString}
 
         cat <<-END_VERSIONS > versions.yaml
         '${task.process}':
@@ -78,9 +79,3 @@ process COLLECT_AND_PLOT {
         """
 
 }
-/*
-mv ${pcm_baseq_0} qcFiles/${sampleId}${libraryIdString}.MIN0.wgs_metrics.txt
-mv ${pcm_baseq_10} qcFiles/${sampleId}${libraryIdString}.MIN10.wgs_metrics.txt
-mv ${pcm_baseq_20} qcFiles/${sampleId}${libraryIdString}.MIN20.wgs_metrics.txt
-mv ${pcm_baseq_30} qcFiles/${sampleId}${libraryIdString}.MIN30.wgs_metrics.txt
-*/

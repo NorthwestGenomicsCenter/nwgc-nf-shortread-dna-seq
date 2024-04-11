@@ -45,7 +45,7 @@ workflow {
     // Run Mapping QC
     if (params.pipelineStepsToRun.contains('mapping_qc')) {
         ch_mappedBams 
-        | map({bam, bai, libraryId -> [bam, bai, params.sampleId, libraryId, params.userId, params.sampleDirectory + "/mapping_qc/${libraryId}/"]})
+        | map({bam, bai, flowCell, lane, library -> [bam, bai, params.sampleId, "${flowCell}.${lane}.${library}", params.userId, params.sampleDirectory + "/mapping_qc/"]})
         | set { ch_mappingQcBams }
 
         MAPPING_QC(ch_mappingQcBams, ch_referenceInfo, qcSampleInfoMap, params.sampleDirectory + "/mapping_qc/")

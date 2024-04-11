@@ -1,11 +1,11 @@
 process VERIFY_BAM_ID {
 
-    tag "VERIFY_BAM_ID_${sampleId}_${userId}"
+    tag "VERIFY_BAM_ID_${sampleId}${flowCellLaneLibraryString}_${userId}"
 
     publishDir "${publishDirectory}", mode: 'link', pattern: '*.VerifyBamId.selfSM'
 
     input:
-        tuple path(bam), path(bai), val(sampleId), val(libraryId), val(userId), val(publishDirectory)
+        tuple path(bam), path(bai), val(sampleId), val(flowCellLaneLibrary), val(userId), val(publishDirectory)
         tuple val(isGRC38), val(referenceGenome)
         tuple val(contaminationUDPath), val(contaminationBedPath), val(contaminationMeanPath)
 
@@ -26,9 +26,9 @@ process VERIFY_BAM_ID {
         def bedPath = contaminationBedPath != 'null' ? contaminationBedPath : "\$MOD_GSVERIFYBAMID_DIR/resource/1000g.100k.${refVersion}.vcf.gz.dat.bed"
         def meanPath = contaminationMeanPath != 'null' ? contaminationMeanPath : "\$MOD_GSVERIFYBAMID_DIR/resource/1000g.100k.${refVersion}.vcf.gz.dat.mu"
 
-        String libraryIdString = ""
-        if (libraryId != null) {
-            libraryIdString = ".${libraryId}"
+        flowCellLaneLibraryString = ""
+        if (flowCellLaneLibrary != null) {
+            flowCellLaneLibraryString = ".${flowCellLaneLibrary}"
         }
 
         """
@@ -41,7 +41,7 @@ process VERIFY_BAM_ID {
             --BamFile $bam \
             --Reference ${referenceGenome} \
             $disableSanityCheck \
-            --Output ${sampleId}${libraryIdString}.VerifyBamId
+            --Output ${sampleId}${flowCellLaneLibraryString}.VerifyBamId
 
         cat <<-END_VERSIONS > versions.yaml
         '${task.process}':

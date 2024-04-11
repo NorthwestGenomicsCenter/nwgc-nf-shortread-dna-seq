@@ -26,9 +26,9 @@ workflow SHORTREAD_QC {
         // ***************************************
         // "Input" for the workflow
 
-        // (bam, bai, sample id, library id, user id, publish directory)
-        // library id is null when doing qc on a merged bam
-        qcInputTuple
+        // (bam, bai, sample id, flowCell.lane.library, user id, publish directory)
+        // flowCell.lane.library is null when doing qc on a merged bam
+        ch_qcInputTuple
 
         // *************************************
         // **** Assumed to be value channel ****
@@ -65,10 +65,10 @@ workflow SHORTREAD_QC {
             def mappingQualityRange = Channel.fromList(params.mappingQualityRange)
 
             // Runs PICARD_COVERAGE_METRICS with default MINIMUM_MAPPING_QUALITY for each MINIMUM_BASE_QUALITY in input baseQualityRange
-            PICARD_COVERAGE_METRICS_BASE_QUALITY(qcInputTuple, ch_referenceInfoTuple, baseQualityRange, params.defaultMappingQuality, sampleInfoMap.sequencingTargetIntervalsList)
+            PICARD_COVERAGE_METRICS_BASE_QUALITY(ch_qcInputTuple, ch_referenceInfoTuple, baseQualityRange, params.defaultMappingQuality, sampleInfoMap.sequencingTargetIntervalsList)
 
             // Runs PICARD_COVERAGE_METRICS with default MINIMUM_BASE_QUALITY for each MINIMUM_MAPPING_QUALITY in input mappingQualityRange
-            PICARD_COVERAGE_METRICS_MAPPING_QUALITY(qcInputTuple, ch_referenceInfoTuple, params.defaultBaseQuality, mappingQualityRange, sampleInfoMap.sequencingTargetIntervalsList)
+            PICARD_COVERAGE_METRICS_MAPPING_QUALITY(ch_qcInputTuple, ch_referenceInfoTuple, params.defaultBaseQuality, mappingQualityRange, sampleInfoMap.sequencingTargetIntervalsList)
 
             // Logs module versions used
             ch_versions = ch_versions.concat(PICARD_COVERAGE_METRICS_BASE_QUALITY.out.versions)
@@ -90,7 +90,7 @@ workflow SHORTREAD_QC {
             | set { intervalsLists }
 
             // Runs PICARD_COVERAGE_METRICS once for each intervals.list file in the intervalsList Channel
-            PICARD_COVERAGE_METRICS_BY_CHROMOSOME(qcInputTuple, ch_referenceInfoTuple, params.defaultBaseQuality, params.defaultMappingQuality, intervalsLists)
+            PICARD_COVERAGE_METRICS_BY_CHROMOSOME(ch_qcInputTuple, ch_referenceInfoTuple, params.defaultBaseQuality, params.defaultMappingQuality, intervalsLists)
 
             // Logs module versions used
             ch_versions = ch_versions.concat(PICARD_COVERAGE_METRICS_BY_CHROMOSOME.out.versions)
@@ -101,12 +101,12 @@ workflow SHORTREAD_QC {
         if (params.qcToRun.contains("contamination")) {
             // Runs contamination
             if (sampleInfoMap.isCustomContaminationTargetSample) {
-                VERIFY_BAM_ID_CUSTOM_TARGET(qcInputTuple, sampleInfoMap.customContaminationTargetReferenceVCF)
+                VERIFY_BAM_ID_CUSTOM_TARGET(ch_qcInputTuple, sampleInfoMap.customContaminationTargetReferenceVCF)
                 ch_versions = ch_versions.concat(VERIFY_BAM_ID_CUSTOM_TARGET.out.versions)
             }
             else {
                 def regularContamInfo = [it.contaminationUDPath, it.contaminationBedPath, it.contaminationMeanPath]
-                VERIFY_BAM_ID(qcInputTuple, ch_referenceInfoTuple, regularContamInfo)
+                VERIFY_BAM_ID(ch_qcInputTuple, ch_referenceInfoTuple, regularContamInfo)
                 ch_versions = ch_versions.concat(VERIFY_BAM_ID.out.versions)
             }
         }
@@ -114,51 +114,51 @@ workflow SHORTREAD_QC {
 
         // CREATES VCF FOR THE SAMPLE
         if (params.qcToRun.contains("fingerprint")) {
-            CREATE_FINGERPRINT_VCF(qcInputTuple, ch_referenceInfoTuple, sampleInfoMap.dbSnp, sampleInfoMap.fingerprintBedFile)
+            CREATE_FINGERPRINT_VCF(ch_qcInputTuple, ch_referenceInfoTuple, sampleInfoMap.dbSnp, sampleInfoMap.fingerprintBedFile)
             ch_versions = ch_versions.concat(CREATE_FINGERPRINT_VCF.out.versions)
         }
 
         
         // RUNS PICARD MULTIPLE METRICS ON THE SAMPLE
         if (params.qcToRun.contains("picard_multiple_metrics")) {
-            PICARD_MULTIPLE_METRICS(qcInputTuple, ch_referenceInfoTuple)
+            PICARD_MULTIPLE_METRICS(ch_qcInputTuple, ch_referenceInfoTuple)
             ch_versions = ch_versions.concat(PICARD_MULTIPLE_METRICS.out.versions)
         }
 
 
         // RUNS SAMTOOLS FLAGSTAT ON THE SAMPLE
         if (params.qcToRun.contains("samtools_flagstat")) {
-            SAMTOOLS_FLAGSTAT(qcInputTuple)
+            SAMTOOLS_FLAGSTAT(ch_qcInputTuple)
             ch_versions = ch_versions.concat(SAMTOOLS_FLAGSTAT.out.versions)
         }
 
 
         // RUNS SAMTOOLS STATS ON THE SAMPLE
         if (params.qcToRun.contains("samtools_stats")) {
-            SAMTOOLS_STATS(qcInputTuple, sampleInfoMap.sequencingTargetBedFile)
+            SAMTOOLS_STATS(ch_qcInputTuple, sampleInfoMap.sequencingTargetBedFile)
             ch_versions = ch_versions.concat(SAMTOOLS_STATS.out.versions)
         }
 
 
         // GENERATES A PLOT FOR EACH QC STEP (excluding contamination and vcf)
         if (params.qcToRun.contains("collect_and_plot")) {
-            // Collect output for each library where necessary
+            // Collect output for each flowCell.lane.library where necessary
             PICARD_COVERAGE_METRICS_BASE_QUALITY.out.metricsFile.groupTuple(size: 4, sort: true) | set { ch_pcmBaseQGrouped }
             PICARD_COVERAGE_METRICS_BY_CHROMOSOME.out.metricsFile.groupTuple(size: 25) | set { ch_pcmChrGrouped }
 
-            // Map Channels from [library, file1, file2, ...] to [library, [file1, file2, ...]]
+            // Map Channels from [flowCell.lane.library, file1, file2, ...] to [flowCell.lane.library, [file1, file2, ...]]
             // Then Join them together
-            qcInputTuple.map({[it[3], it]}) | set { ch_qcInputTupleFormatted } // LibraryId is the 3rd index of qcInputTuple
-            def filterLibraryId = { fileTuple -> [fileTuple[0], fileTuple - fileTuple[0]] }
-            PICARD_MULTIPLE_METRICS.out.metricsFiles.map(filterLibraryId)
-            | join(SAMTOOLS_FLAGSTAT.out.flagstatFile.map(filterLibraryId))
-            | join(SAMTOOLS_STATS.out.statsFile.map(filterLibraryId))
-            | join(PICARD_COVERAGE_METRICS_MAPPING_QUALITY.out.metricsFile.map(filterLibraryId))
+            ch_qcInputTuple.map({[it[3], it]}) | set { ch_qcInputTupleFormatted } // flowCell.lane.library is the 3rd index of ch_qcInputTuple
+            def filterFlowCellLaneLibrary = { fileTuple -> [fileTuple[0], fileTuple - fileTuple[0]] }
+            PICARD_MULTIPLE_METRICS.out.metricsFiles.map(filterFlowCellLaneLibrary)
+            | join(SAMTOOLS_FLAGSTAT.out.flagstatFile.map(filterFlowCellLaneLibrary))
+            | join(SAMTOOLS_STATS.out.statsFile.map(filterFlowCellLaneLibrary))
+            | join(PICARD_COVERAGE_METRICS_MAPPING_QUALITY.out.metricsFile.map(filterFlowCellLaneLibrary))
             | join(ch_pcmBaseQGrouped)
             | join(ch_pcmChrGrouped)
             | join(ch_qcInputTupleFormatted)
             // MultiMap to proper input streams
-            | multiMap {libraryId, picardMultipleMetricsFiles, samtoolsFlagstatFile, samtoolsStatsFile, pcmMapQFile, pcmBaseQFiles, pcmChrFiles, qcGeneralInfo ->
+            | multiMap {flowCellLaneLibrary, picardMultipleMetricsFiles, samtoolsFlagstatFile, samtoolsStatsFile, pcmMapQFile, pcmBaseQFiles, pcmChrFiles, qcGeneralInfo ->
                     picardMultipleMetrics: picardMultipleMetricsFiles
                     samtoolsFlagstat: samtoolsFlagstatFile
                     samtoolsStats: samtoolsStatsFile

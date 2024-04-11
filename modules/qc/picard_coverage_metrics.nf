@@ -1,31 +1,31 @@
 process PICARD_COVERAGE_METRICS {
 
-    tag "PICARD_COVERAGE_METRICS_${sampleId}_${userId}"
+    tag "PICARD_COVERAGE_METRICS_${sampleId}${flowCellLaneLibraryString}${partOfSequencingTargetOutput}_${userId}"
 
-    publishDir "${publishDirectory}", mode: 'link', pattern: "${sampleId}${libraryIdString}.BASEQ${baseQuality}.MAPQ${mappingQuality}.${partOfSequencingTargetOutput}picard.coverage.txt"
+    publishDir "${publishDirectory}", mode: 'link', pattern: "${sampleId}${flowCellLaneLibraryString}.BASEQ${baseQuality}.MAPQ${mappingQuality}${partOfSequencingTargetOutput}.picard.coverage.txt"
  
     input:
-        tuple path(bam), path(bai), val(sampleId), val(libraryId), val(userId), val(publishDirectory)
+        tuple path(bam), path(bai), val(sampleId), val(flowCellLaneLibrary), val(userId), val(publishDirectory)
         tuple val(isGRC38), val(referenceGenome)
         each baseQuality
         each mappingQuality
         each path(intervalsList)
 
     output:
-        tuple val(libraryId), path("${sampleId}${libraryIdString}.BASEQ${baseQuality}.MAPQ${mappingQuality}.${partOfSequencingTargetOutput}picard.coverage.txt"), emit: metricsFile
+        tuple val(flowCellLaneLibrary), path("${sampleId}${flowCellLaneLibraryString}.BASEQ${baseQuality}.MAPQ${mappingQuality}${partOfSequencingTargetOutput}.picard.coverage.txt"), emit: metricsFile
         path "versions.yaml", emit: versions
 
     script:
 
         // Scrape the chromosome from the intervals list path if it exists.
-        partOfSequencingTargetOutput = (intervalsList =~ "\\.(ch.*)?intervals\\.list")[0][1]
+        partOfSequencingTargetOutput = (intervalsList =~ "(ch.*)?.intervals\\.list")[0][1]
         if (partOfSequencingTargetOutput == null) {
             partOfSequencingTargetOutput = ""
         }
 
-        libraryIdString = ""
-        if (libraryId != null) {
-            libraryIdString = ".${libraryId}"
+        flowCellLaneLibraryString = ""
+        if (flowCellLaneLibrary != null) {
+            flowCellLaneLibraryString = ".${flowCellLaneLibrary}"
         }
 
         """
@@ -43,7 +43,7 @@ process PICARD_COVERAGE_METRICS {
             --MINIMUM_MAPPING_QUALITY $mappingQuality \
             --INTERVALS $intervalsList \
             --COVERAGE_CAP 300000 \
-            --OUTPUT ${sampleId}${libraryIdString}.BASEQ${baseQuality}.MAPQ${mappingQuality}.${partOfSequencingTargetOutput}picard.coverage.txt
+            --OUTPUT ${sampleId}${flowCellLaneLibraryString}.BASEQ${baseQuality}.MAPQ${mappingQuality}${partOfSequencingTargetOutput}.picard.coverage.txt
 
         cat <<-END_VERSIONS > versions.yaml
         '${task.process}':

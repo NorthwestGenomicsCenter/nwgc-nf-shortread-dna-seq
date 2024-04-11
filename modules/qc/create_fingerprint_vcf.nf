@@ -1,12 +1,12 @@
 process CREATE_FINGERPRINT_VCF {
 
-    tag "CREATE_FINGERPRINT_VCF_${sampleId}_${userId}"
+    tag "CREATE_FINGERPRINT_VCF_${sampleId}${flowCellLaneLibraryString}_${userId}"
 
     publishDir "${publishDirectory}", mode: 'link', pattern: '*.fingerprint.vcf.gz'
     publishDir "${publishDirectory}", mode: 'link', pattern: '*.fingerprint.vcf.gz.tbi'
  
     input:
-        tuple path(bam), path(bai), val(sampleId), val(libraryId), val(userId), val(publishDirectory)
+        tuple path(bam), path(bai), val(sampleId), val(flowCellLaneLibrary), val(userId), val(publishDirectory)
         tuple val(isGRC38), val(referenceGenome)
         path dbSnp
         path fingerprintBed
@@ -17,9 +17,9 @@ process CREATE_FINGERPRINT_VCF {
         path "versions.yaml", emit: versions
 
     script:
-        String libraryIdString = ""
-        if (libraryId != null) {
-            libraryIdString = ".${libraryId}"
+        flowCellLaneLibraryString = ""
+        if (flowCellLaneLibrary != null) {
+            flowCellLaneLibraryString = ".${flowCellLaneLibrary}"
         }
 
         """
@@ -36,7 +36,7 @@ process CREATE_FINGERPRINT_VCF {
             -G StandardAnnotation \
             -pairHMM AVX_LOGLESS_CACHING \
             -ERC GVCF \
-            --output ${sampleId}${libraryIdString}.fingerprint.g.vcf.gz
+            --output ${sampleId}${flowCellLaneLibraryString}.fingerprint.g.vcf.gz
 
         ## VCF File
         gatk \
@@ -44,8 +44,8 @@ process CREATE_FINGERPRINT_VCF {
             GenotypeGVCFs \
             -R $referenceGenome \
             -L $fingerprintBed \
-            --variant ${sampleId}${libraryIdString}.fingerprint.g.vcf.gz \
-            -O ${sampleId}${libraryIdString}.fingerprint.vcf.gz \
+            --variant ${sampleId}${flowCellLaneLibraryString}.fingerprint.g.vcf.gz \
+            -O ${sampleId}${flowCellLaneLibraryString}.fingerprint.vcf.gz \
             --include-non-variant-sites
 
         cat <<-END_VERSIONS > versions.yaml

@@ -1,21 +1,21 @@
 process SAMTOOLS_STATS {
 
-    tag "SAMTOOLS_STATS_${sampleId}_${userId}"
+    tag "SAMTOOLS_STATS_${sampleId}${flowCellLaneLibraryString}_${userId}"
 
-    publishDir "${publishDirectory}", mode: 'link', pattern: "${sampleId}${libraryIdString}.onTarget.stats.txt"
+    publishDir "${publishDirectory}", mode: 'link', pattern: "${sampleId}${flowCellLaneLibraryString}.onTarget.stats.txt"
 
     input:
-        tuple path(bam), path(bai), val(sampleId), val(libraryId), val(userId), val(publishDirectory)
+        tuple path(bam), path(bai), val(sampleId), val(flowCellLaneLibrary), val(userId), val(publishDirectory)
         path sequencingTargetBedFile
 
     output:
-        tuple val(libraryId), path("${sampleId}${libraryIdString}.onTarget.stats.txt"), emit: statsFile
+        tuple val(flowCellLaneLibrary), path("${sampleId}${flowCellLaneLibraryString}.onTarget.stats.txt"), emit: statsFile
         path "versions.yaml", emit: versions
 
     script:
-        libraryIdString = ""
-        if (libraryId != null) {
-            libraryIdString = ".${libraryId}"
+        flowCellLaneLibraryString = ""
+        if (flowCellLaneLibrary != null) {
+            flowCellLaneLibraryString = ".${flowCellLaneLibrary}"
         }
 
         """
@@ -26,7 +26,7 @@ process SAMTOOLS_STATS {
             -t ${sequencingTargetBedFile}\
             $bam \
             --threads ${task.cpus} \
-            > ${sampleId}${libraryIdString}.onTarget.stats.txt
+            > ${sampleId}${flowCellLaneLibraryString}.onTarget.stats.txt
 
         cat <<-END_VERSIONS > versions.yaml
         '${task.process}':
