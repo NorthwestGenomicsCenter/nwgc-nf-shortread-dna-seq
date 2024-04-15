@@ -1,12 +1,14 @@
 process ANNOTATE_VARIANTS {
 
-    label "ANNOTATE_VARIANTS_${params.sampleId}_${params.userId}"
+    tag "ANNOTATE_VARIANTS_${sampleId}_${userId}"
 
     input:
-        tuple val(chromosome), path(bam), path(gvcf)
+        tuple val(chromosome), path(bam), path(gvcf), val(sampleId), val(userId)
+        val referenceGenome
+        val dbSnp
 
     output:
-        tuple val(chromosome), path(bam), path("*.annotated.g.vcf"),  emit: gvcf_tuple
+        tuple val(chromosome), path(bam), path("*.annotated.g.vcf"), val(sampleId), val(userId),  emit: gvcf_tuple
         path  "*.annotated.g.vcf", emit: gvcf
         path "versions.yaml", emit: versions
 
@@ -18,14 +20,14 @@ process ANNOTATE_VARIANTS {
         java "-Xmx$javaMemory" \
             -jar \$MOD_GSGATK_DIR/GenomeAnalysisTK.jar \
             -T VariantAnnotator \
-            -R $params.referenceGenome \
+            -R $referenceGenome \
             -I $bam \
             -A Coverage \
             -A QualByDepth \
             -A FisherStrand \
             -A StrandOddsRatio \
             -L $chromosome \
-            -D $params.dbSnp \
+            -D $dbSnp \
             --disable_auto_index_creation_and_locking_when_reading_rods \
             -V $gvcf \
             -o ${chromosome}.annotated.g.vcf

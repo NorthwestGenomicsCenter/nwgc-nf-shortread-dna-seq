@@ -5,17 +5,27 @@ include { FILTER_VARIANTS } from '../../modules/call_variants/filter_variants.nf
 workflow CALL_ANNOTATE_FILTER {
 
     take:
-       chromosomeToCallTuple
+        // Channels
+        ch_chromosomeToCallTuple
+
+        // Groovy objects
+        referenceGenome
+        dbSnp
+        targetListFile
+        organism
 
     main:
         ch_versions = Channel.empty()
 
-        HAPLOTYPE_CALLER(chromosomeToCallTuple)
-        ANNOTATE_VARIANTS(HAPLOTYPE_CALLER.out.gvcf_tuple)
-        FILTER_VARIANTS(ANNOTATE_VARIANTS.out.gvcf_tuple)
+        HAPLOTYPE_CALLER(ch_chromosomeToCallTuple, referenceGenome, dbSnp)
+        ANNOTATE_VARIANTS(HAPLOTYPE_CALLER.out.gvcf_tuple, referenceGenome, dbSnp)
+        
+        if (organism.equals('Homo sapiens')) {
+            FILTER_VARIANTS(ANNOTATE_VARIANTS.out.gvcf_tuple, referenceGenome, targetListFile)
+            ch_versions = ch_versions.mix(FILTER_VARIANTS.out.versions)
+        }
 
         // Versions
-        ch_versions = ch_versions.mix(FILTER_VARIANTS.out.versions)
         ch_versions = ch_versions.mix(HAPLOTYPE_CALLER.out.versions)
         ch_versions = ch_versions.mix(ANNOTATE_VARIANTS.out.versions)
 

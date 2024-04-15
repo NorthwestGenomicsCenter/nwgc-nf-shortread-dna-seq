@@ -37,10 +37,12 @@ workflow {
     // ********************
     // Global sample values used for Mapping QC and Merging QC
     Channel.value([params.isGRC38, params.referenceGenome]) | set { ch_referenceInfo }
-    def qcSampleInfoMap = params.subMap("sequencingTarget", "sequencingTargetIntervalsList", "sequencingTargetIntervalsDirectory", 
-                               "baseQualityRange", "mappingQualityRange", 
-                               "isCustomContaminationTargetSample", "customContaminationTargetReferenceVCF", "contaminationUDPath", "contaminationBedPath", "contaminationMeanPath", 
-                               "referenceAbbr", "dbSnp", "sequencingTargetBedFile", "fingerprintBedFile")
+    def qcSampleInfoMap = params.subMap(
+        "sequencingTarget", "sequencingTargetIntervalsList", "sequencingTargetIntervalsDirectory", 
+        "baseQualityRange", "mappingQualityRange", 
+        "isCustomContaminationTargetSample", "customContaminationTargetReferenceVCF", "contaminationUDPath", "contaminationBedPath", "contaminationMeanPath", 
+        "referenceAbbr", "dbSnp", "sequencingTargetBedFile", "fingerprintBedFile"
+        )
 
     // Run Mapping QC
     if (params.pipelineStepsToRun.contains('mapping_qc')) {
@@ -79,8 +81,17 @@ workflow {
     // **** Variant Calling ****
     // *************************
     if (params.pipelineStepsToRun.contains("variant_calling")) {
-        CALL_VARIANTS(ch_mergedBam)
-        ch_filteredGVCF = CALL_VARIANTS.out.filtered_gvcf
+        def variantCallingSampleInfoMap = params.subMap(
+            "sampleId", "userId", "sequencingTarget", "targetListFile", "referenceGenome", "dbSnp", "organism"
+        ) + [publishDirectory: params.sampleDirectory + "/gvcfs/"]
+
+        def chromosomesToCall = params.isGRC38 ? params.grc38Chromosomes : params.hg19Chromosomes
+        if (!params.organism.equals("Homo sapiens")) {
+            chromosomesToCall = ['All']
+        }
+
+        CALL_VARIANTS(ch_mergedBam.map({ bam, bai -> bam}), variantCallingSampleInfoMap, chromosomesToCall)
+        ch_filteredGVCF = CALL_VARIANTS.out.filteredGvcf
     }
     else {
         // This should only ever have one element but if we make it a value channel the process hangs forever on POLYMORPHIC_QC if params.filteredGVCF is null 

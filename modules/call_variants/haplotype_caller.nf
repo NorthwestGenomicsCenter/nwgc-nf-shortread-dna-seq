@@ -1,12 +1,14 @@
 process HAPLOTYPE_CALLER {
 
-    label "HAPLOTYPE_CALLER_${params.sampleId}_${params.userId}"
+    tag "HAPLOTYPE_CALLER_${sampleId}_${userId}"
 
     input:
-        tuple val(chromosome), path(bam)
+        tuple val(chromosome), path(bam), val(sampleId), val(userId)
+        val referenceGenome
+        val dbSnp
 
     output:
-        tuple val(chromosome), path(bam), path("*.g.vcf"),  emit: gvcf_tuple
+        tuple val(chromosome), path(bam), path("*.g.vcf"), val(sampleId), val(userId),  emit: gvcf_tuple
         path "versions.yaml", emit: versions
 
     script:
@@ -17,9 +19,9 @@ process HAPLOTYPE_CALLER {
         gatk \
             --java-options "-Xmx$javaMemory" \
             HaplotypeCaller \
-            -R $params.referenceGenome \
+            -R $referenceGenome \
             -I $bam \
-            -D $params.dbSnp \
+            -D $dbSnp \
             -L $chromosome \
             --annotation-group StandardAnnotation \
             --pair-hmm-implementation AVX_LOGLESS_CACHING \

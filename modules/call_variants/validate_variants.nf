@@ -1,24 +1,37 @@
 process VALIDATE_VARIANTS {
 
-    label "VALIDATE_VARIANTS_${params.sampleId}_${params.userId}"
+    tag "VALIDATE_VARIANTS_${sampleId}_${userId}"
 
-    publishDir "$params.sampleDirectory", mode:  'link', pattern: "validate_variants.txt", saveAs: {s-> "${params.sampleId}.${params.sequencingTarget}.validate_variants.txt"}
+    publishDir "$params.sampleDirectory", mode:  'link', pattern: "validate_variants.txt", saveAs: {s-> "${sampleId}.${sequencingTarget}.validate_variants.txt"}
 
     input:
         path gvcf
         path index
+        tuple val(sampleId), val(userId), val(sequencingTarget), val(referenceGenome), val(publishDirectory)
+        val chromosomesToCheck // List of the chromosome name of checks. i.e. ['chr1', 'chr2', 'chr3', 'chr4', ...] or ['1', '2', '3', '4', ...]
+        val dbSnp
 
     script:
         def taskMemoryString = "$task.memory"
         def javaMemory = taskMemoryString.substring(0, taskMemoryString.length() - 1).replaceAll("\\s","")
 
-        def chromosomesToCheck = ""
-        if ("$params.organism" == 'Homo sapiens') {
-            def chromsomsesToCheckPrefix = " -L "
-            def chromosomes = "$params.isGRC38" == 'true' ? "$params.grc38Chromosomes" : "$params.hg19Chromosomes"
-            chromosomes = chromosomes.substring(1,chromosomes.length()-1).split(",").collect{it as String}
-            for (chromosome in chromosomes) {
-                chromosomesToCheck += chromsomsesToCheckPrefix + chromosome
+        // ******************************
+        // ** NEED TO MOVE TO WORKFLOW **
+        // ******************************
+        // def chromosomesToCheck = ""
+        // if ("$params.organism" == 'Homo sapiens') {
+        //     def chromsomsesToCheckPrefix = " -L "
+        //     def chromosomes = "$params.isGRC38" == 'true' ? "$params.grc38Chromosomes" : "$params.hg19Chromosomes"
+        //     chromosomes = chromosomes.substring(1,chromosomes.length()-1).split(",").collect{it as String}
+        //     for (chromosome in chromosomes) {
+        //         chromosomesToCheck += chromsomsesToCheckPrefix + chromosome
+        //     }
+        // }
+        def chromosomesToCheckString = ""
+        def chromosomesToCheckPrefix = " -L "
+        if (chromosomesToCheck != null) {
+            for (chromosome in chromosomesToCheck) {
+                chromosomesToCheckString += chromosomesToCheckPrefix + chromosome
             }
         }
 
@@ -26,10 +39,10 @@ process VALIDATE_VARIANTS {
         java "-Xmx$javaMemory" \
             -jar \$MOD_GSGATK_DIR/GenomeAnalysisTK.jar \
             -T ValidateVariants \
-            -R $params.referenceGenome \
+            -R $referenceGenome \
             -V $gvcf \
-            --dbsnp $params.dbSnp \
-            $chromosomesToCheck \
+            --dbsnp $dbSnp \
+            $chromosomesToCheckString \
             --validateGVCF \
             --warnOnErrors
 

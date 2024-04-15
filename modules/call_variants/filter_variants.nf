@@ -1,17 +1,16 @@
 process FILTER_VARIANTS {
 
-    label "FILTER_VARIANTS_${params.sampleId}_${params.userId}"
+    tag "FILTER_VARIANTS_${sampleId}_${userId}"
 
     input:
-        tuple val(chromosome), path(bam), path(gvcf)
+        tuple val(chromosome), path(bam), path(gvcf), val(sampleId), val(userId)
+        val referenceGenome
+        val targetListFile
 
     output:
-        tuple val(chromosome), path(bam), path("*.filtered.g.vcf"),  emit: gvcf_tuple
+        tuple val(chromosome), path(bam), path("*.filtered.g.vcf"), val(sampleId), val(userId),  emit: gvcf_tuple
         path  "*.filtered.g.vcf", emit: gvcf
         path "versions.yaml", emit: versions
-
-    when:
-        params.organism == 'Homo sapiens'
 
     script:
         def taskMemoryString = "$task.memory"
@@ -21,14 +20,14 @@ process FILTER_VARIANTS {
         java "-Xmx$javaMemory" \
             -jar \$MOD_GSGATK_DIR/GenomeAnalysisTK.jar \
             -T VariantFiltration \
-            -R $params.referenceGenome \
+            -R $referenceGenome \
             --filterName QDFilter -filter "QD < 5.0" \
             --filterName QUALFilter -filter "QUAL <= 50.0" \
             --filterName ABFilter -filter "ABHet > 0.75" \
             --filterName SBFilter -filter "SB >= 0.10" \
             --filterName HRunFilter -filter "HRun > 4.0" \
             -l OFF \
-            -L $params.targetListFile \
+            -L $targetListFile \
             --disable_auto_index_creation_and_locking_when_reading_rods \
             -V $gvcf \
             -o ${chromosome}.filtered.g.vcf

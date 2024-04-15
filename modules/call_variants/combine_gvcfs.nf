@@ -1,23 +1,21 @@
 process COMBINE_GVCFS {
 
-    label "COMBINE_GVCFS_${params.sampleId}_${params.userId}"
+    tag "COMBINE_GVCFS_${sampleId}_${userId}"
 
-    publishDir "$params.sampleDirectory", mode:  'link', pattern: "combined.g.vcf.gz", saveAs: {s-> "${params.sampleId}.${params.sequencingTarget}.${gvcf_type}.g.vcf.gz"}
-    publishDir "$params.sampleDirectory", mode:  'link', pattern: "combined.g.vcf.gz.tbi", saveAs: {s-> "${params.sampleId}.${params.sequencingTarget}.${gvcf_type}.g.vcf.gz.tbi"}
-    publishDir "$params.sampleDirectory", mode:  'link', pattern: "combined.g.vcf.gz.md5sum", saveAs: {s-> "${params.sampleId}.${params.sequencingTarget}.${gvcf_type}.g.vcf.gz.md5sum"}
+    publishDir "${publishDirectory}", mode:  'link', pattern: "combined.g.vcf.gz", saveAs: {s-> "${sampleId}.${sequencingTarget}.${gvcf_type}.g.vcf.gz"}
+    publishDir "${publishDirectory}", mode:  'link', pattern: "combined.g.vcf.gz.tbi", saveAs: {s-> "${sampleId}.${sequencingTarget}.${gvcf_type}.g.vcf.gz.tbi"}
+    publishDir "${publishDirectory}", mode:  'link', pattern: "combined.g.vcf.gz.md5sum", saveAs: {s-> "${sampleId}.${sequencingTarget}.${gvcf_type}.g.vcf.gz.md5sum"}
 
     input:
         val gvcf_type
         path gvcfList
+        tuple val(sampleId), val(userId), val(sequencingTarget), val(referenceGenome), val(publishDirectory)
 
     output:
         path "combined.g.vcf.gz",  emit: gvcf
         path "combined.g.vcf.gz.tbi",  emit: tbi
         path "combined.g.vcf.gz.md5sum",  emit: sum
         path "versions.yaml", emit: versions
-
-    when:
-        gvcf_type == 'main' || params.organism == 'Homo sapiens'
 
     script:
         def taskMemoryString = "$task.memory"
@@ -66,7 +64,7 @@ process COMBINE_GVCFS {
         java "-Xmx$javaMemory" \
             -cp \$MOD_GSGATK_DIR/GenomeAnalysisTK.jar \
             org.broadinstitute.gatk.tools.CatVariants \
-            -R $params.referenceGenome \
+            -R $referenceGenome \
             --assumeSorted \
             -out combined.g.vcf \
             $gvcfsToCombine

@@ -6,30 +6,52 @@ include { VALIDATE_VARIANTS } from '../modules/call_variants/validate_variants.n
 workflow CALL_VARIANTS {
 
     take:
-        bam
+        // Channels
+        ch_bam
+
+        // Groovy objects
+        // Map with relevant sample info & userId
+        // sampleId, userId, sequencingTarget, targetListFile, referenceGenome, dbSnp, organism, publishDirectory
+        sampleInfoMap
+        // List of chromosome names. i.e [chr1, chr2, chr3, chr4, ...] or [1, 2, 3, 4, ...]
+        // If not a human sample use ['All']
+        chromosomesToCall
+
 
     main:
         ch_versions = Channel.empty()
 
         // Chromosomse to Call
-        chromosomesToCall = Channel.fromList(params.hg19Chromosomes)
-        if (params.isGRC38) {
-            chromosomesToCall = Channel.fromList(params.grc38Chromosomes)
-        }
+        ch_chromosomesToCall = Channel.fromList(chromosomesToCall)
 
-        if (params.organism != 'Homo sapiens') {
-            chromosomesToCall = Channel.fromList(['All'])
-        }
+        // Set up CALL_ANNOTATE_FILTER input tuple
+        ch_chromosomesToCall
+        | combine(ch_bam.map({ bam -> [bam, sampleInfoMap.sampleId, sampleInfoMap.userId] }))
+        | set { ch_chromosomesToCallTuple }
 
-        chromosomesToCallTuple = chromosomesToCall.combine(bam) 
+        // Set up COMBINE_GVCFS & VALIDATE_VARIANTS input tuple
+        Channel.value([sampleInfoMap.sampleId, sampleInfoMap.userId, sampleInfoMap.sequencingTarget, sampleInfoMap.referenceGenome, sampleInfoMap.publishDirectory])
+        | set { ch_sampleInfoTuple }
+
 
         // Do Variant Calling
-        CALL_ANNOTATE_FILTER(chromosomesToCallTuple)
-        COMBINE_GVCFS('main', CALL_ANNOTATE_FILTER.out.gvcf.collect())
-        COMBINE_FILTERED_GVCFS('filtered', CALL_ANNOTATE_FILTER.out.filtered_gvcf.collect())
+        CALL_ANNOTATE_FILTER(ch_chromosomesToCallTuple, sampleInfoMap.referenceGenome, sampleInfoMap.dbSnp, sampleInfoMap.targetListFile, sampleInfoMap.organism)
+        CALL_ANNOTATE_FILTER.out.gvcf
+        | collect
+        | set { ch_collectedGvcfs }
+
+        // Combine GVCFs
+        COMBINE_GVCFS('main', ch_collectedGvcfs, ch_sampleInfoTuple)
+
+        // Filter GVCF if sample is human
+        ch_filteredGvcf = Channel.empty()
+        if (sampleInfoMap.organism.equals('Homo sapiens')) {
+            COMBINE_FILTERED_GVCFS('filtered', ch_collectedGvcfs, ch_sampleInfoTuple)
+            ch_filteredGvcf.mix(COMBINE_FILTERED_GVCFS.out.gvcf)
+        }
 
         // Validate that the files are well formatted
-        VALIDATE_VARIANTS(COMBINE_GVCFS.out.gvcf, COMBINE_GVCFS.out.tbi)
+        VALIDATE_VARIANTS(COMBINE_GVCFS.out.gvcf, COMBINE_GVCFS.out.tbi, ch_sampleInfoTuple, chromosomesToCall, sampleInfoMap.dbSnp)
 
         // Versions
         ch_versions = ch_versions.mix(CALL_ANNOTATE_FILTER.out.versions)
@@ -37,5 +59,5 @@ workflow CALL_VARIANTS {
         ch_versions.unique().collectFile(name: 'call_variants_software_versions.yaml', storeDir: "${params.sampleDirectory}")
 
     emit:
-        filtered_gvcf = COMBINE_FILTERED_GVCFS.out.gvcf
+        filteredGvcf = ch_filteredGvcf
 }
