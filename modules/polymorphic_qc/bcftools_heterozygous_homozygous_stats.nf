@@ -1,6 +1,6 @@
 process BCFTOOLS_HETEROZYGOUS_HOMOZYGOUS_STATS {
 
-    label "BCFTOOLS_HETEROZYGOUS_HOMOZYGOUS_STATS_${params.sampleId}_${params.userId}"
+    tag "BCFTOOLS_HETEROZYGOUS_HOMOZYGOUS_STATS_${params.sampleId}_${params.userId}"
 
     publishDir "${params.samplePolymorphicQCDirectory}", mode: 'link', pattern: "${params.sampleId}.het_hom.txt"
 

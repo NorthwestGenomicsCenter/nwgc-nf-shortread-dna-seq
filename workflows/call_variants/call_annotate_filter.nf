@@ -20,8 +20,10 @@ workflow CALL_ANNOTATE_FILTER {
         HAPLOTYPE_CALLER(ch_chromosomeToCallTuple, referenceGenome, dbSnp)
         ANNOTATE_VARIANTS(HAPLOTYPE_CALLER.out.gvcf_tuple, referenceGenome, dbSnp)
         
+        ch_filteredGvcf = Channel.empty()
         if (organism.equals('Homo sapiens')) {
             FILTER_VARIANTS(ANNOTATE_VARIANTS.out.gvcf_tuple, referenceGenome, targetListFile)
+            ch_filteredGvcf = FILTER_VARIANTS.out.gvcf
             ch_versions = ch_versions.mix(FILTER_VARIANTS.out.versions)
         }
 
@@ -31,6 +33,6 @@ workflow CALL_ANNOTATE_FILTER {
 
     emit:
         gvcf = ANNOTATE_VARIANTS.out.gvcf
-        filtered_gvcf = FILTER_VARIANTS.out.gvcf
+        filtered_gvcf = ch_filteredGvcf
         versions = ch_versions
 }

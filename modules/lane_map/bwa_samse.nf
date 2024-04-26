@@ -11,10 +11,7 @@ process BWA_SAMSE {
         tuple path("${flowCell}.${lane}.${library}.matefixed.sorted.bam"), val(flowCell), val(lane), val(library), val(userId), val(publishDirectory), emit: samse
 
     script:
-        String tmpDir = "tmp"
-        
         """
-        mkdir ${tmpDir}
         bwa samse \
 				${referenceGenome} \
 				-r ${readGroup} \
@@ -24,7 +21,6 @@ process BWA_SAMSE {
         samtools view -Sbhu - | \
         sambamba sort \
                 -t ${task.cpus} \
-                --tmpdir ${tmpDir} \
                 -o ${flowCell}.${lane}.${library}.matefixed.sorted.bam \
                 /dev/stdin
         """

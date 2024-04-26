@@ -1,6 +1,6 @@
 process BCFTOOLS_PERCENT_FILTERED_GATK_STATS {
 
-    label "BCFTOOLS_PERCENT_FILTERED_GATK_STATS_${params.sampleId}_${params.userId}"
+    tag "BCFTOOLS_PERCENT_FILTERED_GATK_STATS_${params.sampleId}_${params.userId}"
 
     publishDir "${params.samplePolymorphicQCDirectory}", mode: 'link', pattern: "${params.sampleId}.percent_filtered_gatk.txt"
 

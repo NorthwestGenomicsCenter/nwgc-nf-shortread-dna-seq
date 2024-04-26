@@ -1,13 +1,13 @@
 process PICARD_MARK_DUPLICATES {
 
-    label "PICARD_MARK_DUPLICATES${params.sampleId}_${params.libraryId}_${params.userId}"
+    tag "PICARD_MARK_DUPLICATES_${params.sampleId}_${params.userId}"
 
     input:
         path bamList
 
     output:
-        path "${params.sampleId}.${params.libraryId}.${params.sequencingTarget}.bam", emit: bam
-        path "${params.sampleId}.${params.libraryId}.${params.sequencingTarget}.bai", emit: bai
+        path "${params.sampleId}.${params.sequencingTarget}.bam", emit: bam
+        path "${params.sampleId}.${params.sequencingTarget}.bai", emit: bai
         path "versions.yaml", emit: versions
 
     script:
@@ -24,8 +24,8 @@ process PICARD_MARK_DUPLICATES {
             -jar \$PICARD_DIR/picard.jar \
             MarkDuplicates \
             $inputs \
-            --OUTPUT ${params.sampleId}.${params.libraryId}.${params.sequencingTarget}.bam \
-            --METRICS_FILE ${params.sampleId}.${params.libraryId}.${params.sequencingTarget}.duplicate_metrics.txt \
+            --OUTPUT ${params.sampleId}.${params.sequencingTarget}.bam \
+            --METRICS_FILE ${params.sampleId}.${params.sequencingTarget}.duplicate_metrics.txt \
             --ASSUME_SORT_ORDER coordinate \
             --CREATE_MD5_FILE false \
             --CREATE_INDEX true \

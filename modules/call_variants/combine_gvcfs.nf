@@ -1,6 +1,6 @@
 process COMBINE_GVCFS {
 
-    tag "COMBINE_GVCFS_${sampleId}_${userId}"
+    tag "COMBINE_GVCFS_${sampleId}_${userId}_${gvcf_type}"
 
     publishDir "${publishDirectory}", mode:  'link', pattern: "combined.g.vcf.gz", saveAs: {s-> "${sampleId}.${sequencingTarget}.${gvcf_type}.g.vcf.gz"}
     publishDir "${publishDirectory}", mode:  'link', pattern: "combined.g.vcf.gz.tbi", saveAs: {s-> "${sampleId}.${sequencingTarget}.${gvcf_type}.g.vcf.gz.tbi"}

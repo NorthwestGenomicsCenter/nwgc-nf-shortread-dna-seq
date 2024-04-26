@@ -13,9 +13,7 @@ process BWA_SAMPE {
     script:
         def threads = task.cpus / 2
 
-        String tmpDir = "tmp"
         """
-        mkdir ${tmpDir}
         bwa sampe \
                 -P ${referenceGenome} \
                 -r ${readGroup} \
@@ -27,7 +25,6 @@ process BWA_SAMPE {
         samtools view -Sbhu - | \
         sambamba sort \
                 -t ${task.cpus} \
-                --tmpdir ${tmpDir} \
                 -o ${flowCell}.${lane}.${library}.matefixed.sorted.bam \
                 /dev/stdin
         """

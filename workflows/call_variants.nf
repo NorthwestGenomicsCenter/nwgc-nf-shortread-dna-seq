@@ -40,15 +40,14 @@ workflow CALL_VARIANTS {
         | collect
         | set { ch_collectedGvcfs }
 
-        // Combine GVCFs
-        COMBINE_GVCFS('main', ch_collectedGvcfs, ch_sampleInfoTuple)
+        // There are only filtered GVCFs if the sample is human
+        CALL_ANNOTATE_FILTER.out.filtered_gvcf
+        | collect
+        | set { ch_collectedFilteredGvcfs }
 
-        // Filter GVCF if sample is human
-        ch_filteredGvcf = Channel.empty()
-        if (sampleInfoMap.organism.equals('Homo sapiens')) {
-            COMBINE_FILTERED_GVCFS('filtered', ch_collectedGvcfs, ch_sampleInfoTuple)
-            ch_filteredGvcf.mix(COMBINE_FILTERED_GVCFS.out.gvcf)
-        }
+
+        COMBINE_GVCFS('main', ch_collectedGvcfs, ch_sampleInfoTuple)
+        COMBINE_FILTERED_GVCFS('filtered', ch_collectedFilteredGvcfs, ch_sampleInfoTuple)
 
         // Validate that the files are well formatted
         VALIDATE_VARIANTS(COMBINE_GVCFS.out.gvcf, COMBINE_GVCFS.out.tbi, ch_sampleInfoTuple, chromosomesToCall, sampleInfoMap.dbSnp)
@@ -56,8 +55,12 @@ workflow CALL_VARIANTS {
         // Versions
         ch_versions = ch_versions.mix(CALL_ANNOTATE_FILTER.out.versions)
         ch_versions = ch_versions.mix(COMBINE_GVCFS.out.versions)
+        ch_versions = ch_versions.mix(COMBINE_FILTERED_GVCFS.out.gvcf)
         ch_versions.unique().collectFile(name: 'call_variants_software_versions.yaml', storeDir: "${params.sampleDirectory}")
 
     emit:
-        filteredGvcf = ch_filteredGvcf
+        gvcf = COMBINE_GVCFS.out.gvcf
+        gvcfIndex = COMBINE_GVCFS.out.tbi
+        filteredGvcf = COMBINE_FILTERED_GVCFS.out.gvcf
+
 }

@@ -1,6 +1,6 @@
 include { MERGE_MAPPED_BAMS } from './workflows/merge_mapped_bams.nf'
-include { SHORTREAD_QC as MERGING_QC } from './workflows/qc.nf' params (qcToRun: params.qcToRunCustom)
-include { SHORTREAD_QC as MAPPING_QC } from './workflows/qc.nf'
+include { SHORTREAD_QC as MERGING_QC } from './workflows/qc.nf' params (qcToRun: params.qcToRunCustom, mode: params.mode)
+include { SHORTREAD_QC as MAPPING_QC } from './workflows/qc.nf' params (qcToRun: params.qcToRunMapping, mode: params.mode)
 include { CALL_VARIANTS } from './workflows/call_variants.nf'
 include { POLYMORPHIC_QC } from './workflows/polymorphic_qc.nf'
 include { LANE_MAP } from './workflows/lane_map.nf'
@@ -30,7 +30,6 @@ workflow {
 
     // If there are input mapped bams mix them in
     ch_mappedBams = ch_mappedBams.mix(Channel.fromList(params.mappedBams))
-    ch_mappedBams | view
 
     // ********************
     // **** Mapping QC ****
@@ -47,7 +46,7 @@ workflow {
     // Run Mapping QC
     if (params.pipelineStepsToRun.contains('mapping_qc')) {
         ch_mappedBams 
-        | map({bam, bai, flowCell, lane, library -> [bam, bai, params.sampleId, "${flowCell}.${lane}.${library}", params.userId, params.sampleDirectory + "/mapping_qc/"]})
+        | map({ bam, bai, flowCell, lane, library -> [bam, bai, params.sampleId, "${flowCell}.${lane}.${library}", params.userId, params.sampleDirectory + "/mapping_qc/"] })
         | set { ch_mappingQcBams }
 
         MAPPING_QC(ch_mappingQcBams, ch_referenceInfo, qcSampleInfoMap, params.sampleDirectory + "/mapping_qc/")
@@ -57,8 +56,10 @@ workflow {
     // **** Merging ****
     // *****************
     if (params.pipelineStepsToRun.contains("merging")) {
-        ch_mappedBams = ch_mappedBams.map { bam, bai -> bam }
-        MERGE_MAPPED_BAMS(ch_mappedBams, params.sampleId, params.sequencingTarget, params.organism, params.isGRC38, params.dbSnp, params.goldStandardIndels, params.knownIndels, params.referenceGenome, params.sampleDirectory + '/merged_bam/')
+        ch_mappedBams
+        | map { bam, bai, flowCell, lane, library -> bam }
+        | set { ch_mappedBamsForMerge }
+        MERGE_MAPPED_BAMS(ch_mappedBamsForMerge, params.sampleId, params.sequencingTarget, params.organism, params.isGRC38, params.dbSnp, params.goldStandardIndels, params.knownIndels, params.referenceGenome, params.sampleDirectory + '/merged_bam/')
         ch_mergedBam = MERGE_MAPPED_BAMS.out.bam
     }
     else {

@@ -18,7 +18,7 @@ process PICARD_COVERAGE_METRICS {
     script:
 
         // Scrape the chromosome from the intervals list path if it exists.
-        partOfSequencingTargetOutput = (intervalsList =~ "(ch.*)?.intervals\\.list")[0][1]
+        partOfSequencingTargetOutput = (intervalsList =~ "(\\.ch.*)?\\.intervals\\.list")[0][1]
         if (partOfSequencingTargetOutput == null) {
             partOfSequencingTargetOutput = ""
         }

@@ -69,6 +69,8 @@ flowCellLaneLibraries:
 mappedBams:
   - "<full path to first mapedBam>"
     "<full path to first mapedBai (mappedBam.bai)>"
+    "<flowcell>"
+    "<lane>"
     "<libraryId>"
   - "<repeat for more bams>"
 # e.g.

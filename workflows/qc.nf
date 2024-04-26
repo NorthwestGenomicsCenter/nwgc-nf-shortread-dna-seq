@@ -105,7 +105,7 @@ workflow SHORTREAD_QC {
                 ch_versions = ch_versions.concat(VERIFY_BAM_ID_CUSTOM_TARGET.out.versions)
             }
             else {
-                def regularContamInfo = [it.contaminationUDPath, it.contaminationBedPath, it.contaminationMeanPath]
+                def regularContamInfo = [sampleInfoMap.contaminationUDPath, sampleInfoMap.contaminationBedPath, sampleInfoMap.contaminationMeanPath]
                 VERIFY_BAM_ID(ch_qcInputTuple, ch_referenceInfoTuple, regularContamInfo)
                 ch_versions = ch_versions.concat(VERIFY_BAM_ID.out.versions)
             }
@@ -150,6 +150,7 @@ workflow SHORTREAD_QC {
             // Then Join them together
             ch_qcInputTuple.map({[it[3], it]}) | set { ch_qcInputTupleFormatted } // flowCell.lane.library is the 3rd index of ch_qcInputTuple
             def filterFlowCellLaneLibrary = { fileTuple -> [fileTuple[0], fileTuple - fileTuple[0]] }
+            
             PICARD_MULTIPLE_METRICS.out.metricsFiles.map(filterFlowCellLaneLibrary)
             | join(SAMTOOLS_FLAGSTAT.out.flagstatFile.map(filterFlowCellLaneLibrary))
             | join(SAMTOOLS_STATS.out.statsFile.map(filterFlowCellLaneLibrary))

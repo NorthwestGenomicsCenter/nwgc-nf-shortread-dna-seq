@@ -1,6 +1,6 @@
 process GATK_PRINT_READS {
 
-    tag "GATK_PRINT_READS_${sampleId}_${params.libraryId}_${params.userId}"
+    tag "GATK_PRINT_READS_${sampleId}_${params.userId}"
 
     publishDir "${publishDirectory}", mode: 'link', pattern: "${sampleId}.merged.matefixed.sorted.markeddups.recal.bam" 
     publishDir "${publishDirectory}", mode: 'link', pattern: "${sampleId}.merged.matefixed.sorted.markeddups.recal.bam.bai"

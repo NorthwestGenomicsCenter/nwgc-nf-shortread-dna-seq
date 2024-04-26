@@ -2,7 +2,10 @@ process COLLECT_AND_PLOT {
 
     tag "COLLECT_AND_PLOT_${sampleId}${flowCellLaneLibraryString}_${userId}"
 
-    publishDir "${publishDirectory}/qcPlots", mode: 'link'
+    publishDir "${publishDirectory}", mode: 'link', pattern: "qcPlots/${sampleId}${flowCellLaneLibraryString}.qcSummaryPlots.v4.png"
+    publishDir "${publishDirectory}", mode: 'link', pattern: "qcFiles/${sampleId}${flowCellLaneLibraryString}.readSummary.txt", saveAs: {"${sampleId}${flowCellLaneLibraryString}.readSummary.txt"}
+    publishDir "${publishDirectory}", mode: 'link', pattern: "qcFiles/${sampleId}${flowCellLaneLibraryString}.q20sByChrom.txt", saveAs: {"${sampleId}${flowCellLaneLibraryString}.q20sByChrom.txt"}
+    publishDir "${publishDirectory}", mode: 'link', pattern: "qcFiles/${sampleId}${flowCellLaneLibraryString}.MIN20.corrected.wgs_metrics.txt", saveAs: {"${sampleId}${flowCellLaneLibraryString}.BASEQ20.MAPQ20.corrected.wgs_metrics.txt"}
  
     input:
         tuple path(alignment_summary_metrics), path(base_distribution_by_cycle), path(gc_bias_metrics), path(gc_bias_summary_metrics), path(insert_size_metrics), path(quality_yield_metrics)
@@ -16,6 +19,9 @@ process COLLECT_AND_PLOT {
 
     output:
         path "qcPlots/*"
+        path "qcFiles/${sampleId}${flowCellLaneLibraryString}.readSummary.txt"
+        path "qcFiles/${sampleId}${flowCellLaneLibraryString}.q20sByChrom.txt"
+        path "qcFiles/${sampleId}${flowCellLaneLibraryString}.MIN20.corrected.wgs_metrics.txt"
         path "versions.yaml", emit: versions
 
     script:

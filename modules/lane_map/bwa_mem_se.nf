@@ -15,11 +15,7 @@ process BWA_MEM_SE {
 
     script:
         def threads = task.cpus / 2
-
-        String tmpDir = "tmp"
-        
         """
-        mkdir ${tmpDir}
         bwa mem -t ${task.cpus} \
 				${memOpts} \
 				-R ${readGroup} \
@@ -29,7 +25,6 @@ process BWA_MEM_SE {
         samtools view -Sbhu - | \
         sambamba sort \
                 -t ${task.cpus} \
-                --tmpdir ${tmpDir} \
                 -o ${flowCell}.${lane}.${library}.matefixed.sorted.bam \
                 /dev/stdin
         """

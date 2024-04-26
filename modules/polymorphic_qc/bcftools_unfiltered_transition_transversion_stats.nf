@@ -1,6 +1,6 @@
 process BCFTOOLS_UNFILTERED_TRANSITION_TRANSVERSION_STATS {
 
-    label "BCFTOOLS_UNFILTERED_TRANSITION_TRANSVERSION_STATS_${params.sampleId}_${params.userId}"
+    tag "BCFTOOLS_UNFILTERED_TRANSITION_TRANSVERSION_STATS_${params.sampleId}_${params.userId}"
 
     publishDir "${params.samplePolymorphicQCDirectory}", mode: 'link', pattern: "${params.sampleId}.transition_transversion.txt"
 

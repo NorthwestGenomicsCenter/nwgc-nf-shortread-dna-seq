@@ -1,6 +1,6 @@
 process GATK_BASE_RECALIBRATOR {
 
-    tag "GATK_BASE_RECALIBRATOR${sampleId}_${params.libraryId}_${params.userId}"
+    tag "GATK_BASE_RECALIBRATOR_${sampleId}_${params.userId}"
 
     input:
         path bam

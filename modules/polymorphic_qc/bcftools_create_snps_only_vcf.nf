@@ -1,6 +1,6 @@
 process BCFTOOLS_CREATE_SNPS_ONLY_VCF {
 
-    label "BCFTOOLS_CREATE_SNPS_ONLY_VCF_${params.sampleId}_${params.userId}"
+    tag "BCFTOOLS_CREATE_SNPS_ONLY_VCF_${params.sampleId}_${params.userId}"
 
     publishDir "${params.samplePolymorphicQCDirectory}", mode: 'link', pattern: "${params.sampleId}.merged.matefixed.sorted.markeddups.recal.filtered.snps.vcf"
 

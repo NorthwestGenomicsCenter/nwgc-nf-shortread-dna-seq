@@ -1,6 +1,6 @@
 process BCFTOOLS_GVCF_TO_VCF {
 
-    label "BCFTOOLS_GVCF_TO_VCF_${params.sampleId}_${params.userId}"
+    tag "BCFTOOLS_GVCF_TO_VCF_${params.sampleId}_${params.userId}"
 
     input:
         path filtered_gvcf

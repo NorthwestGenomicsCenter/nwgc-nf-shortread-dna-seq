@@ -18,8 +18,6 @@ process BWA_MEM_PE {
         String tmpDir = "tmp"
         
         """
-        mkdir ${tmpDir}
-
         bwa mem -t ${task.cpus} \
 				${memOpts} \
 				-R ${readGroup} \
@@ -30,7 +28,6 @@ process BWA_MEM_PE {
         samtools view -Sbhu - | \
         sambamba sort \
                 -t ${task.cpus} \
-                --tmpdir ${tmpDir} \
                 -o ${flowCell}.${lane}.${library}.matefixed.sorted.bam \
                 /dev/stdin
         """
