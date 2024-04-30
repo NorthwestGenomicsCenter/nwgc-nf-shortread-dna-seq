@@ -5,7 +5,7 @@ process COLLECT_AND_PLOT {
     publishDir "${publishDirectory}", mode: 'link', pattern: "qcPlots/${sampleId}${flowCellLaneLibraryString}.qcSummaryPlots.v4.png"
     publishDir "${publishDirectory}", mode: 'link', pattern: "qcFiles/${sampleId}${flowCellLaneLibraryString}.readSummary.txt", saveAs: {"${sampleId}${flowCellLaneLibraryString}.readSummary.txt"}
     publishDir "${publishDirectory}", mode: 'link', pattern: "qcFiles/${sampleId}${flowCellLaneLibraryString}.q20sByChrom.txt", saveAs: {"${sampleId}${flowCellLaneLibraryString}.q20sByChrom.txt"}
-    publishDir "${publishDirectory}", mode: 'link', pattern: "qcFiles/${sampleId}${flowCellLaneLibraryString}.MIN20.corrected.wgs_metrics.txt", saveAs: {"${sampleId}${flowCellLaneLibraryString}.BASEQ20.MAPQ20.corrected.wgs_metrics.txt"}
+    publishDir "${publishDirectory}", mode: 'link', pattern: "qcFiles/${sampleId}${flowCellLaneLibraryString}.MIN20.corrected.wgs_metrics.txt", saveAs: {"${sampleId}${flowCellLaneLibraryString}.BASEQ20.MAPQ20.corrected.picard.coverage.txt"}
  
     input:
         tuple path(alignment_summary_metrics), path(base_distribution_by_cycle), path(gc_bias_metrics), path(gc_bias_summary_metrics), path(insert_size_metrics), path(quality_yield_metrics)
