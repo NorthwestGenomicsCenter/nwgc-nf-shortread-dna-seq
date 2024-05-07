@@ -64,6 +64,7 @@ flowCellLaneLibraries:
     readLength: "<The read length for the given fastq files>"
     readType: "<The read type for the given fastq files>" # Optional input defaulted to PE (Paired End). Can be overriden to SR or SE (Single Read/ End).
     sequencingPlatform: "<sequencing platform of the flow cell>"
+  # Continue for all sample flowcell lane libraries
 
 # Bams  - Bam files that have been mapped (to merge together) 
 mappedBams:
@@ -87,5 +88,10 @@ mergedBam: "<full path to a merged bam that contains nm tags>"
 filteredGVCF: "<full path to a filtered_gvcf file>" # e.g. /net/nwgc/vol1/home/kolart/
 
 # Optional (Already defaulted in nextflow.config file to organism=Homo sapiens, isGRC38=false)
+# Pipeline runs alls steps by default which is ["mapping", "mapping_qc", "merging", "qc", "variant_calling", "polymorphic_qc"]
+# QC is defaulted to all steps which is ["coverage", "coverage_by_chrom", "contamination", "fingerprint", "picard_multiple_metrics", "samtools_flagstat", "samtools_stats", "collect_and_plot"]
 organism: "<species other than Homo sapiens>"  # e.g. organism: "Mus musculus"
 isGRC38: "<true if grc38>"                     # e.g. isGRC38: true
+pipelineStepsToRun: "[list of pipeline steps to run]"         # e.g ["merging", "qc", "variant_calling"]
+qcToRunCustom: "[list of qc steps to run on the merged bam]"  # e.g ["coverage", "contamination", "picard_multiple_metrics", "samtools_flagstat", "samtools_stats"]
+qcToRunMapping: "[list of qc steps to run on each mapped bam]"

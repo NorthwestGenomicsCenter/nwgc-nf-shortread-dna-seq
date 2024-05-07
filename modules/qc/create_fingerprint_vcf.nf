@@ -8,8 +8,8 @@ process CREATE_FINGERPRINT_VCF {
     input:
         tuple path(bam), path(bai), val(sampleId), val(flowCellLaneLibrary), val(userId), val(publishDirectory)
         tuple val(isGRC38), val(referenceGenome)
-        path dbSnp
-        path fingerprintBed
+        val dbSnp
+        val fingerprintBed
 
     output:
         path "*.fingerprint.vcf.gz", emit: vcf
