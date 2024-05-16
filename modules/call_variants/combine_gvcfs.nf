@@ -19,7 +19,6 @@ process COMBINE_GVCFS {
 
     script:
         def taskMemoryString = "$task.memory"
-        def javaMemory = taskMemoryString.substring(0, taskMemoryString.length() - 1).replaceAll("\\s","")
 
         def gvcfsToCombine = ""
         def gvcfPrefix = " -V "
@@ -61,7 +60,9 @@ process COMBINE_GVCFS {
 
         """
         echo $gvcfList
-        java "-Xmx$javaMemory" \
+        java \
+            -XX:InitialRAMPercentage=80 \
+            -XX:MaxRAMPercentage=85 \
             -cp \$MOD_GSGATK_DIR/GenomeAnalysisTK.jar \
             org.broadinstitute.gatk.tools.CatVariants \
             -R $referenceGenome \

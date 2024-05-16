@@ -14,10 +14,11 @@ process ANNOTATE_VARIANTS {
 
     script:
         def taskMemoryString = "$task.memory"
-        def javaMemory = taskMemoryString.substring(0, taskMemoryString.length() - 1).replaceAll("\\s","")
 
         """
-        java "-Xmx$javaMemory" \
+        java \
+            -XX:InitialRAMPercentage=80 \
+            -XX:MaxRAMPercentage=85 \
             -jar \$MOD_GSGATK_DIR/GenomeAnalysisTK.jar \
             -T VariantAnnotator \
             -R $referenceGenome \

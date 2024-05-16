@@ -7,11 +7,15 @@ userId: "<samplify userId>"  # e.g. userid: "kolart"
 userEmail: "<userEmail>"     # e.g. userEmail: "kolart@uw.edu"
 
 # Sample
-sampleDirectory: "<full path to sample directory>"                  # e.g. sampleDirectory: "/net/nwgc/vol1/data/processed/samples/123456/WHOLE_GENOME"
-sampleQCDirectory: "<full path to sample QC directory>"             # e.g. sampleQCDirectory: "/net/nwgc/vol1/data/processed/samples/123456/WHOLE_GENOME/qc"
-samplePolymorphicQCDirectory: "<full path to sample QC directory>"  # e.g. samplePolymorphicQCDirectory: "/net/nwgc/vol1/data/processed/samples/123456/WHOLE_GENOME/polymorphicQC"
-sampleId: "<samplify sampleId>"                                     # e.g  sampleId: 123456
-isNovaseqQCPool: "<true if sample is a Novaseq qc pool>"            # e.g. isNovaseqQCPool: true
+sampleDirectory: "<full path to sample directory>"                      # e.g. sampleDirectory: "/net/nwgc/vol1/data/processed/samples/123456/WHOLE_GENOME"
+sampleFastxQCDirectory: "<full path to fastx qc directory>"             # e.g. sampleFastxQCDirectory: "/net/nwgc/vol1/data/processed/samples/123456/fastqs/qc"
+sampleMappedBamsDirectory: "<full path to mapped bam output directory>" # e.g. sampleMappedBamsDirectory: "/net/nwgc/vol1/data/processed/samples/123456/mappedBams"
+sampleMappingQCDirectory: "<full path to mapping qc directory>"         # e.g. sampleMappingQCDirectory: "/net/nwgc/vol1/data/processed/samples/123456/mappedBams/qc"
+sampleQCDirectory: "<full path to sample QC directory>"                 # e.g. sampleQCDirectory: "/net/nwgc/vol1/data/processed/samples/123456/WHOLE_GENOME/qc"
+samplePolymorphicQCDirectory: "<full path to sample QC directory>"      # e.g. samplePolymorphicQCDirectory: "/net/nwgc/vol1/data/processed/samples/123456/WHOLE_GENOME/polymorphicQC"
+sampleId: "<samplify sampleId>"                                         # e.g  sampleId: 123456
+isNovaseqQCPool: <true if sample is a Novaseq qc pool>                  # e.g. isNovaseqQCPool: true
+novaseqQCPoolPlexity: <number of samples in the Novaseq qc pool>        # e.g. novaseqQCPoolPlexity: 100
 
 # Target
 sequencingTarget: "<name of sequencing target>"                      # e.g. sequencingTarget: "nimblegen_solution_V2refseq_2010"
@@ -28,6 +32,8 @@ dbSnp: "<full path to dbSnp file>"                              # e.g. dbSnp: "/
 goldStandardIndels: "<full path to gold standard indels file>"  # e.g. goldStandardIndels: "/net/nwgc/vol1/references/human/grc38/genome/assembly_bwa_0.7.15/Mills_and_1000G_gold_standard.indels.hg38.vcf"
 knownIndels: "<full path to known indels file>"                 # e.g. knownIndels: "/net/nwgc/vol1/references/human/rc38/genome/assembly_bwa_0.7.15/Homo_sapiens_assembly38.known_indels.vcf"
 referenceAbbr: "<reference genome abbreviation>"                # e.g. referenceAbbr: "grc38"
+# Fingerprint
+fingerprintBedFile:	"<full path to fingerprint bed file>"			# e.g. fingerprintBed: "/net/nwgc/vol1/references/human/grc38/targets/fingerprint_grc38_open_array.bed"
 
 # Contamination
   # Leave null to use default file path 
@@ -38,11 +44,9 @@ contaminationMeanPath: "<full path to contamination Mean file>" # e.g. contamina
 isCustomContaminationTargetSample: "<true or false based on if the sample has a custom contamination target>" #e.g. isCustomTargetContaminationSample: true
 customContaminationTargetReferenceVCF: "<full path to VCF file for a custom contamination target>"            #e.g. customTargetContaminationReferenceVCF: "/net/nwgc/vol1/references/human/hg19/snps/verifyBamId/hapmap_3.3.b37.sites.vcf"
 
-# Fingerprint
-fingerprintBedFile:	"<full path to fingerprint bed file>"			# e.g. fingerprintBed: "/net/nwgc/vol1/references/human/grc38/targets/fingerprint_grc38_open_array.bed"
-
 
 # Semi optional input files. Each yaml should have exactly one of mappedBams, mergedBam, or filteredGVCF depending on the portion of the pipeline meant to run.
+# Each is null by default
 
 # LibraryInfo - List of fastq files that need mapping and associated (optional) read group info
 flowCellLaneLibraries:
@@ -88,7 +92,7 @@ mergedBam: "<full path to a merged bam that contains nm tags>"
 filteredGVCF: "<full path to a filtered_gvcf file>" # e.g. /net/nwgc/vol1/home/kolart/
 
 # Optional (Already defaulted in nextflow.config file to organism=Homo sapiens, isGRC38=false)
-# Pipeline runs alls steps by default which is ["mapping", "mapping_qc", "merging", "qc", "variant_calling", "polymorphic_qc"]
+# Pipeline runs alls steps by default which is ["fastx_qc", "mapping", "mapping_qc", "merging", "qc", "variant_calling", "polymorphic_qc"]
 # QC is defaulted to all steps which is ["coverage", "coverage_by_chrom", "contamination", "fingerprint", "picard_multiple_metrics", "samtools_flagstat", "samtools_stats", "collect_and_plot"]
 organism: "<species other than Homo sapiens>"  # e.g. organism: "Mus musculus"
 isGRC38: "<true if grc38>"                     # e.g. isGRC38: true

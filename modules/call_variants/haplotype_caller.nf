@@ -13,11 +13,10 @@ process HAPLOTYPE_CALLER {
 
     script:
         def taskMemoryString = "$task.memory"
-        def javaMemory = taskMemoryString.substring(0, taskMemoryString.length() - 1).replaceAll("\\s","")
 
         """
         gatk \
-            --java-options "-Xmx$javaMemory" \
+            --java-options "-XX:InitialRAMPercentage=80 -XX:MaxRAMPercentage=85" \
             HaplotypeCaller \
             -R $referenceGenome \
             -I $bam \

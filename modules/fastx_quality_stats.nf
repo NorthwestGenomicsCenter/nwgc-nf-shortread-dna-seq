@@ -6,7 +6,7 @@ process FASTX_QC {
  
     input:
         tuple path(fastq), val(publishDirectory)
-        tuple val(sampleId), val(sampleDirectory), val(userId)
+        tuple val(sampleId), val(userId)
 
     output:
         env FASTQ_BASENAME, emit: fastqBasename

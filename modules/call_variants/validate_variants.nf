@@ -28,7 +28,9 @@ process VALIDATE_VARIANTS {
         }
 
         """
-        java "-Xmx$javaMemory" \
+        java \
+            -XX:InitialRAMPercentage=80 \
+            -XX:MaxRAMPercentage=85 \
             -jar \$MOD_GSGATK_DIR/GenomeAnalysisTK.jar \
             -T ValidateVariants \
             -R $referenceGenome \

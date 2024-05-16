@@ -4,8 +4,27 @@ include { SHORTREAD_QC as MAPPING_QC } from './workflows/qc.nf' params (qcToRun:
 include { CALL_VARIANTS } from './workflows/call_variants.nf'
 include { POLYMORPHIC_QC } from './workflows/polymorphic_qc.nf'
 include { LANE_MAP } from './workflows/lane_map.nf'
+include { FASTX_QC } from "../modules/fastx_quality_stats.nf"
 
 workflow {
+
+    // ******************
+    // **** Fastx QC ****
+    // ******************
+    if (params.pipelineStepsToRun.contains("fastx_qc")) {
+        Channel.fromList(params.flowCellLaneLibraries)
+        | multiMap { 
+            def flowCellLaneLibrary -> 
+            fastq1Tuple: [flowCellLaneLibrary.fastq1, params.sampleFastxQCDirectory]
+            fastq2Tuple: [flowCellLaneLibrary.fastq2, params.sampleFastxQCDirectory]
+        }
+        | mix
+        | set { ch_fastqs }
+
+        Channel.value([params.sampleId, params.userId])
+        | set { ch_sampleFastxQCInfo }
+        FASTX_QC(ch_fastqs, ch_sampleFastxQCInfo)
+    }
 
     // *****************
     // **** Mapping ****
@@ -14,17 +33,17 @@ workflow {
     if (params.pipelineStepsToRun.contains("mapping")) {
 
         Channel.fromList(params.flowCellLaneLibraries)
-        | map { flowCellLaneLibrary -> 
+        | map { def flowCellLaneLibrary -> 
                     def readGroup = Utils.defineReadGroup(params.sequencingCenter, params.sequencingPlatform, params.sampleId, flowCellLaneLibrary)
                     def readType = flowCellLaneLibrary.readType ? flowCellLaneLibrary.readType : params.readType
 
                     [flowCellLaneLibrary.fastq1, flowCellLaneLibrary.fastq2, flowCellLaneLibrary.flowCell, flowCellLaneLibrary.lane, flowCellLaneLibrary.library, 
-                    params.userId, readGroup, flowCellLaneLibrary.readLength, readType, params.sampleDirectory + "/mapped_bams/${flowCellLaneLibrary.library}"] 
+                    params.userId, readGroup, flowCellLaneLibrary.readLength, readType, params.sampleMappedBamsDirectory + "/${flowCellLaneLibrary.flowCell}.${flowCellLaneLibrary.lane}.${flowCellLaneLibrary.library}"] 
                 }
         | set { ch_fastq_info }
         ch_fastq_info | view
 
-        LANE_MAP(ch_fastq_info, params.sampleId, params.sampleDirectory, params.userId, params.isNovaseqQCPool, params.referenceGenome)
+        LANE_MAP(ch_fastq_info, params.isNovaseqQCPool, params.novaseqQCPoolPlexity, params.referenceGenome)
         ch_mappedBams = ch_mappedBams.mix(LANE_MAP.out.mappedBams)
     }
 
@@ -46,10 +65,10 @@ workflow {
     // Run Mapping QC
     if (params.pipelineStepsToRun.contains('mapping_qc')) {
         ch_mappedBams 
-        | map({ bam, bai, flowCell, lane, library -> [bam, bai, params.sampleId, "${flowCell}.${lane}.${library}", params.userId, params.sampleDirectory + "/mapping_qc/"] })
+        | map({ bam, bai, flowCell, lane, library -> [bam, bai, params.sampleId, "${flowCell}.${lane}.${library}", params.userId, params.sampleMappingQCDirectory] })
         | set { ch_mappingQcBams }
 
-        MAPPING_QC(ch_mappingQcBams, ch_referenceInfo, qcSampleInfoMap, params.sampleDirectory + "/mapping_qc/")
+        MAPPING_QC(ch_mappingQcBams, ch_referenceInfo, qcSampleInfoMap, params.sampleMappingQCDirectory)
     }
 
     // *****************
@@ -59,7 +78,7 @@ workflow {
         ch_mappedBams
         | map { bam, bai, flowCell, lane, library -> bam }
         | set { ch_mappedBamsForMerge }
-        MERGE_MAPPED_BAMS(ch_mappedBamsForMerge, params.sampleId, params.sequencingTarget, params.organism, params.isGRC38, params.dbSnp, params.goldStandardIndels, params.knownIndels, params.referenceGenome, params.sampleDirectory + '/merged_bam/')
+        MERGE_MAPPED_BAMS(ch_mappedBamsForMerge, params.sampleId, params.sequencingTarget, params.organism, params.isGRC38, params.dbSnp, params.goldStandardIndels, params.knownIndels, params.referenceGenome, params.sampleDirectory)
         ch_mergedBam = MERGE_MAPPED_BAMS.out.bam
     }
     else {
@@ -84,7 +103,7 @@ workflow {
     if (params.pipelineStepsToRun.contains("variant_calling")) {
         def variantCallingSampleInfoMap = params.subMap(
             "sampleId", "userId", "sequencingTarget", "targetListFile", "referenceGenome", "dbSnp", "organism"
-        ) + [publishDirectory: params.sampleDirectory + "/gvcfs/"]
+        ) + [publishDirectory: params.sampleDirectory]
 
         def chromosomesToCall = params.isGRC38 ? params.grc38Chromosomes : params.hg19Chromosomes
         if (!params.organism.equals("Homo sapiens")) {
