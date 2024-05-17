@@ -4,7 +4,7 @@ include { SHORTREAD_QC as MAPPING_QC } from './workflows/qc.nf' params (qcToRun:
 include { CALL_VARIANTS } from './workflows/call_variants.nf'
 include { POLYMORPHIC_QC } from './workflows/polymorphic_qc.nf'
 include { LANE_MAP } from './workflows/lane_map.nf'
-include { FASTX_QC } from "../modules/fastx_quality_stats.nf"
+include { FASTX_QC } from "./modules/fastx_quality_stats.nf"
 
 workflow {
 
