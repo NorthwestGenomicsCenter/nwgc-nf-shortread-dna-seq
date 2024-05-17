@@ -61,8 +61,8 @@ process COMBINE_GVCFS {
         """
         echo $gvcfList
         java \
-            -XX:InitialRAMPercentage=80 \
-            -XX:MaxRAMPercentage=85 \
+            -XX:InitialRAMPercentage=80.0 \
+            -XX:MaxRAMPercentage=85.0 \
             -cp \$MOD_GSGATK_DIR/GenomeAnalysisTK.jar \
             org.broadinstitute.gatk.tools.CatVariants \
             -R $referenceGenome \

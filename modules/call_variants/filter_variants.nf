@@ -17,8 +17,8 @@ process FILTER_VARIANTS {
 
         """
         java \
-            -XX:InitialRAMPercentage=80 \
-            -XX:MaxRAMPercentage=85 \
+            -XX:InitialRAMPercentage=80.0 \
+            -XX:MaxRAMPercentage=85.0 \
             -jar \$MOD_GSGATK_DIR/GenomeAnalysisTK.jar \
             -T VariantFiltration \
             -R $referenceGenome \
