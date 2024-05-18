@@ -22,9 +22,9 @@ process VERIFY_BAM_ID {
             refVersion = 'b38'
         }
 
-        def udPath = (contaminationUDPath != 'null' && contaminationUDPath != null) ? contaminationUDPath : "\$MOD_GSVERIFYBAMID_DIR/resource/1000g.100k.${refVersion}.vcf.gz.dat.UD"
-        def bedPath = (contaminationBedPath != 'null' && contaminationBedPath != null) ? contaminationBedPath : "\$MOD_GSVERIFYBAMID_DIR/resource/1000g.100k.${refVersion}.vcf.gz.dat.bed"
-        def meanPath = (contaminationMeanPath != 'null' && contaminationMeanPath != null) ? contaminationMeanPath : "\$MOD_GSVERIFYBAMID_DIR/resource/1000g.100k.${refVersion}.vcf.gz.dat.mu"
+        def udPath = (contaminationUDPath != 'null' && contaminationUDPath != null) ? contaminationUDPath : "\$MOD_GSVERIFYBAMID_DIR/resource/1000g.phase3.100k.${refVersion}.vcf.gz.dat.UD"
+        def bedPath = (contaminationBedPath != 'null' && contaminationBedPath != null) ? contaminationBedPath : "\$MOD_GSVERIFYBAMID_DIR/resource/1000g.phase3.100k.${refVersion}.vcf.gz.dat.bed"
+        def meanPath = (contaminationMeanPath != 'null' && contaminationMeanPath != null) ? contaminationMeanPath : "\$MOD_GSVERIFYBAMID_DIR/resource/1000g.phase3.100k.${refVersion}.vcf.gz.dat.mu"
 
         flowCellLaneLibraryString = ""
         if (flowCellLaneLibrary != null) {
