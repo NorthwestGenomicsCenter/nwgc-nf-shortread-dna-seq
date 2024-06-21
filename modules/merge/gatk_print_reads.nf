@@ -2,8 +2,10 @@ process GATK_PRINT_READS {
 
     tag "GATK_PRINT_READS_${sampleId}_${params.userId}"
 
-    publishDir "${publishDirectory}", mode: 'link', pattern: "${sampleId}.merged.matefixed.sorted.markeddups.recal.bam" 
-    publishDir "${publishDirectory}", mode: 'link', pattern: "${sampleId}.merged.matefixed.sorted.markeddups.recal.bam.bai"
+    publishDir "${publishDirectory}", mode: 'link', pattern: "${sampleId}.${sequencingTarget}.merged.bam" 
+    publishDir "${publishDirectory}", mode: 'link', pattern: "${sampleId}.${sequencingTarget}.merged.bam.bai"
+    publishDir "${publishDirectory}", mode: 'link', pattern: "${sampleId}.${sequencingTarget}.merged.bam.md5sum" 
+    publishDir "${publishDirectory}", mode: 'link', pattern: "${sampleId}.${sequencingTarget}.merged.bam.bai.md5sum"
 
     input:
         path bam
@@ -15,7 +17,9 @@ process GATK_PRINT_READS {
         val publishDirectory
 
     output:
-        tuple path("${sampleId}.merged.matefixed.sorted.markeddups.recal.bam"), path("${sampleId}.merged.matefixed.sorted.markeddups.recal.bam.bai"), emit: bamBai
+        tuple path("${sampleId}.${sequencingTarget}.merged.bam"), path("${sampleId}.${sequencingTarget}.merged.bam.bai"), emit: bamBai
+        path "${sampleId}.${sequencingTarget}.merged.bam.md5sum"
+        path "${sampleId}.${sequencingTarget}.merged.bam.bai.md5sum"
         path "versions.yaml", emit: versions
 
     script:
@@ -33,11 +37,14 @@ process GATK_PRINT_READS {
             -R ${referenceGenome} \
             --disable_indel_quals \
             -I ${bam} \
-            --out ${sampleId}.merged.matefixed.sorted.markeddups.recal.bam \
+            --out ${sampleId}.${sequencingTarget}.merged.bam \
             ${sqq} \
             -BQSR ${sampleId}.recal.matrix
 
-        mv ${sampleId}.merged.matefixed.sorted.markeddups.recal.bai ${sampleId}.merged.matefixed.sorted.markeddups.recal.bam.bai
+        mv ${sampleId}.${sequencingTarget}.merged.bai ${sampleId}.${sequencingTarget}.merged.bam.bai
+
+        md5sum ${sampleId}.${sequencingTarget}.merged.bam | awk '{print \$1}' > ${sampleId}.${sequencingTarget}.merged.bam.md5sum
+        md5sum ${sampleId}.${sequencingTarget}.merged.bam.bai | awk '{print \$1}' > ${sampleId}.${sequencingTarget}.merged.bam.bai.md5sum
 
         cat <<-END_VERSIONS > versions.yaml
         '${task.process}':

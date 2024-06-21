@@ -5,6 +5,7 @@ process COMBINE_GVCFS {
     publishDir "${publishDirectory}", mode:  'link', pattern: "combined.g.vcf.gz", saveAs: {s-> "${sampleId}.${sequencingTarget}.${gvcf_type}.g.vcf.gz"}
     publishDir "${publishDirectory}", mode:  'link', pattern: "combined.g.vcf.gz.tbi", saveAs: {s-> "${sampleId}.${sequencingTarget}.${gvcf_type}.g.vcf.gz.tbi"}
     publishDir "${publishDirectory}", mode:  'link', pattern: "combined.g.vcf.gz.md5sum", saveAs: {s-> "${sampleId}.${sequencingTarget}.${gvcf_type}.g.vcf.gz.md5sum"}
+    publishDir "${publishDirectory}", mode:  'link', pattern: "combined.g.vcf.gz.md5sum", saveAs: {s-> "${sampleId}.${sequencingTarget}.${gvcf_type}.g.vcf.gz.tbi.md5sum"}
 
     input:
         val gvcf_type
@@ -14,7 +15,8 @@ process COMBINE_GVCFS {
     output:
         path "combined.g.vcf.gz",  emit: gvcf
         path "combined.g.vcf.gz.tbi",  emit: tbi
-        path "combined.g.vcf.gz.md5sum",  emit: sum
+        path "combined.g.vcf.gz.md5sum",  emit: gvcf_md5
+        path "combined.g.vcf.gz.tbi.md5sum",  emit: tbi_md5
         path "versions.yaml", emit: versions
 
     script:
@@ -75,6 +77,7 @@ process COMBINE_GVCFS {
         tabix -f combined.g.vcf.gz
 
         md5sum combined.g.vcf.gz | awk '{print \$1}' > combined.g.vcf.gz.md5sum
+        md5sum combined.g.vcf.gz.tbi | awk '{print \$1}' > combined.g.vcf.gz.tbi.md5sum
 
         cat <<-END_VERSIONS > versions.yaml
         '${task.process}':

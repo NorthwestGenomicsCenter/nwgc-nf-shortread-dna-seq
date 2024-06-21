@@ -55,7 +55,7 @@ workflow CALL_VARIANTS {
         // Versions
         ch_versions = ch_versions.mix(CALL_ANNOTATE_FILTER.out.versions)
         ch_versions = ch_versions.mix(COMBINE_GVCFS.out.versions)
-        ch_versions = ch_versions.mix(COMBINE_FILTERED_GVCFS.out.gvcf)
+        ch_versions = ch_versions.mix(COMBINE_FILTERED_GVCFS.out.versions)
         ch_versions.unique().collectFile(name: 'call_variants_software_versions.yaml', storeDir: "${params.sampleDirectory}")
 
     emit:
