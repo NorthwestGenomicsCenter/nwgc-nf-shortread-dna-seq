@@ -8,7 +8,7 @@ workflow LANE_MAP {
 
     take:
         // Queue Channel containing tuples of flowCell lane library information
-        // [fastq1, fastq2, flowCell, lane, library, userId, readGroup, readLength, readType, publishDirectory]
+        // [fastq1, fastq2, flowCell, lane, library, sampleId, userId, readGroup, readLength, readType, publishDirectory]
         ch_flowCellLaneLibraryTuple
 
         // Groovy objects

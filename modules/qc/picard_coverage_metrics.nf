@@ -1,18 +1,18 @@
 process PICARD_COVERAGE_METRICS {
 
-    tag "PICARD_COVERAGE_METRICS_${sampleId}${flowCellLaneLibraryString}${partOfSequencingTargetOutput}_${userId}"
+    tag "PICARD_COVERAGE_METRICS_${sampleId}${filePrefixString}${partOfSequencingTargetOutput}_${userId}"
 
-    publishDir "${publishDirectory}", mode: 'link', pattern: "${sampleId}${flowCellLaneLibraryString}.BASEQ${baseQuality}.MAPQ${mappingQuality}${partOfSequencingTargetOutput}.picard.coverage.txt"
+    publishDir "${publishDirectory}", mode: 'link', pattern: "${sampleId}${filePrefixString}.BASEQ${baseQuality}.MAPQ${mappingQuality}${partOfSequencingTargetOutput}.picard.coverage.txt"
  
     input:
-        tuple path(bam), path(bai), val(sampleId), val(flowCellLaneLibrary), val(userId), val(publishDirectory)
+        tuple path(bam), path(bai), val(sampleId), val(filePrefix), val(userId), val(publishDirectory)
         tuple val(isGRC38), val(referenceGenome)
         each baseQuality
         each mappingQuality
         each path(intervalsList)
 
     output:
-        tuple val(flowCellLaneLibrary), path("${sampleId}${flowCellLaneLibraryString}.BASEQ${baseQuality}.MAPQ${mappingQuality}${partOfSequencingTargetOutput}.picard.coverage.txt"), emit: metricsFile
+        tuple val(filePrefix), path("${sampleId}${filePrefixString}.BASEQ${baseQuality}.MAPQ${mappingQuality}${partOfSequencingTargetOutput}.picard.coverage.txt"), emit: metricsFile
         path "versions.yaml", emit: versions
 
     script:
@@ -23,9 +23,12 @@ process PICARD_COVERAGE_METRICS {
             partOfSequencingTargetOutput = ""
         }
 
-        flowCellLaneLibraryString = ""
-        if (flowCellLaneLibrary != null) {
-            flowCellLaneLibraryString = ".${flowCellLaneLibrary}"
+        filePrefixString = ""
+        if (filePrefix != null) {
+            filePrefixString = filePrefix
+        }
+        else {
+            filePrefixString = "${sampleId}"
         }
 
         """
@@ -43,7 +46,7 @@ process PICARD_COVERAGE_METRICS {
             --MINIMUM_MAPPING_QUALITY $mappingQuality \
             --INTERVALS $intervalsList \
             --COVERAGE_CAP 300000 \
-            --OUTPUT ${sampleId}${flowCellLaneLibraryString}.BASEQ${baseQuality}.MAPQ${mappingQuality}${partOfSequencingTargetOutput}.picard.coverage.txt
+            --OUTPUT ${sampleId}${filePrefixString}.BASEQ${baseQuality}.MAPQ${mappingQuality}${partOfSequencingTargetOutput}.picard.coverage.txt
 
         cat <<-END_VERSIONS > versions.yaml
         '${task.process}':

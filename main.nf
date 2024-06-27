@@ -37,7 +37,7 @@ workflow {
                     def readGroup = Utils.defineReadGroup(params.sequencingCenter, params.sequencingPlatform, params.sampleId, flowCellLaneLibrary)
                     def readType = flowCellLaneLibrary.readType ? flowCellLaneLibrary.readType : params.readType
 
-                    [flowCellLaneLibrary.fastq1, flowCellLaneLibrary.fastq2, flowCellLaneLibrary.flowCell, flowCellLaneLibrary.lane, flowCellLaneLibrary.library, 
+                    [flowCellLaneLibrary.fastq1, flowCellLaneLibrary.fastq2, flowCellLaneLibrary.flowCell, flowCellLaneLibrary.lane, flowCellLaneLibrary.library, params.sampleId,
                     params.userId, readGroup, flowCellLaneLibrary.readLength, readType, params.sampleMappedBamsDirectory + "/${flowCellLaneLibrary.flowCell}.${flowCellLaneLibrary.lane}.${flowCellLaneLibrary.library}"] 
                 }
         | set { ch_fastq_info }
@@ -65,7 +65,7 @@ workflow {
     // Run Mapping QC
     if (params.pipelineStepsToRun.contains('mapping_qc')) {
         ch_mappedBams 
-        | map({ bam, bai, flowCell, lane, library -> [bam, bai, params.sampleId, "${flowCell}.${lane}.${library}", params.userId, params.sampleMappingQCDirectory] })
+        | map({ bam, bai, flowCell, lane, library, sampleId -> [bam, bai, params.sampleId, "${flowCell}.${lane}.S${sampleId}.L${library}", params.userId, params.sampleMappingQCDirectory] })
         | set { ch_mappingQcBams }
 
         MAPPING_QC(ch_mappingQcBams, ch_referenceInfo, qcSampleInfoMap, params.sampleMappingQCDirectory)
@@ -91,7 +91,7 @@ workflow {
     // ************
     if (params.pipelineStepsToRun.contains("qc")) {
         // Sample information that qc needs to run
-        ch_bamInfo = ch_mergedBam.combine(Channel.of([params.sampleId, null, params.userId, params.sampleQCDirectory]))
+        ch_bamInfo = ch_mergedBam.combine(Channel.of([params.sampleId, "${params.sampleId}", params.userId, params.sampleQCDirectory]))
 
         MERGING_QC(ch_bamInfo, ch_referenceInfo, qcSampleInfoMap, params.sampleQCDirectory)
     }

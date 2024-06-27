@@ -3,12 +3,12 @@ process BWA_SAMPE {
     tag "BWA_SAMPE_${flowCell}_${lane}_${library}_${userId}"
     
     input:
-        tuple path(fastq1), path(fastq2), val(flowCell), val(lane), val(library), val(userId), val(readGroup), val(publishDirectory)
+        tuple path(fastq1), path(fastq2), val(flowCell), val(lane), val(library), val(sampleId), val(userId), val(readGroup), val(publishDirectory)
         val referenceGenome
 
 
     output:
-        tuple path("${flowCell}.${lane}.${library}.matefixed.sorted.bam"), val(flowCell), val(lane), val(library), val(userId), val(publishDirectory), emit: sampe
+        tuple path("${flowCell}.${lane}.S${sampleId}.L${library}.matefixed.sorted.bam"), val(flowCell), val(lane), val(library), val(sampleId), val(userId), val(publishDirectory), emit: sampe
 
     script:
         def threads = task.cpus / 2
@@ -25,7 +25,7 @@ process BWA_SAMPE {
         samtools view -Sbhu - | \
         sambamba sort \
                 -t ${task.cpus} \
-                -o ${flowCell}.${lane}.${library}.matefixed.sorted.bam \
+                -o ${flowCell}.${lane}.S${sampleId}.L${library}.matefixed.sorted.bam \
                 /dev/stdin
         """
 }

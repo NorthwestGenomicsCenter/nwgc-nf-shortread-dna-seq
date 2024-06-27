@@ -5,10 +5,10 @@ process PICARD_CLEAN_SAM {
     publishDir "${publishDirectory}", mode: "link", pattern: "${fileToClean}.bai"
 
     input:
-        tuple path(fileToClean), val(flowCell), val(lane), val(library), val(userId), val(publishDirectory)
+        tuple path(fileToClean), val(flowCell), val(lane), val(library), val(sampleId), val(userId), val(publishDirectory)
 
     output:
-        tuple path("${fileToClean}"), path("${fileToClean}.bai"), val(flowCell), val(lane), val(library), emit: mappedBam
+        tuple path("${fileToClean}"), path("${fileToClean}.bai"), val(flowCell), val(lane), val(library), val(sampleId) emit: mappedBam
 
     script:
 

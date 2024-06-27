@@ -1,12 +1,12 @@
 process CREATE_FINGERPRINT_VCF {
 
-    tag "CREATE_FINGERPRINT_VCF_${sampleId}${flowCellLaneLibraryString}_${userId}"
+    tag "CREATE_FINGERPRINT_VCF_${sampleId}${filePrefixString}_${userId}"
 
     publishDir "${publishDirectory}", mode: 'link', pattern: '*.fingerprint.vcf.gz'
     publishDir "${publishDirectory}", mode: 'link', pattern: '*.fingerprint.vcf.gz.tbi'
  
     input:
-        tuple path(bam), path(bai), val(sampleId), val(flowCellLaneLibrary), val(userId), val(publishDirectory)
+        tuple path(bam), path(bai), val(sampleId), val(filePrefix), val(userId), val(publishDirectory)
         tuple val(isGRC38), val(referenceGenome)
         val dbSnp
         val fingerprintBed
@@ -17,9 +17,12 @@ process CREATE_FINGERPRINT_VCF {
         path "versions.yaml", emit: versions
 
     script:
-        flowCellLaneLibraryString = ""
-        if (flowCellLaneLibrary != null) {
-            flowCellLaneLibraryString = ".${flowCellLaneLibrary}"
+        filePrefixString = ""
+        if (filePrefix != null) {
+            filePrefixString = filePrefix
+        }
+        else {
+            filePrefixString = "${sampleId}"
         }
 
         """
@@ -36,7 +39,7 @@ process CREATE_FINGERPRINT_VCF {
             -G StandardAnnotation \
             -pairHMM AVX_LOGLESS_CACHING \
             -ERC GVCF \
-            --output ${sampleId}${flowCellLaneLibraryString}.fingerprint.g.vcf.gz
+            --output ${sampleId}${filePrefixString}.fingerprint.g.vcf.gz
 
         ## VCF File
         gatk \
@@ -44,8 +47,8 @@ process CREATE_FINGERPRINT_VCF {
             GenotypeGVCFs \
             -R $referenceGenome \
             -L $fingerprintBed \
-            --variant ${sampleId}${flowCellLaneLibraryString}.fingerprint.g.vcf.gz \
-            -O ${sampleId}${flowCellLaneLibraryString}.fingerprint.vcf.gz \
+            --variant ${sampleId}${filePrefixString}.fingerprint.g.vcf.gz \
+            -O ${sampleId}${filePrefixString}.fingerprint.vcf.gz \
             --include-non-variant-sites
 
         cat <<-END_VERSIONS > versions.yaml

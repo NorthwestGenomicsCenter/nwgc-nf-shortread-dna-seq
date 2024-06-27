@@ -1,20 +1,23 @@
 process SAMTOOLS_FLAGSTAT {
 
-    tag "SAMTOOLS_FLAGSTAT_${sampleId}${flowCellLaneLibraryString}_${userId}"
+    tag "SAMTOOLS_FLAGSTAT_${sampleId}${filePrefixString}_${userId}"
 
-    publishDir "${publishDirectory}", mode: 'link', pattern: "${sampleId}${flowCellLaneLibraryString}.flagstat.output.txt"
+    publishDir "${publishDirectory}", mode: 'link', pattern: "${sampleId}${filePrefixString}.flagstat.output.txt"
 
     input:
-        tuple path(bam), path(bai), val(sampleId), val(flowCellLaneLibrary), val(userId), val(publishDirectory)
+        tuple path(bam), path(bai), val(sampleId), val(filePrefix), val(userId), val(publishDirectory)
 
     output:
-        tuple val(flowCellLaneLibrary), path("${sampleId}${flowCellLaneLibraryString}.flagstat.output.txt"), emit: flagstatFile
+        tuple val(filePrefix), path("${sampleId}${filePrefixString}.flagstat.output.txt"), emit: flagstatFile
         path "versions.yaml", emit: versions
 
     script:
-        flowCellLaneLibraryString = ""
-        if (flowCellLaneLibrary != null) {
-            flowCellLaneLibraryString = ".${flowCellLaneLibrary}"
+        filePrefixString = ""
+        if (filePrefix != null) {
+            filePrefixString = filePrefix
+        }
+        else {
+            filePrefixString = "${sampleId}"
         }
 
         """
@@ -24,7 +27,7 @@ process SAMTOOLS_FLAGSTAT {
             flagstat \
             $bam \
             -@ ${task.cpus} \
-            > ${sampleId}${flowCellLaneLibraryString}.flagstat.output.txt
+            > ${sampleId}${filePrefixString}.flagstat.output.txt
 
         cat <<-END_VERSIONS > versions.yaml
         '${task.process}':

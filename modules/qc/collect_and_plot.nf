@@ -1,11 +1,11 @@
 process COLLECT_AND_PLOT {
 
-    tag "COLLECT_AND_PLOT_${sampleId}${flowCellLaneLibraryString}_${userId}"
+    tag "COLLECT_AND_PLOT_${sampleId}${filePrefixString}_${userId}"
 
-    publishDir "${publishDirectory}", mode: 'link', pattern: "qcPlots/${sampleId}${flowCellLaneLibraryString}.qcSummaryPlots.v4.png"
-    publishDir "${publishDirectory}", mode: 'link', pattern: "qcFiles/${sampleId}${flowCellLaneLibraryString}.readSummary.txt", saveAs: {"${sampleId}${flowCellLaneLibraryString}.readSummary.txt"}
-    publishDir "${publishDirectory}", mode: 'link', pattern: "qcFiles/${sampleId}${flowCellLaneLibraryString}.q20sByChrom.txt", saveAs: {"${sampleId}${flowCellLaneLibraryString}.q20sByChrom.txt"}
-    publishDir "${publishDirectory}", mode: 'link', pattern: "qcFiles/${sampleId}${flowCellLaneLibraryString}.MIN20.corrected.wgs_metrics.txt", saveAs: {"${sampleId}${flowCellLaneLibraryString}.BASEQ20.MAPQ20.corrected.picard.coverage.txt"}
+    publishDir "${publishDirectory}", mode: 'link', pattern: "qcPlots/${sampleId}${filePrefixString}.qcSummaryPlots.v4.png"
+    publishDir "${publishDirectory}", mode: 'link', pattern: "qcFiles/${sampleId}${filePrefixString}.readSummary.txt", saveAs: {"${sampleId}${filePrefixString}.readSummary.txt"}
+    publishDir "${publishDirectory}", mode: 'link', pattern: "qcFiles/${sampleId}${filePrefixString}.q20sByChrom.txt", saveAs: {"${sampleId}${filePrefixString}.q20sByChrom.txt"}
+    publishDir "${publishDirectory}", mode: 'link', pattern: "qcFiles/${sampleId}${filePrefixString}.MIN20.corrected.wgs_metrics.txt", saveAs: {"${sampleId}${filePrefixString}.BASEQ20.MAPQ20.corrected.picard.coverage.txt"}
  
     input:
         tuple path(alignment_summary_metrics), path(base_distribution_by_cycle), path(gc_bias_metrics), path(gc_bias_summary_metrics), path(insert_size_metrics), path(quality_yield_metrics)
@@ -14,20 +14,23 @@ process COLLECT_AND_PLOT {
         path pcm_mapq
         path pcm_baseq_files
         path pcm_chrom_files
-        tuple path(bam), path(bai), val(sampleId), val(flowCellLaneLibrary), val(userId), val(publishDirectory)
+        tuple path(bam), path(bai), val(sampleId), val(filePrefix), val(userId), val(publishDirectory)
         path sequencingTargetBedFile
 
     output:
         path "qcPlots/*"
-        path "qcFiles/${sampleId}${flowCellLaneLibraryString}.readSummary.txt"
-        path "qcFiles/${sampleId}${flowCellLaneLibraryString}.q20sByChrom.txt"
-        path "qcFiles/${sampleId}${flowCellLaneLibraryString}.MIN20.corrected.wgs_metrics.txt"
+        path "qcFiles/${sampleId}${filePrefixString}.readSummary.txt"
+        path "qcFiles/${sampleId}${filePrefixString}.q20sByChrom.txt"
+        path "qcFiles/${sampleId}${filePrefixString}.MIN20.corrected.wgs_metrics.txt"
         path "versions.yaml", emit: versions
 
     script:
-        flowCellLaneLibraryString = ""
-        if (flowCellLaneLibrary != null) {
-            flowCellLaneLibraryString = ".${flowCellLaneLibrary}"
+        filePrefixString = ""
+        if (filePrefix != null) {
+            filePrefixString = filePrefix
+        }
+        else {
+            filePrefixString = "${sampleId}"
         }
         // Move the input files to ./qcFiles as required by the scripts.
         // Also rename files to expected name where appropriate.
@@ -47,7 +50,7 @@ process COLLECT_AND_PLOT {
                                  mv ${stats} qcFiles/
                                  
                                  # Picard coverage metrics custom mapping quality file
-                                 mv ${pcm_mapq} qcFiles/${sampleId}${flowCellLaneLibraryString}.MAPQ0.wgs_metrics.txt
+                                 mv ${pcm_mapq} qcFiles/${sampleId}${filePrefixString}.MAPQ0.wgs_metrics.txt
 
                                  # Picard coverage metrics custom base quality files
                                  for file in ${pcm_baseq_files}
@@ -55,7 +58,7 @@ process COLLECT_AND_PLOT {
                                     # Extract just the BaseQ number to use in the old file format
                                     tail="\${file##*.BASEQ}"
                                     baseQ="\${tail%.MAPQ*}"
-                                    mv \${file} qcFiles/${sampleId}${flowCellLaneLibraryString}.MIN\${baseQ}.wgs_metrics.txt
+                                    mv \${file} qcFiles/${sampleId}${filePrefixString}.MIN\${baseQ}.wgs_metrics.txt
                                  done
 
                                  # Picard coverage metrics by chromosome files
@@ -64,7 +67,7 @@ process COLLECT_AND_PLOT {
                                     # Extract just the chromosome number to use in the old file format
                                     tail="\${file##*MAPQ20.}"
                                     chr="\${tail%.picard*}"
-                                    mv \${file} qcFiles/${sampleId}${flowCellLaneLibraryString}.wgsMetrics.Q20.\${chr}.txt
+                                    mv \${file} qcFiles/${sampleId}${filePrefixString}.wgsMetrics.Q20.\${chr}.txt
                                  done
                                  """
 
@@ -75,8 +78,8 @@ process COLLECT_AND_PLOT {
         $createSoftLinks 
 
 
-        collect.qc.metrics.core.picard.2.18.10.pl ${sampleId}${flowCellLaneLibraryString} \${SCRIPT_DIR} ${sequencingTargetBedFile}
-        run_R_plotQC.v5.sh \${SCRIPT_DIR} ${sampleId}${flowCellLaneLibraryString}
+        collect.qc.metrics.core.picard.2.18.10.pl ${sampleId}${filePrefixString} \${SCRIPT_DIR} ${sequencingTargetBedFile}
+        run_R_plotQC.v5.sh \${SCRIPT_DIR} ${sampleId}${filePrefixString}
 
         cat <<-END_VERSIONS > versions.yaml
         '${task.process}':

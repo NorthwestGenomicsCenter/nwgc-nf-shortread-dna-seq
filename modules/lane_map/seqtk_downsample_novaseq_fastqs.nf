@@ -5,11 +5,11 @@ process SEQTK_DOWNSAMPLE_NOVASEQ_FASTQS {
 	publishDir "${publishDirectory}", mode: "link", pattern: "downsampled_${fastq2}"
 	
 	input:
-		tuple path(fastq1), path(fastq2), val(flowCell), val(lane), val(library), val(userId), val(readGroup), val(readLength), val(readType), val(publishDirectory)
+		tuple path(fastq1), path(fastq2), val(flowCell), val(lane), val(library), val(sampleId), val(userId), val(readGroup), val(readLength), val(readType), val(publishDirectory)
 		val novaseqQCDownsamplingAmount
 		
 	output:
-		tuple path("downsampled_${fastq1}"), path("downsampled_${fastq2}"), val(flowCell), val(lane), val(library), val(userId), val(readGroup), val(readLength), val(readType), val(publishDirectory), emit: flowCellLaneLibraryTuple
+		tuple path("downsampled_${fastq1}"), path("downsampled_${fastq2}"), val(flowCell), val(lane), val(library), val(sampleId), val(userId), val(readGroup), val(readLength), val(readType), val(publishDirectory), emit: flowCellLaneLibraryTuple
 	
 	script:
 		"""

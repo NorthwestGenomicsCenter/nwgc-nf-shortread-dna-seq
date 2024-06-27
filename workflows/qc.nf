@@ -26,8 +26,9 @@ workflow SHORTREAD_QC {
         // ***************************************
         // "Input" for the workflow
 
-        // (bam, bai, sample id, flowCell.lane.library, user id, publish directory)
-        // flowCell.lane.library is null when doing qc on a merged bam
+        // (bam, bai, sample id, file prefix, user id, publish directory)
+        // file prefix is FlowCell.Lane.S{sampleId}.L{library} when doing mapping QC
+        // file prefix is sampleId when doing merge
         ch_qcInputTuple
 
         // *************************************
@@ -142,13 +143,13 @@ workflow SHORTREAD_QC {
 
         // GENERATES A PLOT FOR EACH QC STEP (excluding contamination and vcf)
         if (params.qcToRun.contains("collect_and_plot")) {
-            // Collect output for each flowCell.lane.library where necessary
+            // Collect output for each flowCell.lane.S{sampleId}.L{library} where necessary
             PICARD_COVERAGE_METRICS_BASE_QUALITY.out.metricsFile.groupTuple(size: 4, sort: true) | set { ch_pcmBaseQGrouped }
             PICARD_COVERAGE_METRICS_BY_CHROMOSOME.out.metricsFile.groupTuple(size: 25) | set { ch_pcmChrGrouped }
 
-            // Map Channels from [flowCell.lane.library, file1, file2, ...] to [flowCell.lane.library, [file1, file2, ...]]
+            // Map Channels from [flowCell.lane.S{sampleId}.L{library}, file1, file2, ...] to [flowCell.lane.S{sampleId}.L{library}, [file1, file2, ...]]
             // Then Join them together
-            ch_qcInputTuple.map({[it[3], it]}) | set { ch_qcInputTupleFormatted } // flowCell.lane.library is the 3rd index of ch_qcInputTuple
+            ch_qcInputTuple.map({[it[3], it]}) | set { ch_qcInputTupleFormatted } // flowCell.lane.S{sampleId}.L{library} is the 3rd index of ch_qcInputTuple
             def filterFlowCellLaneLibrary = { fileTuple -> [fileTuple[0], fileTuple - fileTuple[0]] }
             
             PICARD_MULTIPLE_METRICS.out.metricsFiles.map(filterFlowCellLaneLibrary)

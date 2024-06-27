@@ -1,11 +1,11 @@
 process VERIFY_BAM_ID_CUSTOM_TARGET {
 
-    tag "VERIFY_BAM_ID_CUSTOM_TARGET_${sampleId}${flowCellLaneLibraryString}_${userId}"
+    tag "VERIFY_BAM_ID_CUSTOM_TARGET_${sampleId}${filePrefixString}_${userId}"
 
     publishDir "${publishDirectory}", mode: 'link', pattern: '*.VerifyBamId.selfSM'
 
     input:
-        tuple path(bam), path(bai), val(sampleId), val(flowCellLaneLibrary), val(userId), val(publishDirectory)
+        tuple path(bam), path(bai), val(sampleId), val(filePrefix), val(userId), val(publishDirectory)
         path customTargetContaminationReferenceVCF
 
     output:
@@ -14,9 +14,12 @@ process VERIFY_BAM_ID_CUSTOM_TARGET {
 
 
     script:
-        flowCellLaneLibraryString = ""
-        if (flowCellLaneLibrary != null) {
-            flowCellLaneLibraryString = ".${flowCellLaneLibrary}"
+        filePrefixString = ""
+        if (filePrefix != null) {
+            filePrefixString = filePrefix
+        }
+        else {
+            filePrefixString = "${sampleId}"
         }
 
         """
@@ -25,7 +28,7 @@ process VERIFY_BAM_ID_CUSTOM_TARGET {
         verifyBamID \
             --vcf ${customTargetContaminationReferenceVCF} \
             --bam $bam \
-            --out ${sampleId}${flowCellLaneLibraryString}.VerifyBamId \
+            --out ${sampleId}${filePrefixString}.VerifyBamId \
             --verbose \
             --chip-none \
             --maxDepth 1000 \

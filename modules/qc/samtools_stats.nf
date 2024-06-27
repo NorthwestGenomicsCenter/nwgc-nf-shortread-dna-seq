@@ -1,23 +1,25 @@
 process SAMTOOLS_STATS {
 
-    tag "SAMTOOLS_STATS_${sampleId}${flowCellLaneLibraryString}_${userId}"
+    tag "SAMTOOLS_STATS_${sampleId}${filePrefixString}_${userId}"
 
-    publishDir "${publishDirectory}", mode: 'link', pattern: "${sampleId}${flowCellLaneLibraryString}.onTarget.stats.txt"
+    publishDir "${publishDirectory}", mode: 'link', pattern: "${sampleId}${filePrefixString}.onTarget.stats.txt"
 
     input:
-        tuple path(bam), path(bai), val(sampleId), val(flowCellLaneLibrary), val(userId), val(publishDirectory)
+        tuple path(bam), path(bai), val(sampleId), val(filePrefix), val(userId), val(publishDirectory)
         path sequencingTargetBedFile
 
     output:
-        tuple val(flowCellLaneLibrary), path("${sampleId}${flowCellLaneLibraryString}.onTarget.stats.txt"), emit: statsFile
+        tuple val(filePrefix), path("${sampleId}${filePrefixString}.onTarget.stats.txt"), emit: statsFile
         path "versions.yaml", emit: versions
 
     script:
-        flowCellLaneLibraryString = ""
-        if (flowCellLaneLibrary != null) {
-            flowCellLaneLibraryString = ".${flowCellLaneLibrary}"
+        filePrefixString = ""
+        if (filePrefix != null) {
+            filePrefixString = filePrefix
         }
-
+        else {
+            filePrefixString = "${sampleId}"
+        }
         """
         mkdir -p ${publishDirectory}
 
@@ -26,7 +28,7 @@ process SAMTOOLS_STATS {
             -t ${sequencingTargetBedFile}\
             $bam \
             --threads ${task.cpus} \
-            > ${sampleId}${flowCellLaneLibraryString}.onTarget.stats.txt
+            > ${sampleId}${filePrefixString}.onTarget.stats.txt
 
         cat <<-END_VERSIONS > versions.yaml
         '${task.process}':
