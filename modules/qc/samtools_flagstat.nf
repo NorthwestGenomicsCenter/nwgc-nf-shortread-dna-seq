@@ -1,14 +1,14 @@
 process SAMTOOLS_FLAGSTAT {
 
-    tag "SAMTOOLS_FLAGSTAT_${sampleId}${filePrefixString}_${userId}"
+    tag "SAMTOOLS_FLAGSTAT_${filePrefixString}_${userId}"
 
-    publishDir "${publishDirectory}", mode: 'link', pattern: "${sampleId}${filePrefixString}.flagstat.output.txt"
+    publishDir "${publishDirectory}", mode: 'link', pattern: "${filePrefixString}.flagstat.output.txt"
 
     input:
         tuple path(bam), path(bai), val(sampleId), val(filePrefix), val(userId), val(publishDirectory)
 
     output:
-        tuple val(filePrefix), path("${sampleId}${filePrefixString}.flagstat.output.txt"), emit: flagstatFile
+        tuple val(filePrefix), path("${filePrefixString}.flagstat.output.txt"), emit: flagstatFile
         path "versions.yaml", emit: versions
 
     script:
@@ -27,7 +27,7 @@ process SAMTOOLS_FLAGSTAT {
             flagstat \
             $bam \
             -@ ${task.cpus} \
-            > ${sampleId}${filePrefixString}.flagstat.output.txt
+            > ${filePrefixString}.flagstat.output.txt
 
         cat <<-END_VERSIONS > versions.yaml
         '${task.process}':

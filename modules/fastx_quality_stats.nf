@@ -5,8 +5,7 @@ process FASTX_QC {
     publishDir "${publishDirectory}", mode:  'link', pattern: "*.fastq.stats"
  
     input:
-        tuple path(fastq), val(publishDirectory)
-        tuple val(sampleId), val(userId)
+        tuple path(fastq), val(flowcell), val(lane), val(library), val(sampleId), val(userId), val(publishDirectory)
 
     output:
         env FASTQ_BASENAME, emit: fastqBasename
@@ -15,14 +14,12 @@ process FASTX_QC {
 
     script:
         """
-        FASTQ_BASENAME=\$(basename "$fastq" .fq.gz)
-
-        gunzip -c $fastq | \
+        gunzip -c ${fastq} | \
         fastx_quality_stats \
             -Q 33 \
-            -o \${FASTQ_BASENAME}.fastq.stats.temp
+            -o ${flowcell}.${lane}.S${sampleId}.L${library}.fastq.stats.temp
 
-        mv \${FASTQ_BASENAME}.fastq.stats.temp \${FASTQ_BASENAME}.fastq.stats
+        mv ${flowcell}.${lane}.S${sampleId}.L${library}.fastq.stats.temp ${flowcell}.${lane}.S${sampleId}.L${library}.fastq.stats
     
         cat <<-END_VERSIONS > versions.yaml
         '${task.process}_${task.index}':

@@ -1,6 +1,6 @@
 process VERIFY_BAM_ID_CUSTOM_TARGET {
 
-    tag "VERIFY_BAM_ID_CUSTOM_TARGET_${sampleId}${filePrefixString}_${userId}"
+    tag "VERIFY_BAM_ID_CUSTOM_TARGET_${filePrefixString}_${userId}"
 
     publishDir "${publishDirectory}", mode: 'link', pattern: '*.VerifyBamId.selfSM'
 
@@ -28,7 +28,7 @@ process VERIFY_BAM_ID_CUSTOM_TARGET {
         verifyBamID \
             --vcf ${customTargetContaminationReferenceVCF} \
             --bam $bam \
-            --out ${sampleId}${filePrefixString}.VerifyBamId \
+            --out ${filePrefixString}.VerifyBamId \
             --verbose \
             --chip-none \
             --maxDepth 1000 \

@@ -1,6 +1,6 @@
 process VERIFY_BAM_ID {
 
-    tag "VERIFY_BAM_ID_${sampleId}${filePrefixString}_${userId}"
+    tag "VERIFY_BAM_ID_${filePrefixString}_${userId}"
 
     publishDir "${publishDirectory}", mode: 'link', pattern: '*.VerifyBamId.selfSM'
 
@@ -44,7 +44,7 @@ process VERIFY_BAM_ID {
             --BamFile $bam \
             --Reference ${referenceGenome} \
             $disableSanityCheck \
-            --Output ${sampleId}${filePrefixString}.VerifyBamId
+            --Output ${filePrefixString}.VerifyBamId
 
         cat <<-END_VERSIONS > versions.yaml
         '${task.process}':

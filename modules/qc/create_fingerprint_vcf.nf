@@ -1,6 +1,6 @@
 process CREATE_FINGERPRINT_VCF {
 
-    tag "CREATE_FINGERPRINT_VCF_${sampleId}${filePrefixString}_${userId}"
+    tag "CREATE_FINGERPRINT_VCF_${filePrefixString}_${userId}"
 
     publishDir "${publishDirectory}", mode: 'link', pattern: '*.fingerprint.vcf.gz'
     publishDir "${publishDirectory}", mode: 'link', pattern: '*.fingerprint.vcf.gz.tbi'
@@ -39,7 +39,7 @@ process CREATE_FINGERPRINT_VCF {
             -G StandardAnnotation \
             -pairHMM AVX_LOGLESS_CACHING \
             -ERC GVCF \
-            --output ${sampleId}${filePrefixString}.fingerprint.g.vcf.gz
+            --output ${filePrefixString}.fingerprint.g.vcf.gz
 
         ## VCF File
         gatk \
@@ -47,8 +47,8 @@ process CREATE_FINGERPRINT_VCF {
             GenotypeGVCFs \
             -R $referenceGenome \
             -L $fingerprintBed \
-            --variant ${sampleId}${filePrefixString}.fingerprint.g.vcf.gz \
-            -O ${sampleId}${filePrefixString}.fingerprint.vcf.gz \
+            --variant ${filePrefixString}.fingerprint.g.vcf.gz \
+            -O ${filePrefixString}.fingerprint.vcf.gz \
             --include-non-variant-sites
 
         cat <<-END_VERSIONS > versions.yaml

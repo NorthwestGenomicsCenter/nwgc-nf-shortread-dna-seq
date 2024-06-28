@@ -20,7 +20,7 @@ workflow MAP {
     def ch_referenceGenome = Channel.value(referenceGenome)
     def ch_bwaMemOptions = Channel.value(params.bwaMemOptions)
 
-    ch_flowCellLaneLibraryTuple.branch { fastq1, fastq2, flowCell, lane, library, userId, readGroup, readLength, readType, publishDirectory ->
+    ch_flowCellLaneLibraryTuple.branch { fastq1, fastq2, flowCell, lane, library, sampleId, userId, readGroup, readLength, readType, publishDirectory ->
         samse: (readType == 'SR' || readType == 'SE') && readLength < 75
         memse: (readType == 'SR' || readType == 'SE') && readLength >= 75
         sampe: readType == 'PE' && readLength < 75
@@ -29,8 +29,8 @@ workflow MAP {
     }
     | set { ch_branchedFlowCellLaneLibraries }
 
-    def mapToSingleRead = {fastq1, fastq2, flowCell, lane, library, userId, readGroup, readLength, readType, publishDirectory -> [fastq1, flowCell, lane, library, userId, readGroup, publishDirectory]}
-    def mapToPairedEnd = {fastq1, fastq2, flowCell, lane, library, userId, readGroup, readLength, readType, publishDirectory -> [fastq1, fastq2, flowCell, lane, library, userId, readGroup, publishDirectory]}
+    def mapToSingleRead = {fastq1, fastq2, flowCell, lane, library, sampleId, userId, readGroup, readLength, readType, publishDirectory -> [fastq1, flowCell, lane, library, sampleId, userId, readGroup, publishDirectory]}
+    def mapToPairedEnd = {fastq1, fastq2, flowCell, lane, library, sampleId, userId, readGroup, readLength, readType, publishDirectory -> [fastq1, fastq2, flowCell, lane, library, sampleId, userId, readGroup, publishDirectory]}
 
     def ch_samseInput = ch_branchedFlowCellLaneLibraries.samse.map mapToSingleRead
     def ch_memseInput = ch_branchedFlowCellLaneLibraries.memse.map mapToSingleRead

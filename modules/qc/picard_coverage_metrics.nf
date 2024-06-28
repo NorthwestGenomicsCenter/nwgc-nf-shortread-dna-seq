@@ -1,8 +1,8 @@
 process PICARD_COVERAGE_METRICS {
 
-    tag "PICARD_COVERAGE_METRICS_${sampleId}${filePrefixString}${partOfSequencingTargetOutput}_${userId}"
+    tag "PICARD_COVERAGE_METRICS_${filePrefixString}${partOfSequencingTargetOutput}_${userId}"
 
-    publishDir "${publishDirectory}", mode: 'link', pattern: "${sampleId}${filePrefixString}.BASEQ${baseQuality}.MAPQ${mappingQuality}${partOfSequencingTargetOutput}.picard.coverage.txt"
+    publishDir "${publishDirectory}", mode: 'link', pattern: "${filePrefixString}.BASEQ${baseQuality}.MAPQ${mappingQuality}${partOfSequencingTargetOutput}.picard.coverage.txt"
  
     input:
         tuple path(bam), path(bai), val(sampleId), val(filePrefix), val(userId), val(publishDirectory)
@@ -12,7 +12,7 @@ process PICARD_COVERAGE_METRICS {
         each path(intervalsList)
 
     output:
-        tuple val(filePrefix), path("${sampleId}${filePrefixString}.BASEQ${baseQuality}.MAPQ${mappingQuality}${partOfSequencingTargetOutput}.picard.coverage.txt"), emit: metricsFile
+        tuple val(filePrefix), path("${filePrefixString}.BASEQ${baseQuality}.MAPQ${mappingQuality}${partOfSequencingTargetOutput}.picard.coverage.txt"), emit: metricsFile
         path "versions.yaml", emit: versions
 
     script:
@@ -46,7 +46,7 @@ process PICARD_COVERAGE_METRICS {
             --MINIMUM_MAPPING_QUALITY $mappingQuality \
             --INTERVALS $intervalsList \
             --COVERAGE_CAP 300000 \
-            --OUTPUT ${sampleId}${filePrefixString}.BASEQ${baseQuality}.MAPQ${mappingQuality}${partOfSequencingTargetOutput}.picard.coverage.txt
+            --OUTPUT ${filePrefixString}.BASEQ${baseQuality}.MAPQ${mappingQuality}${partOfSequencingTargetOutput}.picard.coverage.txt
 
         cat <<-END_VERSIONS > versions.yaml
         '${task.process}':

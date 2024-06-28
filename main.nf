@@ -15,15 +15,13 @@ workflow {
         Channel.fromList(params.flowCellLaneLibraries)
         | multiMap { 
             def flowCellLaneLibrary -> 
-            fastq1Tuple: [flowCellLaneLibrary.fastq1, params.sampleFastxQCDirectory]
-            fastq2Tuple: [flowCellLaneLibrary.fastq2, params.sampleFastxQCDirectory]
+            fastq1Tuple: [flowCellLaneLibrary.fastq1, flowCellLaneLibrary.flowCell, flowCellLaneLibrary.lane, flowCellLaneLibrary.library, params.sampleId, params.userId, params.sampleFastxQCDirectory]
+            fastq2Tuple: [flowCellLaneLibrary.fastq2, flowCellLaneLibrary.flowCell, flowCellLaneLibrary.lane, flowCellLaneLibrary.library, params.sampleId, params.userId, params.sampleFastxQCDirectory]
         }
         | mix
         | set { ch_fastqs }
 
-        Channel.value([params.sampleId, params.userId])
-        | set { ch_sampleFastxQCInfo }
-        FASTX_QC(ch_fastqs, ch_sampleFastxQCInfo)
+        FASTX_QC(ch_fastqs)
     }
 
     // *****************
@@ -38,7 +36,7 @@ workflow {
                     def readType = flowCellLaneLibrary.readType ? flowCellLaneLibrary.readType : params.readType
 
                     [flowCellLaneLibrary.fastq1, flowCellLaneLibrary.fastq2, flowCellLaneLibrary.flowCell, flowCellLaneLibrary.lane, flowCellLaneLibrary.library, params.sampleId,
-                    params.userId, readGroup, flowCellLaneLibrary.readLength, readType, params.sampleMappedBamsDirectory + "/${flowCellLaneLibrary.flowCell}.${flowCellLaneLibrary.lane}.${flowCellLaneLibrary.library}"] 
+                    params.userId, readGroup, flowCellLaneLibrary.readLength, readType, params.sampleMappedBamsDirectory + "/${flowCellLaneLibrary.flowCell}.${flowCellLaneLibrary.lane}.S${params.sampleId}.L${flowCellLaneLibrary.library}"] 
                 }
         | set { ch_fastq_info }
         ch_fastq_info | view
@@ -76,7 +74,7 @@ workflow {
     // *****************
     if (params.pipelineStepsToRun.contains("merging")) {
         ch_mappedBams
-        | map { bam, bai, flowCell, lane, library -> bam }
+        | map { bam, bai, flowCell, lane, library, sampleId -> bam }
         | set { ch_mappedBamsForMerge }
         MERGE_MAPPED_BAMS(ch_mappedBamsForMerge, params.sampleId, params.sequencingTarget, params.organism, params.isGRC38, params.dbSnp, params.goldStandardIndels, params.knownIndels, params.referenceGenome, params.sampleDirectory)
         ch_mergedBam = MERGE_MAPPED_BAMS.out.bam
