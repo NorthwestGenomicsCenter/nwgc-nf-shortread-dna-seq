@@ -8,7 +8,7 @@ process BWA_SAMSE {
 
 
     output:
-        tuple path("${flowCell}.${lane}.S${sampleId}.L${library}.matefixed.sorted.bam"), val(flowCell), val(lane), val(library), val(sampleId), val(userId), val(publishDirectory), emit: samse
+        tuple path("${flowCell}.${lane}.S${sampleId}.L${library}.bam"), val(flowCell), val(lane), val(library), val(sampleId), val(userId), val(publishDirectory), emit: samse
 
     script:
         """
@@ -21,7 +21,7 @@ process BWA_SAMSE {
         samtools view -Sbhu - | \
         sambamba sort \
                 -t ${task.cpus} \
-                -o ${flowCell}.${lane}.S${sampleId}.L${library}.matefixed.sorted.bam \
+                -o ${flowCell}.${lane}.S${sampleId}.L${library}.bam \
                 /dev/stdin
         """
 }
