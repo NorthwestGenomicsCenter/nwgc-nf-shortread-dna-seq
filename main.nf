@@ -46,7 +46,10 @@ workflow {
     }
 
     // If there are input mapped bams mix them in
-    ch_mappedBams = ch_mappedBams.mix(Channel.fromList(params.mappedBams))
+    ch_mappedBams = ch_mappedBams.mix(
+    Channel.fromList(params.mappedBams)
+    .map {mappedBamInfo -> [mappedBamInfo.bam, mappedBamInfo.bai, mappedBamInfo.flowcell, mappedBamInfo.lane, mappedBamInfo.library, params.sampleId]}
+    )
 
     // ********************
     // **** Mapping QC ****
@@ -63,7 +66,7 @@ workflow {
     // Run Mapping QC
     if (params.pipelineStepsToRun.contains('mapping_qc')) {
         ch_mappedBams 
-        | map({ bam, bai, flowCell, lane, library, sampleId -> [bam, bai, params.sampleId, "${flowCell}.${lane}.S${sampleId}.L${library}", params.userId, params.sampleMappingQCDirectory] })
+        | map({ bam, bai, flowCell, lane, library, sampleId -> [bam, bai, sampleId, "${flowCell}.${lane}.S${sampleId}.L${library}", params.userId, params.sampleMappingQCDirectory] })
         | set { ch_mappingQcBams }
 
         MAPPING_QC(ch_mappingQcBams, ch_referenceInfo, qcSampleInfoMap, params.sampleMappingQCDirectory)

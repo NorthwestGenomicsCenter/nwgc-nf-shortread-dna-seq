@@ -21,7 +21,7 @@ workflow LANE_MAP {
         // Downsample for novaseq pool
         if (isNovaseqQCPool) {
             def downsamplePercentage = params.averageNovaseqQCReadCountTarget / (params.totalNovaseqQCReads / novaseqQCPoolPlexity)
-            SEQTK_DOWNSAMPLE_NOVASEQ_FASTQS(ch_flowCellLaneLibraryTuple, downsamplePErcentage)
+            SEQTK_DOWNSAMPLE_NOVASEQ_FASTQS(ch_flowCellLaneLibraryTuple, downsamplePercentage)
             ch_flowCellLaneLibraryTuple = SEQTK_DOWNSAMPLE_NOVASEQ_FASTQS.out.flowCellLaneLibraryTuple
         }
 

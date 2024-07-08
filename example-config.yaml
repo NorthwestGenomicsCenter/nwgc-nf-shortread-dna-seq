@@ -72,12 +72,18 @@ flowCellLaneLibraries:
 
 # Bams  - Bam files that have been mapped (to merge together) 
 mappedBams:
-  - "<full path to first mapedBam>"
-    "<full path to first mapedBai (mappedBam.bai)>"
-    "<flowcell>"
-    "<lane>"
-    "<libraryId>"
-  - "<repeat for more bams>"
+  - bam: "<full path to first mapedBam>"
+    bai: "<full path to first mapedBai (mappedBam.bai)>"
+    flowcell: "<flowcell>"
+    lane: "<lane>"
+    library: "<libraryId>"
+  - bam: "<full path to second mapedBam>"
+    bai: "<full path to second mapedBai (mappedBam.bai)>"
+    flowcell: "<flowcell2>"
+    lane: "<lane2>"
+    library: "<libraryId2>"
+  # Continue for all sample mapped bams
+
 # e.g.
 #bams:
 #  - "/net/nwgc/vol1/home/kolart/nextflow_library_merge_test/downsampled_1.bam"
