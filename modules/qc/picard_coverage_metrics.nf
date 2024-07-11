@@ -5,7 +5,7 @@ process PICARD_COVERAGE_METRICS {
     publishDir "${publishDirectory}", mode: 'link', pattern: "${filePrefixString}.BASEQ${baseQuality}.MAPQ${mappingQuality}${partOfSequencingTargetOutput}.picard.coverage.txt"
  
     input:
-        tuple path(bam), path(bai), val(sampleId), val(filePrefix), val(userId), val(publishDirectory)
+        tuple path(bam), path(bai), val(sampleId), val(filePrefix), val(userId), val(publishDirectory), val(flowcell), val(lane), val(library)
         tuple val(isGRC38), val(referenceGenome)
         each baseQuality
         each mappingQuality

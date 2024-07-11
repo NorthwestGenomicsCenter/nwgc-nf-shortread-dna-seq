@@ -5,7 +5,7 @@ process VERIFY_BAM_ID {
     publishDir "${publishDirectory}", mode: 'link', pattern: '*.VerifyBamId.selfSM'
 
     input:
-        tuple path(bam), path(bai), val(sampleId), val(filePrefix), val(userId), val(publishDirectory)
+        tuple path(bam), path(bai), val(sampleId), val(filePrefix), val(userId), val(publishDirectory), val(flowcell), val(lane), val(library)
         tuple val(isGRC38), val(referenceGenome)
         tuple val(contaminationUDPath), val(contaminationBedPath), val(contaminationMeanPath)
 

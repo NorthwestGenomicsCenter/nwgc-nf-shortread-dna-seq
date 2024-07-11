@@ -5,7 +5,7 @@ process SAMTOOLS_FLAGSTAT {
     publishDir "${publishDirectory}", mode: 'link', pattern: "${filePrefixString}.flagstat.output.txt"
 
     input:
-        tuple path(bam), path(bai), val(sampleId), val(filePrefix), val(userId), val(publishDirectory)
+        tuple path(bam), path(bai), val(sampleId), val(filePrefix), val(userId), val(publishDirectory), val(flowcell), val(lane), val(library)
 
     output:
         tuple val(filePrefix), path("${filePrefixString}.flagstat.output.txt"), emit: flagstatFile

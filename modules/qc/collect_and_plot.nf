@@ -14,7 +14,7 @@ process COLLECT_AND_PLOT {
         path pcm_mapq
         path pcm_baseq_files
         path pcm_chrom_files
-        tuple path(bam), path(bai), val(sampleId), val(filePrefix), val(userId), val(publishDirectory)
+        tuple path(bam), path(bai), val(sampleId), val(filePrefix), val(userId), val(publishDirectory), val(flowcell), val(lane), val(library)
         path sequencingTargetBedFile
 
     output:

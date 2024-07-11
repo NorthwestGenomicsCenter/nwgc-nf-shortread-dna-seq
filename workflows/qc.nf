@@ -26,9 +26,11 @@ workflow SHORTREAD_QC {
         // ***************************************
         // "Input" for the workflow
 
-        // (bam, bai, sample id, file prefix, user id, publish directory)
+        // (bam, bai, sample id, file prefix, user id, publish directory, flow cell, lane, library)
         // file prefix is FlowCell.Lane.S{sampleId}.L{library} when doing mapping QC
         // file prefix is sampleId when doing merge
+        // flow cell, lane, and libary are null when doing a merge
+        // DO NOT DELETE flow cell, lane, and libary. They are used to pass information to samplify via the plugin they don't do anything within the pipeline.
         ch_qcInputTuple
 
         // *************************************

@@ -39,7 +39,6 @@ workflow {
                     params.userId, readGroup, flowCellLaneLibrary.readLength, readType, params.sampleMappedBamsDirectory + "/${flowCellLaneLibrary.flowCell}.${flowCellLaneLibrary.lane}.S${params.sampleId}.L${flowCellLaneLibrary.library}"] 
                 }
         | set { ch_fastq_info }
-        ch_fastq_info | view
 
         LANE_MAP(ch_fastq_info, params.isNovaseqQCPool, params.novaseqQCPoolPlexity, params.referenceGenome)
         ch_mappedBams = ch_mappedBams.mix(LANE_MAP.out.mappedBams)
@@ -66,7 +65,7 @@ workflow {
     // Run Mapping QC
     if (params.pipelineStepsToRun.contains('mapping_qc')) {
         ch_mappedBams 
-        | map({ bam, bai, flowCell, lane, library, sampleId -> [bam, bai, sampleId, "${flowCell}.${lane}.S${sampleId}.L${library}", params.userId, params.sampleMappingQCDirectory] })
+        | map({ bam, bai, flowCell, lane, library, sampleId -> [bam, bai, sampleId, "${flowCell}.${lane}.S${sampleId}.L${library}", params.userId, params.sampleMappingQCDirectory, flowcell, lane, library] })
         | set { ch_mappingQcBams }
 
         MAPPING_QC(ch_mappingQcBams, ch_referenceInfo, qcSampleInfoMap, params.sampleMappingQCDirectory)
@@ -92,7 +91,7 @@ workflow {
     // ************
     if (params.pipelineStepsToRun.contains("qc")) {
         // Sample information that qc needs to run
-        ch_bamInfo = ch_mergedBam.combine(Channel.of([params.sampleId, "${params.sampleId}", params.userId, params.sampleQCDirectory]))
+        ch_bamInfo = ch_mergedBam.combine(Channel.of([params.sampleId, "${params.sampleId}", params.userId, params.sampleQCDirectory, null, null, null]))
 
         MERGING_QC(ch_bamInfo, ch_referenceInfo, qcSampleInfoMap, params.sampleQCDirectory)
     }

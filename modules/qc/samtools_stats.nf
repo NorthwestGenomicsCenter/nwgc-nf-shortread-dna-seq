@@ -5,7 +5,7 @@ process SAMTOOLS_STATS {
     publishDir "${publishDirectory}", mode: 'link', pattern: "${filePrefixString}.onTarget.stats.txt"
 
     input:
-        tuple path(bam), path(bai), val(sampleId), val(filePrefix), val(userId), val(publishDirectory)
+        tuple path(bam), path(bai), val(sampleId), val(filePrefix), val(userId), val(publishDirectory), val(flowcell), val(lane), val(library)
         path sequencingTargetBedFile
 
     output:

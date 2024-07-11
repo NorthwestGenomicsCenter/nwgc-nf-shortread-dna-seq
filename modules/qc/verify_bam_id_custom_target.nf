@@ -5,7 +5,7 @@ process VERIFY_BAM_ID_CUSTOM_TARGET {
     publishDir "${publishDirectory}", mode: 'link', pattern: '*.VerifyBamId.selfSM'
 
     input:
-        tuple path(bam), path(bai), val(sampleId), val(filePrefix), val(userId), val(publishDirectory)
+        tuple path(bam), path(bai), val(sampleId), val(filePrefix), val(userId), val(publishDirectory), val(flowcell), val(lane), val(library)
         path customTargetContaminationReferenceVCF
 
     output:
