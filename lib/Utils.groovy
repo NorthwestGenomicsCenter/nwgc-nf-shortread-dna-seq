@@ -47,6 +47,7 @@ public class Utils {
 
         // Set up default values 
         def defaultDate = new Date().format('yyyy-MM-dd')
+        def defaultSequencingCenter = "External"
  
         def readGroups = []
         flowCellLaneLibraries.eachWithIndex { flowCellLaneLibrary, index ->
@@ -60,12 +61,13 @@ public class Utils {
             def lane = flowCellLaneLibrary.lane
             def library = flowCellLaneLibrary.library
             def dateString = flowCellLaneLibrary.runDate ? flowCellLaneLibrary.runDate : defaultDate
+            def sequencingCenterString = sequencingCenter != null ? sequencingCenter : defaultSequencingCenter
             def sequencingPlatform = flowCellLaneLibrary.sequencingPlatform ? flowCellLaneLibrary.sequencingPlatform : defaultSequencingPlatform
 
             // Create the tags 
             def readGroupTags = []
             readGroupTags.add("ID:" + flowCell + "." + lane  + "." + library)
-            readGroupTags.add("CN:" + sequencingCenter)
+            readGroupTags.add("CN:" + sequencingCenterString)
             readGroupTags.add("PL:" + sequencingPlatform)
             readGroupTags.add("PU:" + flowCell + "." + lane  + "." + library)
             readGroupTags.add("LB:" + library)

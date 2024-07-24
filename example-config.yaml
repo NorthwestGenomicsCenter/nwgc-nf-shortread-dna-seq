@@ -70,7 +70,18 @@ flowCellLaneLibraries:
     sequencingPlatform: "<sequencing platform of the flow cell>"
   # Continue for all sample flowcell lane libraries
 
-# Bams  - Bam files that have been mapped (to merge together) 
+# bamsForReprocessing - Bam files to be split back into fastqs and completely reprocessed
+bamsForReprocessing:
+  - "<full path to first bam>"
+  - "<full path to second bam>"
+
+# externalFastqs - fastq files that have no associated FCLL information to be reprocessed.
+#                  Must be named in standard format flowcell.lane.barcode1.barcode2_1.fastq.gz or flowcell.lane.library_1.fastq.gz
+externalFastqs:
+  - "<full path to first fastq>"
+  - "<full path to second fastq>"
+
+# mappedBams  - Bam files that have been mapped (to merge together) 
 mappedBams:
   - bam: "<full path to first mapedBam>"
     bai: "<full path to first mapedBai (mappedBam.bai)>"
@@ -85,7 +96,7 @@ mappedBams:
   # Continue for all sample mapped bams
 
 # e.g.
-#bams:
+#mappedBams:
 #  - "/net/nwgc/vol1/home/kolart/nextflow_library_merge_test/downsampled_1.bam"
 #  - "/net/nwgc/vol1/home/kolart/nextflow_library_merge_test/downsampled_2.bam"
 
@@ -100,6 +111,7 @@ filteredGVCF: "<full path to a filtered_gvcf file>" # e.g. /net/nwgc/vol1/home/k
 # Optional (Already defaulted in nextflow.config file to organism=Homo sapiens, isGRC38=false)
 # Pipeline runs alls steps by default which is ["fastx_qc", "mapping", "mapping_qc", "merging", "qc", "variant_calling", "polymorphic_qc"]
 # QC is defaulted to all steps which is ["coverage", "coverage_by_chrom", "contamination", "fingerprint", "picard_multiple_metrics", "samtools_flagstat", "samtools_stats", "collect_and_plot"]
+# Mapping QC is defaulted to ["coverage", "coverage_by_chrom", "contamination", "picard_multiple_metrics", "samtools_flagstat", "samtools_stats"]
 organism: "<species other than Homo sapiens>"  # e.g. organism: "Mus musculus"
 isGRC38: "<true if grc38>"                     # e.g. isGRC38: true
 pipelineStepsToRun: "[list of pipeline steps to run]"         # e.g ["merging", "qc", "variant_calling"]

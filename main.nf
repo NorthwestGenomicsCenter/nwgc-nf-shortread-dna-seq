@@ -5,14 +5,32 @@ include { CALL_VARIANTS } from './workflows/call_variants.nf'
 include { POLYMORPHIC_QC } from './workflows/polymorphic_qc.nf'
 include { LANE_MAP } from './workflows/lane_map.nf'
 include { FASTX_QC } from "./modules/fastx_quality_stats.nf"
+include { REPROCESS_EXTERNAL } from "./workflows/reprocess_external.nf"
 
 workflow {
+
+    // *******************************
+    // *** Format for reprocessing ***
+    // *******************************
+    ch_flowCellLaneLibrary = Channel.empty()
+    if (params.reprocess_external != null && params.reprocess_external) {
+        ch_bamsForReprocessing = Channel.fromList(params.bamsForReprocessing)
+        ch_externalFastqs = Channel.fromList(params.externalFastqs)
+        def sampleInfoTuple = params.subMap("sampleId", "userId")
+
+        REPROCESS_EXTERNAL(ch_bamsForReprocessing, ch_externalFastqs, sampleInfoTuple)
+        ch_flowCellLaneLibrary = REPROCESS_EXTERNAL.out.flowCellLaneLibraries
+    }
+    else {
+        ch_flowCellLaneLibrary = Channel.fromList(params.flowCellLaneLibraries)
+    }
+
 
     // ******************
     // **** Fastx QC ****
     // ******************
     if (params.pipelineStepsToRun.contains("fastx_qc")) {
-        Channel.fromList(params.flowCellLaneLibraries)
+        ch_flowCellLaneLibrary
         | multiMap { 
             def flowCellLaneLibrary -> 
             fastq1Tuple: [flowCellLaneLibrary.fastq1, flowCellLaneLibrary.flowCell, flowCellLaneLibrary.lane, flowCellLaneLibrary.library, params.sampleId, params.userId, params.sampleFastxQCDirectory]
@@ -30,7 +48,7 @@ workflow {
     ch_mappedBams = Channel.empty()
     if (params.pipelineStepsToRun.contains("mapping")) {
 
-        Channel.fromList(params.flowCellLaneLibraries)
+        ch_flowCellLaneLibrary
         | map { def flowCellLaneLibrary -> 
                     def readGroup = Utils.defineReadGroup(params.sequencingCenter, params.sequencingPlatform, params.sampleId, flowCellLaneLibrary)
                     def readType = flowCellLaneLibrary.readType ? flowCellLaneLibrary.readType : params.readType
