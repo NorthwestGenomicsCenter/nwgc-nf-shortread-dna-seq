@@ -70,16 +70,20 @@ flowCellLaneLibraries:
     sequencingPlatform: "<sequencing platform of the flow cell>"
   # Continue for all sample flowcell lane libraries
 
+# camsForReprocessing - Cram files and their references to be split back into fastqs and completely reprocessed
+cramsForReprocessing:
+  - cram: "<full path to first cram>", 
+    reference: "<full path to first cram reference file>"
+  - cram: "<full path to second cram>", 
+    reference: "<full path to second cram reference file>"
+  # continue for all crams
+
 # bamsForReprocessing - Bam files to be split back into fastqs and completely reprocessed
-bamsForReprocessing:
-  - "<full path to first bam>"
-  - "<full path to second bam>"
+bamsForReprocessing: ["<full path to first bam>", "<full path to second bam>", ...]
 
 # externalFastqs - fastq files that have no associated FCLL information to be reprocessed.
 #                  Must be named in standard format flowcell.lane.barcode1.barcode2_1.fastq.gz or flowcell.lane.library_1.fastq.gz
-externalFastqs:
-  - "<full path to first fastq>"
-  - "<full path to second fastq>"
+externalFastqs: ["<full path to first fastq>", "<full path to second fastq>", ...]
 
 # mappedBams  - Bam files that have been mapped (to merge together) 
 mappedBams:

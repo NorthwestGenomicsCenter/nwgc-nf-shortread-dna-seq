@@ -1,12 +1,15 @@
 include { PICARD_SAM_TO_FASTQ } from "../modules/reprocess_bams/picard_sam_to_fastq.nf"
 include { EXTRACT_READ_LENGTH } from "../modules/reprocess_bams/extract_read_length.nf"
 include { PATHIFY_FASTQS }      from "../modules/reprocess_bams/pathify_fastqs.nf"
+include { PICARD_CRAM_TO_FASTQ } from "../modules/reprocess_bams/picard_cram_to_fastq.nf"
 
 workflow REPROCESS_EXTERNAL {
 
     take:
+        // ch_crams = Queue Channel with a list of crams in the format [cram: <cram file path>, reference: <reference file path>]
         // ch_bams = Queue Channel with a list of bam paths
         // ch_fastqInputs = Queue Channel with a list of fastq paths
+        ch_crams
         ch_bams // bam paths
         ch_fastqInputs // fastq paths
 
@@ -37,10 +40,14 @@ workflow REPROCESS_EXTERNAL {
         // *** Start processing ***
         // ************************
 
+        ch_crams = ch_crams.map { cramInfo -> [cramInfo.cram, cramInfo.reference]}
+        PICARD_CRAM_TO_FASTQ(ch_crams, sampleInfo)
+
         // takes bam and converst it to fastqs
         PICARD_SAM_TO_FASTQ(ch_bams, sampleInfo)
         // Split bam into fastqs by read group
-        ch_fastqs = PICARD_SAM_TO_FASTQ.out.fastqs.flatten()
+        ch_fastqs = PICARD_CRAM_TO_FASTQ.out.fastqs.flatten()
+        ch_fastqs = ch_fastqs.mix(PICARD_SAM_TO_FASTQ.out.fastqs.flatten())
         ch_fastqs = ch_fastqs.mix(ch_fastqInputs)
 
         // Processes fastq files from raw stream of individual files to a channel of flowcell lane library maps

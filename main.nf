@@ -16,9 +16,10 @@ workflow {
     if (params.reprocess_external != null && params.reprocess_external) {
         ch_bamsForReprocessing = Channel.fromList(params.bamsForReprocessing)
         ch_externalFastqs = Channel.fromList(params.externalFastqs)
+        ch_cramsForReprocessing = Channel.fromList(params.cramsForReprocessing)
         def sampleInfoTuple = params.subMap("sampleId", "userId")
 
-        REPROCESS_EXTERNAL(ch_bamsForReprocessing, ch_externalFastqs, sampleInfoTuple)
+        REPROCESS_EXTERNAL(ch_cramsForReprocessing, ch_bamsForReprocessing, ch_externalFastqs, sampleInfoTuple)
         ch_flowCellLaneLibrary = REPROCESS_EXTERNAL.out.flowCellLaneLibraries
     }
     else {
@@ -59,13 +60,15 @@ workflow {
         | set { ch_fastq_info }
 
         LANE_MAP(ch_fastq_info, params.isNovaseqQCPool, params.novaseqQCPoolPlexity, params.referenceGenome)
+
+
         ch_mappedBams = ch_mappedBams.mix(LANE_MAP.out.mappedBams)
     }
 
     // If there are input mapped bams mix them in
     ch_mappedBams = ch_mappedBams.mix(
     Channel.fromList(params.mappedBams)
-    .map {mappedBamInfo -> [mappedBamInfo.bam, mappedBamInfo.bai, mappedBamInfo.flowcell, mappedBamInfo.lane, mappedBamInfo.library, params.sampleId]}
+    .map {mappedBamInfo -> [mappedBamInfo.bam, mappedBamInfo.bai, mappedBamInfo.flowCell, mappedBamInfo.lane, mappedBamInfo.library, params.sampleId]}
     )
 
     // ********************
@@ -83,7 +86,7 @@ workflow {
     // Run Mapping QC
     if (params.pipelineStepsToRun.contains('mapping_qc')) {
         ch_mappedBams 
-        | map({ bam, bai, flowCell, lane, library, sampleId -> [bam, bai, sampleId, "${flowCell}.${lane}.S${sampleId}.L${library}", params.userId, params.sampleMappingQCDirectory, flowcell, lane, library] })
+        | map({ bam, bai, flowCell, lane, library, sampleId -> [bam, bai, sampleId, "${flowCell}.${lane}.S${sampleId}.L${library}", params.userId, params.sampleMappingQCDirectory, flowCell, lane, library] })
         | set { ch_mappingQcBams }
 
         MAPPING_QC(ch_mappingQcBams, ch_referenceInfo, qcSampleInfoMap, params.sampleMappingQCDirectory)
