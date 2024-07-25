@@ -47,7 +47,7 @@ public class Utils {
 
         // Set up default values 
         def defaultDate = new Date().format('yyyy-MM-dd')
-        def defaultSequencingCenter = "External"
+        def defaultSequencingCenter = "Unknown"
  
         def readGroups = []
         flowCellLaneLibraries.eachWithIndex { flowCellLaneLibrary, index ->

@@ -5,6 +5,7 @@
 # User
 userId: "<samplify userId>"  # e.g. userid: "kolart"
 userEmail: "<userEmail>"     # e.g. userEmail: "kolart@uw.edu"
+sequencingCenter: "Sequencing Center" # e.g.  sequencingCenter: "University_of_Washington_Genome_Sciences"
 
 # Sample
 sampleDirectory: "<full path to sample directory>"                      # e.g. sampleDirectory: "/net/nwgc/vol1/data/processed/samples/123456/WHOLE_GENOME"
