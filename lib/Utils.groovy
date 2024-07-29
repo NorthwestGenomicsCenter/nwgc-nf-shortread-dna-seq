@@ -51,6 +51,11 @@ public class Utils {
  
         def readGroups = []
         flowCellLaneLibraries.eachWithIndex { flowCellLaneLibrary, index ->
+            if (flowCellLaneLibrary.RG) {
+                readGroups.add(flowCellLaneLibrary.RG)
+                return    
+            }
+
             // Verify flowCell, lane and library are defined
             if (!flowCellLaneLibrary.flowCell || !flowCellLaneLibrary.lane || !flowCellLaneLibrary.library) {
                     throw new Exception("A flowCellLaneLibrary is missing a flowCell, lane or libary defintion")
@@ -82,6 +87,10 @@ public class Utils {
     }
 
     public static defineReadGroup(sequencingCenter, defaultSequencingPlatform, sampleId, flowCellLaneLibrary) {
+
+        if (flowCellLaneLibrary.RG) {
+            return flowCellLaneLibrary.RG  
+        }
 
         // Set up default values 
         def defaultDate = new Date().format('yyyy-MM-dd')

@@ -5,7 +5,7 @@ process VERIFY_BAM_ID {
     publishDir "${publishDirectory}", mode: 'link', pattern: '*.VerifyBamId.selfSM'
 
     errorStrategy {
-        if (${library}?.trim()) {
+        if (library?.trim()) {
             'ignore'
         }
         else {
