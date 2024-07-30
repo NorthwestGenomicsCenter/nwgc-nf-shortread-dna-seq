@@ -1,5 +1,5 @@
 include { PICARD_SAM_TO_FASTQ } from "../modules/reprocess_bams/picard_sam_to_fastq.nf"
-include { EXTRACT_READ_LENGTH } from "../modules/reprocess_bams/extract_read_length.nf"
+include { EXTRACT_FASTQ_INFO } from "../modules/reprocess_bams/extract_fastq_info.nf"
 include { PATHIFY_FASTQS }      from "../modules/reprocess_bams/pathify_fastqs.nf"
 include { PICARD_CRAM_TO_FASTQ } from "../modules/reprocess_bams/picard_cram_to_fastq.nf"
 include { EXTRACT_READ_GROUPS } from "../modules/reprocess_bams/extract_read_groups.nf"
@@ -53,16 +53,28 @@ workflow REPROCESS_EXTERNAL {
         // Closure to filter out all fastqs that don't have exactly 2 reads
         def filterUnpairedReads = { prefix, fastqs -> fastqs.size() == 2 }
 
-        // Closure to extract the flowcell lane and barcode/library out of the beginning of a fastq name
+        // Closure to convert a tuple of fastq information into a map of fastq information
         def mapifyFCLL = { 
-            prefix, fastqs, readGroup ->
-            return [fastq1: fastqs[0], fastq2: fastqs[1], RG: readGroup]
+            PU, fastqs, readGroup ->
+            def puTag = PU.split(":")[1]
+            return [fastq1: fastqs[0], fastq2: fastqs[1], RG: readGroup, library: puTag]
         }
 
-        // Closure to adjust read length due to it being overcounted by one
-        def adjustReadLength = { fastqInfo, readLengthRaw -> 
-            readLengthAdjusted = Integer.valueOf(readLengthRaw) - 1 // Done because the script overcounts by one due the newline character
-            fastqInfo + [readLength: readLengthAdjusted] 
+        // Closure to adjust read length and merge read length / flow cell / lane into the fastq info map
+        def mergeFastqExtraInfo = { fastqInfo, readLengthRaw, fastqAtString -> 
+            def readLengthAdjusted = Integer.valueOf(readLengthRaw) - 1 // Done because the script overcounts by one due the newline character
+            def fastqAtStringArray = fastqAtString.split(":")
+            def flowCell = fastqInfo["library"]
+            def lane = fastqInfo["library"]
+
+            if (fastqAtStringArray.size() >= 4) {
+                lane = fastqAtStringArray[3]
+            }
+            if (fastqAtStringArray.size() >= 3) {
+                flowCell = fastqAtStringArray[2]
+            }
+
+            return fastqInfo + [readLength: readLengthAdjusted, flowCell: flowCell, lane: lane]
         }
 
 
@@ -95,8 +107,8 @@ workflow REPROCESS_EXTERNAL {
         | filter (filterUnpairedReads)
         | join(ch_readGroups)
         | map (mapifyFCLL)
-        | EXTRACT_READ_LENGTH
-        | map (adjustReadLength)
+        | EXTRACT_FASTQ_INFO
+        | map (mergeFastqExtraInfo)
         | set { ch_fcllInfo }
 
 

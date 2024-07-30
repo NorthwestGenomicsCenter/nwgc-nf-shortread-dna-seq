@@ -1,4 +1,4 @@
-process EXTRACT_READ_LENGTH {
+process EXTRACT_FASTQ_INFO {
 
     executor 'local'
  
@@ -6,7 +6,7 @@ process EXTRACT_READ_LENGTH {
         val fcllInfo
 
     output:
-        tuple val(fcllInfo), env("READ_LENGTH")
+        tuple val(fcllInfo), env("READ_LENGTH"), env("FASTQ_AT_STRING")
 
     script:
 
@@ -14,6 +14,7 @@ process EXTRACT_READ_LENGTH {
     
         """
         READ_LENGTH=\$(zcat ${fastq1} | head -2 | tail -1 | wc | awk '{print \$3}')
+        FASTQ_AT_STRING=\$(zcat ${fastq1} | head -1)
         """
 
 }
