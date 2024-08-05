@@ -14,6 +14,7 @@ process BWA_SAMPE {
         def threads = task.cpus / 2
 
         """
+        set -o pipefail
         bwa sampe \
                 -P ${referenceGenome} \
                 -r ${readGroup} \

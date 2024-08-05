@@ -18,6 +18,7 @@ process BWA_MEM_PE {
         String tmpDir = "tmp"
         
         """
+        set -o pipefail
         bwa mem -t ${task.cpus} \
 				${memOpts} \
 				-R ${readGroup} \

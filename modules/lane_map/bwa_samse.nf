@@ -12,6 +12,7 @@ process BWA_SAMSE {
 
     script:
         """
+        set -o pipefail
         bwa samse \
 				${referenceGenome} \
 				-r ${readGroup} \

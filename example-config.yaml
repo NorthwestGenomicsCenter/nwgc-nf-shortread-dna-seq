@@ -66,7 +66,7 @@ flowCellLaneLibraries:
     flowCell: "<flow cell name>"
     lane: "<flow cell lane number>"
     runDate: "<iso formatted date the flow cell was run on the sequencer>"
-    readLength: "<The read length for the given fastq files>"
+    readLength: <The read length for the given fastq files>
     readType: "<The read type for the given fastq files>" # Optional input defaulted to PE (Paired End). Can be overriden to SR or SE (Single Read/ End).
     sequencingPlatform: "<sequencing platform of the flow cell>"
   # Continue for all sample flowcell lane libraries

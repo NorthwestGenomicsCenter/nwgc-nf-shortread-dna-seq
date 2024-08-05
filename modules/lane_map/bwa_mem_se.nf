@@ -16,6 +16,7 @@ process BWA_MEM_SE {
     script:
         def threads = task.cpus / 2
         """
+        set -o pipefail
         bwa mem -t ${task.cpus} \
 				${memOpts} \
 				-R ${readGroup} \
