@@ -1,8 +1,6 @@
 process BWA_SAMPE {
 
     tag "BWA_SAMPE_${flowCell}_${lane}_${library}_${userId}"
-
-    memory { 7.GB * (Math.pow(2, task.attempt - 1)) }
     
     input:
         tuple path(fastq1), path(fastq2), val(flowCell), val(lane), val(library), val(sampleId), val(userId), val(readGroup), val(publishDirectory)

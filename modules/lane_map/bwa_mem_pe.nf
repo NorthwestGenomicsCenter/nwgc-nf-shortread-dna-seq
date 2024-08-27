@@ -3,8 +3,6 @@ process BWA_MEM_PE {
 
     publishDir "${publishDirectory}", mode: "link", pattern: "${flowCell}.${lane}.S${sampleId}.L${library}.bam"
     publishDir "${publishDirectory}", mode: "link", pattern: "${flowCell}.${lane}.S${sampleId}.L${library}.bam.bai"
-
-    memory { 7.GB * (Math.pow(2, task.attempt - 1)) }
     
     input:
         tuple path(fastq1), path(fastq2), val(flowCell), val(lane), val(library), val(sampleId), val(userId), val(readGroup), val(publishDirectory)
