@@ -5,7 +5,7 @@ process COMBINE_GVCFS {
     publishDir "${publishDirectory}", mode:  'link', pattern: "combined.g.vcf.gz", saveAs: {s-> "${sampleId}.${sequencingTarget}.${gvcf_type}.g.vcf.gz"}
     publishDir "${publishDirectory}", mode:  'link', pattern: "combined.g.vcf.gz.tbi", saveAs: {s-> "${sampleId}.${sequencingTarget}.${gvcf_type}.g.vcf.gz.tbi"}
     publishDir "${publishDirectory}", mode:  'link', pattern: "combined.g.vcf.gz.md5sum", saveAs: {s-> "${sampleId}.${sequencingTarget}.${gvcf_type}.g.vcf.gz.md5sum"}
-    publishDir "${publishDirectory}", mode:  'link', pattern: "combined.g.vcf.gz.md5sum", saveAs: {s-> "${sampleId}.${sequencingTarget}.${gvcf_type}.g.vcf.gz.tbi.md5sum"}
+    publishDir "${publishDirectory}", mode:  'link', pattern: "combined.g.vcf.gz.tbi.md5sum", saveAs: {s-> "${sampleId}.${sequencingTarget}.${gvcf_type}.g.vcf.gz.tbi.md5sum"}
 
     input:
         val gvcf_type
