@@ -3,6 +3,7 @@ include { EXTRACT_FASTQ_INFO } from "../modules/reprocess_bams/extract_fastq_inf
 include { PATHIFY_FASTQS }      from "../modules/reprocess_bams/pathify_fastqs.nf"
 include { PICARD_CRAM_TO_FASTQ } from "../modules/reprocess_bams/picard_cram_to_fastq.nf"
 include { EXTRACT_READ_GROUPS } from "../modules/reprocess_bams/extract_read_groups.nf"
+include { GZIP } from "../modules/reprocess_bams/gzip.nf"
 
 workflow REPROCESS_EXTERNAL {
 
@@ -88,8 +89,10 @@ workflow REPROCESS_EXTERNAL {
         // takes bam and converst it to fastqs
         PICARD_SAM_TO_FASTQ(ch_bams, sampleInfo)
         // Split bam into fastqs by read group
-        ch_fastqs = PICARD_CRAM_TO_FASTQ.out.fastqs.flatten()
-        ch_fastqs = ch_fastqs.mix(PICARD_SAM_TO_FASTQ.out.fastqs.flatten())
+        ch_uncompressedFastqs = PICARD_CRAM_TO_FASTQ.out.fastqs.flatten()
+        ch_uncompressedFastqs = ch_uncompressedFastqs.mix(PICARD_SAM_TO_FASTQ.out.fastqs.flatten())
+        GZIP(ch_uncompressedFastqs)
+        ch_fastqs = GZIP.out
         ch_fastqs = ch_fastqs.mix(ch_fastqInputs)
 
         // Extracts the readGroup from bam/cram files

@@ -7,7 +7,7 @@ process PICARD_SAM_TO_FASTQ {
         tuple val(sampleId), val(userId)
 
     output:
-        path "*.fastq.gz", emit: fastqs
+        path "*.fastq", emit: fastqs
 
     script:
         """
@@ -20,7 +20,6 @@ process PICARD_SAM_TO_FASTQ {
             --INPUT ${bam} \
             --OUTPUT_DIR \$SCRIPT_DIR \
             --OUTPUT_PER_RG true \
-            --INCLUDE_NON_PF_READS true \
-            --COMPRESS_OUTPUTS_PER_RG true
+            --INCLUDE_NON_PF_READS true
         """
 }

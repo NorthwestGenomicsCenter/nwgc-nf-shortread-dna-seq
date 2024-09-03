@@ -21,7 +21,6 @@ process PICARD_CRAM_TO_FASTQ {
             --REFERENCE_SEQUENCE ${reference} \
             --OUTPUT_DIR \$SCRIPT_DIR \
             --OUTPUT_PER_RG true \
-            --INCLUDE_NON_PF_READS true \
-            --COMPRESS_OUTPUTS_PER_RG true
+            --INCLUDE_NON_PF_READS true
         """
 }
