@@ -10,7 +10,7 @@ workflow REPROCESS_EXTERNAL {
     take:
         // ch_crams = Queue Channel with a list of crams in the format [cram: <cram file path>, reference: <reference file path>]
         // ch_bams = Queue Channel with a list of bam paths
-        // ch_fastqInputs = Queue Channel with a list of fastq paths
+        // fastqInputs = Queue Channel with a list of fastqs in the format [[read1: <file path to the first read>, read2: <file path to the second read>], ...]
         ch_crams
         ch_bams // bam paths
         ch_fastqInputs // fastq paths
@@ -78,6 +78,14 @@ workflow REPROCESS_EXTERNAL {
             return fastqInfo + [readLength: readLengthAdjusted, flowCell: flowCell, lane: lane]
         }
 
+        // Closure to set library tag if needed for external fastqs
+        def setLibraryTag = { externalFastqInfo ->
+            returnInfo = externalFastqInfo 
+            if (returnInfo["library"] == null) {
+                    returnInfo["library"] = 1
+            }
+            return returnInfo
+        }
 
         // ************************
         // *** Start processing ***
@@ -93,7 +101,6 @@ workflow REPROCESS_EXTERNAL {
         ch_uncompressedFastqs = ch_uncompressedFastqs.mix(PICARD_SAM_TO_FASTQ.out.fastqs.flatten())
         GZIP(ch_uncompressedFastqs)
         ch_fastqs = GZIP.out
-        ch_fastqs = ch_fastqs.mix(ch_fastqInputs)
 
         // Extracts the readGroup from bam/cram files
         ch_cramsAndBams = ch_crams.mix(ch_bams)
@@ -110,6 +117,14 @@ workflow REPROCESS_EXTERNAL {
         | filter (filterUnpairedReads)
         | join(ch_readGroups)
         | map (mapifyFCLL)
+        | set { ch_bamCramFCLLMaps }
+
+        ch_fastqInputs
+        | map (setLibraryTag)
+        | mix (ch_bamCramFCLLMaps)
+        | set { ch_fcllMaps }
+
+        ch_fcllMaps
         | EXTRACT_FASTQ_INFO
         | map (mergeFastqExtraInfo)
         | set { ch_fcllInfo }

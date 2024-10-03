@@ -8,6 +8,6 @@ process GZIP {
 
     script:
         """
-        gzip \$(readlink ${fileToCompress})
+        gzip -f ${fileToCompress}
         """
 }

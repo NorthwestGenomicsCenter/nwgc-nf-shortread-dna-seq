@@ -57,19 +57,27 @@ public class Utils {
                 readGroupString = flowCellLaneLibrary.RG
                 def readGroupArray = readGroupString.split("\t")
                 boolean hasPlatform = false
+                boolean hasSample = false
                 for (int i=0; i < readGroupArray.size(); i++) {
                     if (readGroupArray[i].startsWith("PL:")) {
                         hasPlatform = true
-                        break
+                    }
+                    if (readGroupArray[i].startsWith("SM:")) {
+                        readGroupArray[i] = "SM:" + sampleId
+                        hasSample = true
                     }
                 }
 
                 // If there is no sequencing platform in the readgroup add the default sequencing platform (platform tag is necessary for downstream processing steps)
                 if (!hasPlatform) {
-                    readGroupString = readGroupString + "\tPL:" + defaultSequencingPlatform
+                    readGroupArray.add("PL:" + defaultSequencingPlatform)
                 }
 
-                readGroupString = "'" + readGroupString + "'"
+                if (!hasSample) {
+                    readGroupArray.add("SM:" + sampleId)
+                }
+
+                readGroupString = "'" + readGroupArray.join("\\t") + "'"
                 readGroups.add(readGroupString)
                 return
             }
@@ -112,19 +120,27 @@ public class Utils {
             def readGroupString = flowCellLaneLibrary.RG
             def readGroupArray = readGroupString.split("\t")
             boolean hasPlatform = false
+            boolean hasSample = false
             for (int i=0; i < readGroupArray.size(); i++) {
                 if (readGroupArray[i].startsWith("PL:")) {
                     hasPlatform = true
-                    break
+                }
+                if (readGroupArray[i].startsWith("SM:")) {
+                    readGroupArray[i] = "SM:" + sampleId
+                    hasSample = true
                 }
             }
 
             // If there is no sequencing platform in the readgroup add the default sequencing platform (platform tag is necessary for downstream processing steps)
             if (!hasPlatform) {
-                readGroupString = readGroupString + "\tPL:" + defaultSequencingPlatform
+                readGroupArray.add("PL:" + defaultSequencingPlatform)
             }
 
-            readGroupString = "'" + readGroupString + "'"
+            if (!hasSample) {
+                readGroupArray.add("SM:" + sampleId)
+            }
+
+            readGroupString = "'" + readGroupArray.join("\\t") + "'"
             return readGroupString
         }
 
