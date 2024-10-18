@@ -11,6 +11,6 @@ process EXTRACT_READ_GROUPS {
 
 		"""
 		READ_GROUPS=\$(samtools view -H ${bam} | grep '^@RG')
-		READ_GROUP_PUS=\$(samtools view -H ${bam} | grep '^@RG' | grep -o "PU[^\\S]*")
+		READ_GROUP_PUS=\$(samtools view -H ${bam} | grep '^@RG' | grep -o "PU:\\S*")
 		"""
 }
