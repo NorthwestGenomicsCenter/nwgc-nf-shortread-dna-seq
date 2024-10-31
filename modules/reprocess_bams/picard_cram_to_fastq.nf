@@ -7,7 +7,7 @@ process PICARD_CRAM_TO_FASTQ {
         tuple val(sampleId), val(userId)
 
     output:
-        path "*.fastq.gz", emit: fastqs
+        path "*.fastq", emit: fastqs
 
     script:
         """
