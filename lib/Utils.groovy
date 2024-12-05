@@ -70,11 +70,11 @@ public class Utils {
 
                 // If there is no sequencing platform in the readgroup add the default sequencing platform (platform tag is necessary for downstream processing steps)
                 if (!hasPlatform) {
-                    readGroupArray.add("PL:" + defaultSequencingPlatform)
+                    readGroupArray = readGroupArray + ["PL:" + defaultSequencingPlatform]
                 }
 
                 if (!hasSample) {
-                    readGroupArray.add("SM:" + sampleId)
+                    readGroupArray = readGroupArray + ["SM:" + sampleId]
                 }
 
                 readGroupString = "'" + readGroupArray.join("\\t") + "'"
@@ -133,12 +133,12 @@ public class Utils {
 
             // If there is no sequencing platform in the readgroup add the default sequencing platform (platform tag is necessary for downstream processing steps)
             if (!hasPlatform) {
-                readGroupArray.add("PL:" + defaultSequencingPlatform)
-            }
-
-            if (!hasSample) {
-                readGroupArray.add("SM:" + sampleId)
-            }
+                readGroupArray = readGroupArray + ["PL:" + defaultSequencingPlatform]
+	    }
+	
+	    if (!hasSample) {
+	        readGroupArray = readGroupArray + ["SM:" + sampleId]
+	    }
 
             readGroupString = "'" + readGroupArray.join("\\t") + "'"
             return readGroupString
