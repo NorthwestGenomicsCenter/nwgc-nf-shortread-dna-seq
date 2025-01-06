@@ -15,11 +15,10 @@ workflow {
     ch_flowCellLaneLibrary = Channel.empty()
     if (params.reprocess_external != null && params.reprocess_external) {
         ch_bamsForReprocessing = Channel.fromList(params.bamsForReprocessing)
-        ch_externalFastqs = Channel.fromList(params.externalFastqs)
         ch_cramsForReprocessing = Channel.fromList(params.cramsForReprocessing)
         def sampleInfoTuple = params.subMap("sampleId", "userId")
 
-        REPROCESS_EXTERNAL(ch_cramsForReprocessing, ch_bamsForReprocessing, ch_externalFastqs, sampleInfoTuple)
+        REPROCESS_EXTERNAL(ch_cramsForReprocessing, ch_bamsForReprocessing, params.externalFastqs, sampleInfoTuple)
         ch_flowCellLaneLibrary = REPROCESS_EXTERNAL.out.flowCellLaneLibraries
     }
     else {

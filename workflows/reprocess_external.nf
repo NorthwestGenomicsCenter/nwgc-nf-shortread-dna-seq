@@ -10,10 +10,10 @@ workflow REPROCESS_EXTERNAL {
     take:
         // ch_crams = Queue Channel with a list of crams in the format [cram: <cram file path>, reference: <reference file path>]
         // ch_bams = Queue Channel with a list of bam paths
-        // fastqInputs = Queue Channel with a list of fastqs in the format [[read1: <file path to the first read>, read2: <file path to the second read>], ...]
+        // fastqInputs = Groovy list with a list of fastqs in the format [[read1: <file path to the first read>, read2: <file path to the second read>], ...]
         ch_crams
         ch_bams // bam paths
-        ch_fastqInputs // fastq paths
+        fastqInputs // fastq paths
 
         // Groovy objects
         sampleInfo // Tuple [sampleId, userId]
@@ -79,10 +79,12 @@ workflow REPROCESS_EXTERNAL {
         }
 
         // Closure to set library tag if needed for external fastqs
+        def defaultLibaryTag = 1
         def setLibraryTag = { externalFastqInfo ->
             returnInfo = externalFastqInfo 
             if (returnInfo["library"] == null) {
-                    returnInfo["library"] = 1
+                    returnInfo["library"] = defaultLibaryTag
+                    defaultLibaryTag ++
             }
             return returnInfo
         }
@@ -119,8 +121,13 @@ workflow REPROCESS_EXTERNAL {
         | map (mapifyFCLL)
         | set { ch_bamCramFCLLMaps }
 
+
+        for (fastqPair: fastqInputs) {
+            setLibraryTag(fastqPair)
+        }
+        ch_fastqInputs = Channel.fromList(fastqInputs)
+
         ch_fastqInputs
-        | map (setLibraryTag)
         | mix (ch_bamCramFCLLMaps)
         | set { ch_fcllMaps }
 
