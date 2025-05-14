@@ -12,6 +12,6 @@ process EXTRACT_READ_GROUPS {
 		file = bamOrCram[0]
 		"""
 		READ_GROUPS=\$(samtools view -H ${file} | grep '^@RG')
-		READ_GROUP_PUS=\$(samtools view -H ${file} | grep '^@RG' | grep -o "PU:\\S*")
+		READ_GROUP_PUS=\$(samtools view -H 3205460.cram | grep '^@RG' | grep -o "PU:\\S*" || samtools view -H 3205460.cram | grep '^@RG' | grep -o "ID:\\S*")
 		"""
 }
