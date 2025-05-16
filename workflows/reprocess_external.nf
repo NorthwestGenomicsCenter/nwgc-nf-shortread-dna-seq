@@ -57,8 +57,7 @@ workflow REPROCESS_EXTERNAL {
         // Closure to convert a tuple of fastq information into a map of fastq information
         def mapifyFCLL = { 
             PU, fastqs, readGroup ->
-            def puTag = PU.split(":")[1]
-            return [fastq1: fastqs[0], fastq2: fastqs[1], RG: readGroup, library: puTag]
+            return [fastq1: fastqs[0], fastq2: fastqs[1], RG: readGroup, library: PU]
         }
 
         // Closure to adjust read length and merge read length / flow cell / lane into the fastq info map
