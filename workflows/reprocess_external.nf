@@ -98,7 +98,7 @@ workflow REPROCESS_EXTERNAL {
 
         // takes bam and converst it to fastqs
 	PICARD_SORT_SAM(ch_bams, sampleInfo)
-        PICARD_SAM_TO_FASTQ(PICARD_SORT_SAM.out.bam, sampleInfo)
+        PICARD_SAM_TO_FASTQ(PICARD_SORT_SAM.out.sorted_bam, sampleInfo)
         // Split bam into fastqs by read group
         ch_uncompressedFastqs = PICARD_CRAM_TO_FASTQ.out.fastqs.flatten()
         ch_uncompressedFastqs = ch_uncompressedFastqs.mix(PICARD_SAM_TO_FASTQ.out.fastqs.flatten())
