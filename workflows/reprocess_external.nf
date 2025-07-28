@@ -56,10 +56,13 @@ workflow REPROCESS_EXTERNAL {
         def filterUnpairedReads = { prefix, fastqs -> fastqs.size() == 2 }
 
         // Closure to convert a tuple of fastq information into a map of fastq information
-        def mapifyFCLL = { 
-            PU, fastqs, readGroup ->
-            return [fastq1: fastqs[0], fastq2: fastqs[1], RG: readGroup, library: PU]
-        }
+	def mapifyFCLL = { 
+	    PU, fastqs, readGroup ->
+	        // Remove "PU:" prefix if present
+	        def cleanPU = PU?.startsWith("PU:") ? PU.replaceFirst("^PU:", "") : PU
+	        return [fastq1: fastqs[0], fastq2: fastqs[1], RG: readGroup, library: cleanPU]
+	}
+
 
         // Closure to adjust read length and merge read length / flow cell / lane into the fastq info map
         def mergeFastqExtraInfo = { fastqInfo, readLengthRaw, fastqAtString -> 
