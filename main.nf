@@ -18,7 +18,7 @@ workflow {
         ch_cramsForReprocessing = Channel.fromList(params.cramsForReprocessing)
         def sampleInfoTuple = params.subMap("sampleId", "userId")
 
-        REPROCESS_EXTERNAL(ch_cramsForReprocessing, ch_bamsForReprocessing, params.externalFastqs, sampleInfoTuple)
+        REPROCESS_EXTERNAL(ch_cramsForReprocessing, ch_bamsForReprocessing, params.externalFastqs, sampleInfoTuple, params.samToFastqValidationStringency)
         ch_flowCellLaneLibrary = REPROCESS_EXTERNAL.out.flowCellLaneLibraries
     }
     else {

@@ -85,6 +85,9 @@ bamsForReprocessing:
   - "<full path to second bam>"
   # continue for all bams
 
+# samToFastqValidationStringency - optional value if need to silence samToFastq errors
+samToFastqValidationStringency: "SILENT"
+
 # externalFastqs - fastq files that have no associated FCLL information to be reprocessed.
 #                  If the library id is left out it will be assumed that all fastqs are from the same library.
 externalFastqs: 
