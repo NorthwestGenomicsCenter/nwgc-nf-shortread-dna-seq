@@ -97,7 +97,7 @@ workflow REPROCESS_EXTERNAL {
         // ************************
 
         ch_crams = ch_crams.map { cramInfo -> [cramInfo.cram, cramInfo.reference]}
-        PICARD_CRAM_TO_FASTQ(ch_crams, sampleInfo)
+        PICARD_CRAM_TO_FASTQ(ch_crams, sampleInfo, samToFastqValidationStringency)
 
         // takes bam and converst it to fastqs
 	PICARD_SORT_SAM(ch_bams, sampleInfo)

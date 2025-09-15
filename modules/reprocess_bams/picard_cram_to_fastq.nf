@@ -5,6 +5,7 @@ process PICARD_CRAM_TO_FASTQ {
     input:
         tuple path(cram), val(reference)
         tuple val(sampleId), val(userId)
+        val validationStringency
 
     output:
         path "*.fastq", emit: fastqs
@@ -27,6 +28,7 @@ process PICARD_CRAM_TO_FASTQ {
             --OUTPUT_DIR \$SCRIPT_DIR \
             --OUTPUT_PER_RG true \
             --RG_TAG \$READ_GROUP_TAG \
+            --VALIDATION_STRINGENCY ${validationStringency} \
             --INCLUDE_NON_PF_READS true
         """
 }
