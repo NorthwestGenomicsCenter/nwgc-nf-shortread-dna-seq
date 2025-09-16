@@ -19,7 +19,7 @@ process BWA_MEM_SE {
         set -o pipefail
         bwa mem -t ${task.cpus} \
 				${memOpts} \
-				-R "${readGroup}" \
+				-R ${readGroup} \
 				${referenceGenome} \
 				${fastq1} | \
         samblaster --addMateTags -a | \

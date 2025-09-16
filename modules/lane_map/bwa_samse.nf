@@ -15,7 +15,7 @@ process BWA_SAMSE {
         set -o pipefail
         bwa samse \
 				${referenceGenome} \
-				-r "${readGroup}" \
+				-r ${readGroup} \
 		    	<(bwa aln -t ${task.cpus} ${referenceGenome} -0 ${fastq1}) \
 		    	${fastq1} | \
         samblaster --addMateTags -a | \
