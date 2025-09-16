@@ -17,7 +17,7 @@ process BWA_SAMPE {
         set -o pipefail
         bwa sampe \
                 -P ${referenceGenome} \
-                -r ${readGroup} \
+                -r "${readGroup}" \
                 <(bwa aln -t ${threads} ${referenceGenome} -1 ${fastq1}) \
                 <(bwa aln -t ${threads} ${referenceGenome} -2 ${fastq2}) \
                 ${fastq1} \
