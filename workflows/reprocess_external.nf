@@ -29,7 +29,7 @@ workflow REPROCESS_EXTERNAL {
             readGroupArray = readGroupString.split("\n")
             ret = []
             for (int i=0; i < readGroupArray.size(); i++) {
-                ret += [PU: readGroupPUArray[i]replace("ID:","PU:") - "\t", RG: readGroupArray[i]]
+                ret += [PU: readGroupPUArray[i].replace("ID:","PU:") - "\t", RG: readGroupArray[i]]
             }
             return ret
         }
