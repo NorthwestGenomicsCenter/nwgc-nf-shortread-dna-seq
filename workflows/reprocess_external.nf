@@ -29,7 +29,7 @@ workflow REPROCESS_EXTERNAL {
             readGroupArray = readGroupString.split("\n")
             ret = []
             for (int i=0; i < readGroupArray.size(); i++) {
-                ret += [PU: readGroupPUArray[i] - "\t", RG: readGroupArray[i]]
+                ret += [PU: readGroupPUArray[i]replace("ID:","PU:") - "\t", RG: readGroupArray[i]]
             }
             return ret
         }
@@ -120,7 +120,7 @@ workflow REPROCESS_EXTERNAL {
         | PATHIFY_FASTQS // Makes sure that all of the fastqs are treated as paths by nextflow
         | map (extractPU)
         | groupTuple
-//        | filter (filterUnpairedReads)
+        | filter (filterUnpairedReads)
         | join(ch_readGroups)
         | map (mapifyFCLL)
         | set { ch_bamCramFCLLMaps }
