@@ -32,7 +32,7 @@ process CREATE_FINGERPRINT_VCF {
         gatk \
             --java-options "-XX:InitialRAMPercentage=80.0 -XX:MaxRAMPercentage=85.0" \
             HaplotypeCaller \
-            -R ${referenceGenome}\
+            -R ${referenceGenome} \
             -I $bam \
             -D $dbSnp \
             -L $fingerprintBed \

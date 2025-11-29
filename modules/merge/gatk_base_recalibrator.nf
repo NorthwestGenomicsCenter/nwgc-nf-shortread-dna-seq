@@ -22,6 +22,11 @@ process GATK_BASE_RECALIBRATOR {
             CHR_TAG = 'chr'
         }
 
+        String snps = ''
+        if (isGRC38 && organism.equals("Homo sapiens")) {
+            snps = "-knownSites ${dbSnp} "
+        }
+
         String indels = ''
         if (isGRC38 && organism.equals("Homo sapiens")) {
             indels = "-knownSites ${gsIndels} \
@@ -64,7 +69,7 @@ process GATK_BASE_RECALIBRATOR {
         -I ${bam} \
         --out ${sampleId}.recal.matrix \
         -nct ${task.cpus} \
-        -knownSites ${dbSnp} \
+        ${snps} \
         ${indels} \
         --downsample_to_fraction 0.1 \
         ${chroms} \
