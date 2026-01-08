@@ -73,22 +73,16 @@ flowchart TD
     G["Samtools Flagstat"]
     B["Mapping QC"] -- "mapped.bam" --> H
     H["Samtools Stats"]
-    C --> I
-    I["Base Quality"]
-    I -- "BASEQ0.MAPQ20.cov<BR>BASEQ10.MAPQ20.cov<BR>BASEQ20.MAPQ20.cov<BR>BASEQ30.MAPQ20.cov" --> K
+    C -- "BASEQ0.MAPQ20.cov<BR>BASEQ10.MAPQ20.cov<BR>BASEQ20.MAPQ20.cov<BR>BASEQ30.MAPQ20.cov<BR>BASEQ20.MAPQ0.cov" --> I
+    I@{shape: fr-circ}
+    D -- "One cov file per chrom" --> J
+    J@{shape: fr-circ}
+    E -- "VerifyBamId.selfSM" --> K
     K@{shape: fr-circ}
-    C --> J
-    J["Mapping Quality"]
-    J -- "BASEQ20.MAPQ0.cov" --> L
+    F -- "alignment_summary_metrics.txt<BR>base_distribution_by_cycle.txt<BR>gc_bias_metrics.txt<BR>gc_bias_summary_metrics.txt<BR>insert_size_metrics.txt<BR>quality_yield_metrics.txt<BR>base_distribution_by_cycle.pdf<BR>insert_size_histogram.pdf<BR>gc_bias.pdf" --> L
     L@{shape: fr-circ}
-    D -- "One cov file per chrom" --> M
+    G -- "flagstat.output.txt" --> M
     M@{shape: fr-circ}
-    E -- "VerifyBamId.selfSM" --> N
+    H -- "onTarget.stats.txt" --> N
     N@{shape: fr-circ}
-    F -- "alignment_summary_metrics.txt<BR>base_distribution_by_cycle.txt<BR>gc_bias_metrics.txt<BR>gc_bias_summary_metrics.txt<BR>insert_size_metrics.txt<BR>quality_yield_metrics.txt<BR>base_distribution_by_cycle.pdf<BR>insert_size_histogram.pdf<BR>gc_bias.pdf" --> O
-    O@{shape: fr-circ}
-    G -- "flagstat.output.txt" --> P
-    P@{shape: fr-circ}
-    H -- "onTarget.stats.txt" --> Q
-    Q@{shape: fr-circ}
 ```
