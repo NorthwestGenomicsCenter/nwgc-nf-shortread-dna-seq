@@ -29,7 +29,7 @@ graph TB
 
 ```mermaid
 ---
-title: Pipeline Overview
+title: Mapping
 ---
 flowchart TD
     A["Demultiplex Pipeline"] -- "flowCellLane.fastq" --> B
@@ -46,10 +46,49 @@ flowchart TD
     style E font-size:0.9em
     E -. "Yes" .-> F
     F["bwa sampe"]
-    E -. "Yes" .-> G
+    E -. "No" .-> G
     G["bwa samse"]
     D -- "mapped.bam" --> H
     F -- "mapped.bam" --> H
     G -- "mapped.bam" --> H
-    H@{ shape: fr-circ}
+    H["Mapping QC"]
+```
+
+```mermaid
+---
+title: Mapping QC
+---
+flowchart TD
+    A["Mapping"] -- "mapped.bam" --> B
+    style A fill:#E0E0E0
+    B["Mapping QC"] -- "mapped.bam" --> C
+    C["Picard Coverage Metrics"]
+    B["Mapping QC"] -- "mapped.bam" --> D
+    D["Picard Coverage<BR> Metrics By Chrom"]
+    B["Mapping QC"] -- "mapped.bam" --> E
+    E["Contamination"]
+    B["Mapping QC"] -- "mapped.bam" --> F
+    F["Picard Multiple Metrics"]
+    B["Mapping QC"] -- "mapped.bam" --> G
+    G["Samtools Flagstat"]
+    B["Mapping QC"] -- "mapped.bam" --> H
+    H["Samtools Stats"]
+    C --> I
+    I["Base Quality"]
+    I -- "BASEQ0.MAPQ20.cov<BR>BASEQ10.MAPQ20.cov<BR>BASEQ20.MAPQ20.cov<BR>BASEQ30.MAPQ20.cov" --> K
+    K@{shape: fr-circ}
+    C --> J
+    J["Mapping Quality"]
+    J -- "BASEQ20.MAPQ0.cov" --> L
+    L@{shape: fr-circ}
+    D -- "One cov file per chrom" --> M
+    M@{shape: fr-circ}
+    E -- "VerifyBamId.selfSM" --> N
+    N@{shape: fr-circ}
+    F -- "alignment_summary_metrics.txt<BR>base_distribution_by_cycle.txt<BR>gc_bias_metrics.txt<BR>gc_bias_summary_metrics.txt<BR>insert_size_metrics.txt<BR>quality_yield_metrics.txt<BR>base_distribution_by_cycle.pdf<BR>insert_size_histogram.pdf<BR>gc_bias.pdf" --> O
+    O@{shape: fr-circ}
+    G -- "flagstat.output.txt" --> P
+    P@{shape: fr-circ}
+    H -- "onTarget.stats.txt" --> Q
+    Q@{shape: fr-circ}
 ```
