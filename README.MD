@@ -147,6 +147,7 @@ flowchart TD
     J -- "readSummary.txt<BR>q20sByChrom.txt<BR>MIN20.corrected.wgs.metrics.txt" --> R
     R@{shape: fr-circ}
 ```
+
 ```mermaid
 ---
 title: Variant Calling (Main)
@@ -164,6 +165,7 @@ flowchart TD
     G["GATK VariantAnnnotator"] -- "chromN.annotated.gvcf" --> H
     H["GATK CatVariants"] -- "main.combined.gvcf" --> I
     I@{shape: fr-circ}```
+```
 
 ```mermaid
 ---
