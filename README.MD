@@ -28,7 +28,7 @@ graph TB
     G["QC"]
     F --> H
     H["Variant Calling"]
-    F --> I
+    H --> I
     I["Polymorphic QC"]
 ```
 
@@ -150,7 +150,7 @@ flowchart TD
 
 ```mermaid
 ---
-title: Variant Calling (Main)
+title: Variant Calling - Main
 ---
 flowchart TD
     A["Merge"] -- "merged.recalibrated.bam" --> B
@@ -169,7 +169,7 @@ flowchart TD
 
 ```mermaid
 ---
-title: Variant Calling (Filtered)
+title: Variant Calling - Filtered (Homo sapiens only)
 ---
 flowchart TD
     A["Merge"] -- "merged.recalibrated.bam" --> B
@@ -187,4 +187,26 @@ flowchart TD
     J["GATK VariantFiltration"] -- "chromN.annotated.filtered.gvcf" --> K
     K["GATK CatVariants (Filtered)"] -- "filtered.combined.gvcf" --> L
     L@{shape: fr-circ}
+ ```
+
+```mermaid
+---
+title: Polymorphic QC (Homo sapiens only)
+---
+flowchart TD
+    A["Variant Calling - Filtered"] -- "filtered.gvcf" --> B
+    style A fill:#E0E0E0
+    B["BCFtools GVCF to VCF"] -- "filtered.vcf" --> C
+    C["BCFtools SNPs Only"] -- "filtered.snps.vcf" --> D
+    D["BCFtools Unfiltered Transition Transverions"] -- "transition_transverion.txt" --> E
+    E@{shape: fr-circ}
+    C -- "filtered.snps.vcf" --> F
+    F["BCFtools Filtered Transition Transverions Stats"] -- "transition_transverion.filtered.txt" --> G
+    G@{shape: fr-circ}
+    C -- "filtered.snps.vcf" --> H
+    H["BCFtools Percent Filtered GATK Stats"] -- "percent_filtered_gatk.txt" --> I
+    I@{shape: fr-circ}
+    C -- "filtered.snps.vcf" --> J
+    J["BCFtools Hetrozygous Homozygous Stats"] -- "het_hom.txt" --> K
+    K@{shape: fr-circ}
  ```
