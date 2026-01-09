@@ -164,7 +164,7 @@ flowchart TD
     F["GATK HaplotypeCaller"] -- "chromN.gvcf" --> G
     G["GATK VariantAnnnotator"] -- "chromN.annotated.gvcf" --> H
     H["GATK CatVariants"] -- "main.combined.gvcf" --> I
-    I@{shape: fr-circ}```
+    I@{shape: fr-circ}
 ```
 
 ```mermaid
