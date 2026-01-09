@@ -15,16 +15,21 @@ A Nextflow pipeline to process raw Illumina BCL files through alignment, recalib
 title: Pipeline Overview
 ---
 graph TB
-    A[BCL files]
-    A --> B["Demultiplex FastQs (BCL Convert 4.2.7)"]
-    B --> C["Map to BAM (BWA‑MEM 0.7.15)"]
-    C --> D["Mark Duplicates & Merge BAM (Picard 3.1.1)"]
-    D --> E["Base Recalibration (GATK 3.7 BaseRecalibrator)"]
-    E --> F["Quality Binning (GATK PrintReads 3.7)"]
-    F --> G["Variant Calling (GATK HaplotypeCaller 4.2.0.0)"]
-    G --> H["Variant Annotation (GATK VariantAnnotator 3.7)"]
-    H --> I["Combine Variants (GATK CatVariants 3.7)"]
-    I --> J["Validate Variants (GATK ValidateVariants 3.7)"]
+    A["Demulitplex Pipeline"] -- "flowCellLane1.fastq" --> B
+    style A fill:#E0E0E0
+    A -- "flowCellLane2.fastq" --> C
+    A -- "flowCellLaneN.fastq" --> D
+    B["Mapping"] -- "mapped.bam" --> E
+    C["Mapping"] -- "mapped.bam" --> E
+    D["Mapping"] -- "mapped.bam" --> E
+    E["Merge"] -- "merged.bam" --> F
+    F@{shape: fr-circ}
+    F --> G
+    G["QC"]
+    F --> H
+    H["Variant Calling"]
+    F --> I
+    I["Polymorphic QC"]
 ```
 
 ```mermaid
