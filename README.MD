@@ -91,3 +91,60 @@ flowchart TD
     H -- "onTarget.stats.txt" --> N
     N@{shape: fr-circ}
 ```
+
+```mermaid
+---
+title: Merge
+---
+flowchart TD
+    A["Mapping"] -- "mapped.bam" --> B
+    style A fill:#E0E0E0
+    A -- "mapped.bam" --> B
+    A -- "mapped.bam" --> B
+    B["Picard MarkDuplicates"] -- "merged.bam" --> C
+    C["GATK BaseRecalibrator"] -- "recalibration.matrix" --> D
+    D["GATK PrintReads"] -- "merged.recalibrated.bam" --> E
+    E@{ shape: fr-circ}
+```
+
+```mermaid
+---
+title: Merge QC
+---
+flowchart TD
+    A["Merge"] -- "merged.recalibrated.bam" --> B
+    style A fill:#E0E0E0
+    B["Merge QC"] -- "merged.recalibrated.bam" --> C
+    C["Picard Coverage Metrics"]
+    B -- "merged.recalibrated.bam" --> D
+    D["Picard Coverage<BR> Metrics By Chrom"]
+    B -- "merged.recalibrated.bam" --> E
+    E["Contamination"]
+    B -- "merged.recalibrated.bam" --> F
+    F["Picard Multiple Metrics"]
+    B -- "merged.recalibrated.bam" --> G
+    G["Samtools Flagstat"]
+    B -- "merged.recalibrated.bam" --> H
+    H["Samtools Stats"]
+    B -- "merged.recalibrated.bam" --> I
+    I["Fingerprint"]
+    B -- "merged.recalibrated.bam" --> J
+    J["Collect and Plot"]
+    C -- "BASEQ0.MAPQ20.cov<BR>BASEQ10.MAPQ20.cov<BR>BASEQ20.MAPQ20.cov<BR>BASEQ30.MAPQ20.cov<BR>BASEQ20.MAPQ0.cov" --> K
+    K@{shape: fr-circ}
+    D -- "One cov file per chrom" --> L
+    L@{shape: fr-circ}
+    E -- "VerifyBamId.selfSM" --> M
+    M@{shape: fr-circ}
+    F -- "alignment_summary_metrics.txt<BR>base_distribution_by_cycle.txt<BR>gc_bias_metrics.txt<BR>gc_bias_summary_metrics.txt<BR>insert_size_metrics.txt<BR>quality_yield_metrics.txt<BR>base_distribution_by_cycle.pdf<BR>insert_size_histogram.pdf<BR>gc_bias.pdf" --> N
+    N@{shape: fr-circ}
+    G -- "flagstat.output.txt" --> O
+    O@{shape: fr-circ}
+    H -- "onTarget.stats.txt" --> P
+    P@{shape: fr-circ}
+    I -- "fingerprint.vcf.gz" --> Q
+    Q@{shape: fr-circ}
+    J -- "readSummary.txt<BR>q20sByChrom.txt<BR>MIN20.corrected.wgs.metrics.txt" --> R
+    R@{shape: fr-circ}
+```
+
