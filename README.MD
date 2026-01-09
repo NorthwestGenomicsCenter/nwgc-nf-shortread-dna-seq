@@ -28,7 +28,7 @@ graph TB
     G["QC"]
     F --> H
     H["Variant Calling"]
-    H --> I
+    H -- "(Only Homo sapiens)<BR>filtered.gvcf" --> I
     I["Polymorphic QC"]
 ```
 
