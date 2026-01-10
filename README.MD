@@ -28,8 +28,28 @@ graph TB
     G["QC"]
     F --> H
     H["Variant Calling"]
-    H -- "(Only Homo sapiens)<BR>filtered.gvcf" --> I
+    H -- "(Homo sapiens Only)<BR>filtered.gvcf" --> I
     I["Polymorphic QC"]
+```
+
+```mermaid
+---
+title: External Reprocessing Overview
+---
+graph TB
+    A["External Data Source"] -- "BAMs<BR>or CRAMs<BR>or FASTQs" --> B
+    style A fill:#E0E0E0
+    B["Reprocess External"] -- "BAM Files" --> C
+    C["Picard SortSAM"] -- "Sorted Bams" --> D
+    D["Picard SamToFastq"] -- "Fastq Files" --> E
+    E["Extract Read Groups"] -- "Fastq Files<BR>Read Group Info" --> I
+    B -- "CRAM Files" --> G
+    G["Picard CramToFastq"] -- "Fastq Files" --> E
+    B -- "Fastq Files" --> H
+    H["Pathify Fastqs"] -- "Fastq Files" --> E
+    I["Extract Fastq Info"] -- "Flow Cell Lane Library Info" --> J
+    J["Mapping"]
+    style J fill:#E0E0E0
 ```
 
 ```mermaid
